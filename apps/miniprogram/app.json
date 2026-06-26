@@ -1,0 +1,32 @@
+{
+  "pages": [
+    "pages/explore/index",
+    "pages/itinerary/index",
+    "pages/favorite/index",
+    "pages/mine/index",
+    "pages/share/index"
+  ],
+  "window": {
+    "navigationStyle": "custom",
+    "backgroundTextStyle": "dark",
+    "backgroundColor": "#f7f2e8"
+  },
+  "tabBar": {
+    "color": "#6f7a73",
+    "selectedColor": "#22564b",
+    "backgroundColor": "#fffdf8",
+    "borderStyle": "white",
+    "list": [
+      {"pagePath": "pages/explore/index", "text": "探索"},
+      {"pagePath": "pages/itinerary/index", "text": "行程"},
+      {"pagePath": "pages/favorite/index", "text": "收藏"},
+      {"pagePath": "pages/mine/index", "text": "我的"}
+    ]
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于将探索地图定位到你附近的城市和旅行内容"
+    }
+  },
+  "requiredPrivateInfos": ["getLocation"]
+}

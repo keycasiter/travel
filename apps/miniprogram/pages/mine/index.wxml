@@ -1,0 +1,5 @@
+<view class="page">
+  <view class="page-title">{{title}}</view>
+  <view class="page-subtitle">{{subtitle}}</view>
+  <view class="empty-panel">登录和用户数据将在 API 接入后展示。</view>
+</view>

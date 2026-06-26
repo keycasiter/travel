@@ -1,0 +1,13 @@
+<view class="page explore-page">
+  <view class="hero-map">
+    <view class="map-glow"></view>
+    <view class="china-shape"></view>
+    <view class="hotspot hotspot-hz"></view>
+    <view class="hotspot hotspot-bj"></view>
+    <view class="map-copy">
+      <view class="page-title">{{title}}</view>
+      <view class="page-subtitle">{{subtitle}}</view>
+    </view>
+  </view>
+  <button class="plan-button" bindtap="goPlan">规划行程</button>
+</view>

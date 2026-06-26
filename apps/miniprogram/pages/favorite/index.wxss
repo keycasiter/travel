@@ -1,0 +1,9 @@
+.empty-panel {
+  margin-top: 40rpx;
+  padding: 28rpx;
+  border: 1rpx solid rgba(34, 50, 45, 0.14);
+  border-radius: 8rpx;
+  background: #fffdf8;
+  color: #64716b;
+  font-size: 28rpx;
+}
