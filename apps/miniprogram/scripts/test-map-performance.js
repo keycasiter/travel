@@ -36,6 +36,8 @@ assert.ok(componentSource.includes('submitSearch'), 'explore map component shoul
 assert.ok(componentSource.includes('tapSearchCategory'), 'explore map component should handle nearby category searches');
 assert.ok(componentSource.includes('getCenterLocation'), 'explore map component should search around the current visible map center');
 assert.ok(componentSource.includes('getRegion'), 'explore map component should search category POIs inside the current visible map viewport');
+assert.ok(componentSource.includes('isWideViewport'), 'explore map component should avoid broad rectangle searches at national scale');
+assert.ok(componentSource.includes('pageSize: 12'), 'explore map component should cap category exploration results to a lightweight marker count');
 assert.ok(componentSource.includes('suggestTencentPlaces'), 'explore map component should request Tencent suggestions while typing');
 assert.ok(componentSource.includes('getTencentLocationContext'), 'explore map component should describe the current location with Tencent reverse geocoding');
 assert.ok(componentSource.includes('previewTencentRoutes'), 'explore map component should preview Tencent route plans for selected POIs');
@@ -83,6 +85,8 @@ assert.ok(tencentMapSource.includes('/api/v1/map/places/search'), 'Tencent searc
 assert.ok(tencentMapSource.includes('/api/v1/map/places/suggest'), 'Tencent search helper should call the signed Go API suggestion proxy');
 assert.ok(tencentMapSource.includes('/api/v1/map/location/context'), 'Tencent search helper should call the signed Go API reverse geocoder proxy');
 assert.ok(tencentMapSource.includes('/api/v1/map/routes/preview'), 'Tencent search helper should call the signed Go API route preview proxy');
+assert.ok(tencentMapSource.includes('SEARCH_CACHE_TTL_MS'), 'Tencent search helper should cache repeated map searches briefly');
+assert.ok(tencentMapSource.includes('pendingSearches'), 'Tencent search helper should dedupe identical in-flight map searches');
 assert.ok(tencentMapSource.includes('lat'), 'Tencent search helper should pass the current map center latitude');
 assert.ok(tencentMapSource.includes('lng'), 'Tencent search helper should pass the current map center longitude');
 assert.ok(tencentMapSource.includes('swLat'), 'Tencent search helper should pass the viewport southwest latitude for rectangle search');

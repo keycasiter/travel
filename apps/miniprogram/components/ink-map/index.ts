@@ -64,6 +64,7 @@ const SEARCH_MARKER_ID_OFFSET = 10000;
 const CURRENT_LOCATION_MARKER_ID = 900000;
 const SUGGESTION_DELAY_MS = 320;
 const DEFAULT_AREA_KEYWORD = '景点';
+const MAX_RECTANGLE_SPAN_DEGREES = 2.2;
 
 type ComponentDataHost = {
   data: Record<string, unknown>;
@@ -254,14 +255,15 @@ Component({
 
       wx.showLoading({ title: '搜索中' });
       try {
-        const viewport = options.useViewport ? await this.getVisibleViewport() : null;
+        const visibleViewport = options.useViewport ? await this.getVisibleViewport() : null;
+        const viewport = visibleViewport && !isWideViewport(visibleViewport) ? visibleViewport : null;
         const searchResults = await searchTencentPlaces({
           keyword,
           center: isValidSearchCenter(center) ? center : undefined,
           viewport,
           categories: options.categories,
           radiusMeters: options.radiusMeters || 1000,
-          pageSize: 20
+          pageSize: 12
         });
         this.applySearchResults(searchResults, activeCategoryId);
         this.setData({ viewportDirty: false });
@@ -704,6 +706,12 @@ function regionToViewport(region: NativeMapRegionResult): MapViewport | null {
     southwest: { lat: Number(southwest.latitude), lng: Number(southwest.longitude) },
     northeast: { lat: Number(northeast.latitude), lng: Number(northeast.longitude) }
   };
+}
+
+function isWideViewport(viewport: MapViewport): boolean {
+  const latSpan = Math.abs(viewport.northeast.lat - viewport.southwest.lat);
+  const lngSpan = Math.abs(viewport.northeast.lng - viewport.southwest.lng);
+  return latSpan > MAX_RECTANGLE_SPAN_DEGREES || lngSpan > MAX_RECTANGLE_SPAN_DEGREES;
 }
 
 function locationContextHeadline(context: TencentLocationContext): string {

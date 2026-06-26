@@ -13,6 +13,9 @@ exports.MAP_SEARCH_CATEGORIES = [
     { id: 'transport', label: '交通', keyword: '交通', categories: ['交通设施'] },
     { id: 'inspiration', label: '灵感', keyword: '灵感', categories: ['旅游景点', '文化场馆', '美食'] }
 ];
+const SEARCH_CACHE_TTL_MS = 45 * 1000;
+const searchCache = new Map();
+const pendingSearches = new Map();
 function searchTencentPlaces(options) {
     const keyword = options.keyword.trim();
     if (!keyword) {
@@ -41,7 +44,25 @@ function searchTencentPlaces(options) {
     else {
         return Promise.resolve([]);
     }
-    return (0, api_1.request)(`/api/v1/map/places/search?${toQueryString(queryParams)}`);
+    const query = toQueryString(queryParams);
+    const cached = searchCache.get(query);
+    if (cached && cached.expiresAt > Date.now()) {
+        return Promise.resolve(cached.results);
+    }
+    const pending = pendingSearches.get(query);
+    if (pending) {
+        return pending;
+    }
+    const search = (0, api_1.request)(`/api/v1/map/places/search?${query}`)
+        .then((results) => {
+        searchCache.set(query, { expiresAt: Date.now() + SEARCH_CACHE_TTL_MS, results });
+        return results;
+    })
+        .finally(() => {
+        pendingSearches.delete(query);
+    });
+    pendingSearches.set(query, search);
+    return search;
 }
 function suggestTencentPlaces(options) {
     const keyword = options.keyword.trim();

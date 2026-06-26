@@ -79,6 +79,10 @@ interface RoutePreviewOptions {
   modes?: readonly TencentRouteMode[];
 }
 
+const SEARCH_CACHE_TTL_MS = 45 * 1000;
+const searchCache = new Map<string, { expiresAt: number; results: TencentPoi[] }>();
+const pendingSearches = new Map<string, Promise<TencentPoi[]>>();
+
 export function searchTencentPlaces(options: SearchTencentPlacesOptions): Promise<TencentPoi[]> {
   const keyword = options.keyword.trim();
   if (!keyword) {
@@ -108,7 +112,26 @@ export function searchTencentPlaces(options: SearchTencentPlacesOptions): Promis
     return Promise.resolve([]);
   }
 
-  return request<TencentPoi[]>(`/api/v1/map/places/search?${toQueryString(queryParams)}`);
+  const query = toQueryString(queryParams);
+  const cached = searchCache.get(query);
+  if (cached && cached.expiresAt > Date.now()) {
+    return Promise.resolve(cached.results);
+  }
+  const pending = pendingSearches.get(query);
+  if (pending) {
+    return pending;
+  }
+
+  const search = request<TencentPoi[]>(`/api/v1/map/places/search?${query}`)
+    .then((results) => {
+      searchCache.set(query, { expiresAt: Date.now() + SEARCH_CACHE_TTL_MS, results });
+      return results;
+    })
+    .finally(() => {
+      pendingSearches.delete(query);
+    });
+  pendingSearches.set(query, search);
+  return search;
 }
 
 export function suggestTencentPlaces(options: SuggestTencentPlacesOptions): Promise<TencentPoi[]> {
