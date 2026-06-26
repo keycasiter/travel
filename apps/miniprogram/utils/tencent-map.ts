@@ -1,4 +1,4 @@
-import { TENCENT_MAP_KEY, TENCENT_MAP_SEARCH_URL } from './config';
+import { request } from './api';
 
 export const MAP_SEARCH_CATEGORIES = [
   { id: 'landmark', label: '地标', keyword: '地标 建筑' },
@@ -25,24 +25,6 @@ export interface TencentPoi {
   distance?: number;
 }
 
-interface TencentPlaceSearchResponse {
-  status: number;
-  message?: string;
-  data?: TencentPlace[];
-}
-
-interface TencentPlace {
-  id?: string;
-  title?: string;
-  address?: string;
-  category?: string;
-  location?: {
-    lat?: number;
-    lng?: number;
-  };
-  _distance?: number;
-}
-
 interface SearchTencentPlacesOptions {
   keyword: string;
   center: MapSearchCenter;
@@ -56,56 +38,17 @@ export function searchTencentPlaces(options: SearchTencentPlacesOptions): Promis
     return Promise.resolve([]);
   }
 
-  if (!TENCENT_MAP_KEY) {
-    return Promise.reject(new Error('腾讯地图 Key 未配置'));
-  }
-
   const radiusMeters = clampInteger(options.radiusMeters || 6000, 500, 20000);
   const pageSize = clampInteger(options.pageSize || 20, 1, 20);
-
-  return new Promise<TencentPoi[]>((resolve, reject) => {
-    wx.request<TencentPlaceSearchResponse>({
-      url: TENCENT_MAP_SEARCH_URL,
-      data: {
-        key: TENCENT_MAP_KEY,
-        keyword,
-        boundary: `nearby(${options.center.lat},${options.center.lng},${radiusMeters})`,
-        page_size: pageSize,
-        page_index: 1,
-        orderby: '_distance'
-      },
-      success: (res) => {
-        const body = res.data;
-        if (res.statusCode >= 400) {
-          reject(new Error(`腾讯地图搜索失败：HTTP ${res.statusCode}`));
-          return;
-        }
-        if (!body || body.status !== 0) {
-          reject(new Error(body?.message || `腾讯地图搜索失败：${body?.status ?? 'unknown'}`));
-          return;
-        }
-        resolve(normalizePlaces(body.data || []));
-      },
-      fail: (error) => reject(error)
-    });
+  const query = toQueryString({
+    keyword,
+    lat: options.center.lat,
+    lng: options.center.lng,
+    radiusMeters,
+    pageSize
   });
-}
 
-function normalizePlaces(places: TencentPlace[]): TencentPoi[] {
-  return places
-    .filter((place) => isFiniteNumber(place.location?.lat) && isFiniteNumber(place.location?.lng))
-    .map((place, index) => {
-      const lat = Number(place.location?.lat);
-      const lng = Number(place.location?.lng);
-      return {
-        id: String(place.id || `${place.title || 'poi'}-${index}-${lat}-${lng}`),
-        title: String(place.title || '未命名地点'),
-        address: String(place.address || ''),
-        category: String(place.category || ''),
-        location: { lat, lng },
-        distance: isFiniteNumber(place._distance) ? Number(place._distance) : undefined
-      };
-    });
+  return request<TencentPoi[]>(`/api/v1/map/places/search?${query}`);
 }
 
 function clampInteger(value: number, min: number, max: number): number {
@@ -115,6 +58,8 @@ function clampInteger(value: number, min: number, max: number): number {
   return Math.min(Math.max(Math.round(value), min), max);
 }
 
-function isFiniteNumber(value: unknown): value is number {
-  return typeof value === 'number' && Number.isFinite(value);
+function toQueryString(params: Record<string, string | number>): string {
+  return Object.keys(params)
+    .map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(String(params[key]))}`)
+    .join('&');
 }

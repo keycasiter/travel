@@ -7,22 +7,28 @@ import (
 )
 
 type Config struct {
-	Env             string
-	HTTPAddr        string
-	MySQLDSN        string
-	WechatAppID     string
-	WechatAppSecret string
+	Env               string
+	HTTPAddr          string
+	MySQLDSN          string
+	WechatAppID       string
+	WechatAppSecret   string
+	TencentMapKey     string
+	TencentMapSecret  string
+	TencentMapBaseURL string
 }
 
 func Load() Config {
 	loadDotEnv(".env")
 	loadDotEnv("../../.env")
 	return Config{
-		Env:             getEnv("APP_ENV", "local"),
-		HTTPAddr:        getEnv("HTTP_ADDR", ":8080"),
-		MySQLDSN:        getEnv("MYSQL_DSN", ""),
-		WechatAppID:     getEnv("WECHAT_APP_ID", ""),
-		WechatAppSecret: getEnv("WECHAT_APP_SECRET", ""),
+		Env:               getEnv("APP_ENV", "local"),
+		HTTPAddr:          getEnv("HTTP_ADDR", ":8080"),
+		MySQLDSN:          getEnv("MYSQL_DSN", ""),
+		WechatAppID:       getEnv("WECHAT_APP_ID", ""),
+		WechatAppSecret:   getEnv("WECHAT_APP_SECRET", ""),
+		TencentMapKey:     getEnv("TENCENT_MAP_KEY", ""),
+		TencentMapSecret:  getEnv("TENCENT_MAP_SECRET", ""),
+		TencentMapBaseURL: getEnv("TENCENT_MAP_BASE_URL", "https://apis.map.qq.com"),
 	}
 }
 

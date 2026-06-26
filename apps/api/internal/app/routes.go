@@ -6,6 +6,7 @@ import (
 	"travel/apps/api/internal/favorite"
 	"travel/apps/api/internal/httpx"
 	"travel/apps/api/internal/itinerary"
+	"travel/apps/api/internal/tencentmap"
 	"travel/apps/api/internal/weather"
 
 	"github.com/gin-gonic/gin"
@@ -29,6 +30,13 @@ func (a *App) Router() *gin.Engine {
 	api.GET("/regions/:id/services", contentHandler.ListServices)
 	api.GET("/regions/:id/pois", contentHandler.ListPOIs)
 	api.GET("/regions/:id/guides", contentHandler.ListGuides)
+
+	mapHandler := newMapHandler(tencentmap.NewClient(tencentmap.Config{
+		Key:     a.Config.TencentMapKey,
+		Secret:  a.Config.TencentMapSecret,
+		BaseURL: a.Config.TencentMapBaseURL,
+	}))
+	api.GET("/map/places/search", mapHandler.searchPlaces)
 
 	itineraryHandler := itinerary.NewHandler(itinerary.NewRepository(a.DB))
 	api.POST("/itineraries/generate", itineraryHandler.Generate)

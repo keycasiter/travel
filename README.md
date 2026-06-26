@@ -54,6 +54,14 @@ Set `.env` `MYSQL_DSN` to the printed value, then run `make migrate-up` and `mak
 
 ## API
 
+Tencent Map nearby search is proxied by the Go API so the WebService `SecretKey` is not shipped in the Mini Program bundle. Configure these values in `.env` before using map search:
+
+```bash
+TENCENT_MAP_KEY=your-webservice-key
+TENCENT_MAP_SECRET=your-webservice-secret-key
+TENCENT_MAP_BASE_URL=https://apis.map.qq.com
+```
+
 Start the Go API:
 
 ```bash

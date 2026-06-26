@@ -58,14 +58,15 @@ assert.ok(!geometrySource.includes('findContainingMapFeature'), 'map geometry ut
 assert.ok(!includeValues.has('data/china-provinces.js'), 'DevTools package should not force-include abandoned GeoJSON data');
 assert.ok(includeValues.has('utils/tencent-map.js'), 'DevTools package should force-include Tencent search runtime JS');
 
-assert.ok(configSource.includes("TENCENT_MAP_KEY = '2DHBZ-6RR6W-LYRRN-Y5FY2-KG35Q-OSFGP'"), 'Tencent map key should be configured for local mini program search');
-assert.ok(configSource.includes('TENCENT_MAP_SEARCH_URL'), 'Tencent place search URL should be configured centrally');
-assert.ok(configSource.includes('/ws/place/v1/search'), 'Tencent place search WebService URL should be configured');
-assert.ok(tencentMapSource.includes('TENCENT_MAP_SEARCH_URL'), 'Tencent search helper should call configured place search WebService');
-assert.ok(tencentMapSource.includes('wx.request'), 'Tencent search helper should use wx.request in mini program');
-assert.ok(tencentMapSource.includes('nearby('), 'Tencent search helper should search near the current map center');
-assert.ok(tencentMapSource.includes('page_size'), 'Tencent search helper should bound search result count');
-assert.ok(tencentMapSource.includes("orderby: '_distance'"), 'Tencent search helper should order nearby POIs by distance');
+assert.ok(!configSource.includes('TENCENT_MAP_KEY'), 'mini program config must not expose Tencent WebService key');
+assert.ok(!configSource.includes('TENCENT_MAP_SEARCH_URL'), 'mini program config must not expose Tencent WebService URL');
+assert.ok(!tencentMapSource.includes('apis.map.qq.com'), 'mini program must not call Tencent WebService directly');
+assert.ok(!tencentMapSource.includes('wx.request'), 'Tencent search helper should use the local API request wrapper');
+assert.ok(tencentMapSource.includes('/api/v1/map/places/search'), 'Tencent search helper should call the signed Go API proxy');
+assert.ok(tencentMapSource.includes('lat'), 'Tencent search helper should pass the current map center latitude');
+assert.ok(tencentMapSource.includes('lng'), 'Tencent search helper should pass the current map center longitude');
+assert.ok(tencentMapSource.includes('radiusMeters'), 'Tencent search helper should pass the nearby search radius');
+assert.ok(tencentMapSource.includes('pageSize'), 'Tencent search helper should bound API proxy result count');
 for (const label of ['地标', '景观', '美食', '交通', '灵感']) {
   assert.ok(tencentMapSource.includes(label), `Tencent search categories should include ${label}`);
 }

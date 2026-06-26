@@ -26,7 +26,7 @@ migrate-down:
 	cd $(API_DIR) && go run ./cmd/migrate --direction down --steps 1 --path migrations
 
 api-test:
-	cd $(API_DIR) && go test ./...
+	cd $(API_DIR) && go test -p 1 ./...
 
 api-run:
 	cd $(API_DIR) && go run ./cmd/api
