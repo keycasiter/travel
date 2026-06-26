@@ -1,0 +1,4 @@
+[
+  {"id":"guide-hangzhou-48h","regionId":"city-hangzhou","title":"杭州 48 小时慢游精选攻略","content":"第一天安排西湖苏堤、湖滨和南山路，第二天早出发去灵隐寺。雨天可把户外湖线缩短，增加浙江省博物馆等室内点位。","tags":["2日游","城市漫步","避坑"],"coverUrl":"seed://hangzhou-48h-cover","official":true},
+  {"id":"guide-beijing-72h","regionId":"city-beijing","title":"北京 72 小时历史文化路线","content":"第一天围绕天安门、故宫和景山，第二天走胡同和中轴线，第三天安排长城或博物馆。故宫、国博等热门点位需要提前预约。","tags":["3日游","历史文化","预约提醒"],"coverUrl":"seed://beijing-72h-cover","official":true}
+]

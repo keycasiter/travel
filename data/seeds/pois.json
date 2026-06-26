@@ -1,0 +1,6 @@
+[
+  {"id":"poi-hangzhou-westlake","regionId":"area-hangzhou-westlake","type":"landmark","name":"西湖苏堤","summary":"杭州最经典的湖景步行线，适合清晨或傍晚慢游。","lat":30.2444,"lng":120.1436,"tags":["城市漫步","地标","轻松"],"durationMinutes":120,"costLevel":0,"hotScore":99},
+  {"id":"poi-hangzhou-lingyin","regionId":"area-hangzhou-westlake","type":"scenic","name":"灵隐寺","summary":"杭州代表性寺院和山林景点，适合半日安排。","lat":30.2401,"lng":120.1023,"tags":["历史文化","自然","避暑"],"durationMinutes":150,"costLevel":2,"hotScore":95},
+  {"id":"poi-beijing-palace-museum","regionId":"area-beijing-dongcheng","type":"landmark","name":"故宫博物院","summary":"北京历史文化核心点位，适合半日深度参观。","lat":39.9163,"lng":116.3972,"tags":["历史文化","地标"],"durationMinutes":180,"costLevel":2,"hotScore":100},
+  {"id":"poi-beijing-jingshan","regionId":"area-beijing-dongcheng","type":"viewpoint","name":"景山公园","summary":"俯瞰中轴线和故宫的经典机位，适合接在故宫后。","lat":39.9251,"lng":116.3968,"tags":["打卡","城市漫步","地标"],"durationMinutes":60,"costLevel":1,"hotScore":92}
+]

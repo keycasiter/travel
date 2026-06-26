@@ -1,0 +1,8 @@
+[
+  {"id":"svc-hangzhou-food","regionId":"city-hangzhou","type":"food","title":"西湖周边轻食与杭帮菜","summary":"湖滨、南山路和龙井村适合安排正餐或茶歇，热门餐厅建议避开饭点排队。","tips":["午餐优先预约或错峰","龙井村适合茶歇和慢游"]},
+  {"id":"svc-hangzhou-accommodation","regionId":"city-hangzhou","type":"accommodation","title":"住湖滨或武林更便于公共交通","summary":"首次到杭州建议住湖滨、武林或凤起路附近，兼顾地铁、餐饮和夜间出行。","tips":["周末房价波动明显","雨季选择离地铁近的酒店"]},
+  {"id":"svc-hangzhou-transport","regionId":"city-hangzhou","type":"transport","title":"地铁 + 步行覆盖核心点位","summary":"西湖核心区适合步行和公交接驳，跨片区优先地铁，节假日减少自驾进入景区。","tips":["节假日西湖周边拥堵","灵隐方向建议早出发"]},
+  {"id":"svc-beijing-food","regionId":"city-beijing","type":"food","title":"胡同小吃与正餐分开安排","summary":"东城适合把小吃、咖啡和历史街区散步组合，正餐建议提前锁定位置。","tips":["热门烤鸭店提前预约","景区周边低性价比餐厅较多"]},
+  {"id":"svc-beijing-accommodation","regionId":"city-beijing","type":"accommodation","title":"住二环内或地铁换乘站附近","summary":"首次到北京建议住东城、西城或地铁 2/5/6 号线换乘便利区域。","tips":["早起参观故宫更轻松","亲子行优先减少换乘"]},
+  {"id":"svc-beijing-transport","regionId":"city-beijing","type":"transport","title":"核心景点优先地铁 + 步行","summary":"北京核心景点停车和打车等待成本高，东城片区适合地铁到达后步行串联。","tips":["天安门和故宫需提前预约","早晚高峰预留地铁时间"]}
+]
