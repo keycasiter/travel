@@ -16,6 +16,7 @@
     bind:close="closeSheet"
   >
     <view wx:if="{{activeOverview}}" class="sheet-content">
+      <button class="sheet-map-button" bindtap="goRegionMap">街道地图</button>
       <view class="section-title">旅行便利</view>
       <view wx:for="{{activeOverview.services}}" wx:key="id" class="content-row">
         <view class="row-title">{{item.title}}</view>

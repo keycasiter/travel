@@ -128,6 +128,15 @@ Page({
     wx.switchTab({ url: '/pages/itinerary/index' });
   },
 
+  goRegionMap() {
+    const regionId = this.data.activeOverview?.region.id || this.data.selectedRegionId;
+    if (!regionId) {
+      this.setData({ locationStatus: '请先选择一个已支持城市。' });
+      return;
+    }
+    wx.navigateTo({ url: `/pages/region-map/index?regionId=${encodeURIComponent(regionId)}` });
+  },
+
   focusMapRegion(regionId: string) {
     const map = this.selectComponent('#inkMap') as { focusRegion?: (regionId: string) => void } | null;
     if (map?.focusRegion) {

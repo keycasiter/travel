@@ -36,6 +36,18 @@
   padding-bottom: 30rpx;
 }
 
+.sheet-map-button {
+  width: 100%;
+  height: 78rpx;
+  line-height: 78rpx;
+  padding: 0;
+  border-radius: 8rpx;
+  background: #22322d;
+  color: #fffdf8;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+
 .section-title {
   margin: 28rpx 0 14rpx;
   color: #22564b;

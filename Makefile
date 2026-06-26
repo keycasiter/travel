@@ -40,6 +40,7 @@ mini-install:
 mini-check:
 	cd $(MINI_DIR) && npm run test:map
 	cd $(MINI_DIR) && npm run test:map-performance
+	cd $(MINI_DIR) && npm run test:native-map-page
 	cd $(MINI_DIR) && npm run test:components
 	cd $(MINI_DIR) && npm run check:devtools
 	cd $(MINI_DIR) && npm run typecheck

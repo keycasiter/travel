@@ -8,6 +8,7 @@
     "test:components": "node scripts/test-component-events.js",
     "test:map": "npm run build:runtime && node scripts/test-map-geometry.js",
     "test:map-performance": "npm run build:runtime && node scripts/test-map-performance.js",
+    "test:native-map-page": "node scripts/test-native-map-page.js",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

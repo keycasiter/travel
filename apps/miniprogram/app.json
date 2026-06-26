@@ -1,6 +1,7 @@
 {
   "pages": [
     "pages/explore/index",
+    "pages/region-map/index",
     "pages/itinerary/index",
     "pages/favorite/index",
     "pages/mine/index",

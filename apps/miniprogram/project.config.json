@@ -48,6 +48,10 @@
       },
       {
         "type": "file",
+        "value": "pages/region-map/index.js"
+      },
+      {
+        "type": "file",
         "value": "pages/itinerary/index.js"
       },
       {

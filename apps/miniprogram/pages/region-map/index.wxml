@@ -1,0 +1,36 @@
+<view class="region-map-page">
+  <map
+    id="streetMap"
+    class="native-map"
+    longitude="{{longitude}}"
+    latitude="{{latitude}}"
+    scale="{{scale}}"
+    markers="{{markers}}"
+    include-points="{{includePoints}}"
+    show-location
+    enable-zoom
+    enable-scroll
+    enable-rotate
+    enable-3D
+    bindmarkertap="onMarkerTap"
+  />
+
+  <view class="map-header">
+    <button class="back-button" bindtap="goBack">返回</button>
+    <view class="map-title">{{regionName || '街道地图'}}</view>
+  </view>
+
+  <view class="map-actions">
+    <button class="action-button" bindtap="zoomToStreet">街道</button>
+    <button class="action-button" bindtap="showAllPois">全部</button>
+    <button class="action-button" bindtap="locateMe">定位</button>
+  </view>
+
+  <view class="poi-panel">
+    <view class="status-text">{{statusText}}</view>
+    <view wx:if="{{selectedPoi}}" class="poi-title">{{selectedPoi.name}}</view>
+    <view wx:if="{{selectedPoi}}" class="poi-summary">{{selectedPoi.summary}}</view>
+    <view wx:if="{{transportServices.length > 0}}" class="transport-text">{{transportServices[0].summary}}</view>
+    <button class="traffic-button" bindtap="openTraffic">交通</button>
+  </view>
+</view>

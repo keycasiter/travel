@@ -18,6 +18,7 @@ if (config.setting && config.setting.ignoreDevUnusedFiles !== false) {
 const runtimeFiles = [
   'app.js',
   'pages/explore/index.js',
+  'pages/region-map/index.js',
   'pages/itinerary/index.js',
   'pages/favorite/index.js',
   'pages/mine/index.js',
