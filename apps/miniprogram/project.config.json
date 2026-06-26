@@ -19,9 +19,7 @@
     "ignoreDevUnusedFiles": false,
     "localPlugins": false,
     "disableUseStrict": false,
-    "useCompilerPlugins": [
-      "typescript"
-    ],
+    "useCompilerPlugins": false,
     "condition": false,
     "swc": false,
     "disableSWC": true,
@@ -33,8 +31,37 @@
   },
   "simulatorPluginLibVersion": {},
   "packOptions": {
-    "ignore": [],
+    "ignore": [
+      {
+        "type": "folder",
+        "value": "scripts"
+      }
+    ],
     "include": [
+      {
+        "type": "file",
+        "value": "app.js"
+      },
+      {
+        "type": "file",
+        "value": "pages/explore/index.js"
+      },
+      {
+        "type": "file",
+        "value": "pages/itinerary/index.js"
+      },
+      {
+        "type": "file",
+        "value": "pages/favorite/index.js"
+      },
+      {
+        "type": "file",
+        "value": "pages/mine/index.js"
+      },
+      {
+        "type": "file",
+        "value": "pages/share/index.js"
+      },
       {
         "type": "file",
         "value": "components/ink-map/index.js"
@@ -42,6 +69,14 @@
       {
         "type": "file",
         "value": "components/bottom-sheet/index.js"
+      },
+      {
+        "type": "file",
+        "value": "utils/api.js"
+      },
+      {
+        "type": "file",
+        "value": "utils/config.js"
       }
     ]
   },

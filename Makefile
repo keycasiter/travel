@@ -38,6 +38,7 @@ mini-install:
 	cd $(MINI_DIR) && npm install
 
 mini-check:
+	cd $(MINI_DIR) && npm run build:runtime
 	cd $(MINI_DIR) && npm run check:devtools
 	cd $(MINI_DIR) && npm run typecheck
 

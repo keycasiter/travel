@@ -82,6 +82,8 @@ make mini-install
 make mini-check
 ```
 
+`make mini-check` also generates checked-in JavaScript runtime files from the TypeScript sources for WeChat Developer Tools.
+
 Open `apps/miniprogram` in WeChat Developer Tools.
 
 ## MVP Verification
