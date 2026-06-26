@@ -8,7 +8,6 @@ Local runnable MVP for a China domestic travel guide WeChat Mini Program.
 - MySQL 8.0+
 - Node.js 20+
 - WeChat Developer Tools
-- `migrate` CLI from `golang-migrate`
 
 ## Workspace
 

@@ -4,10 +4,10 @@ MINI_DIR := apps/miniprogram
 .PHONY: migrate-up migrate-down api-test api-run api-seed mini-install mini-check verify
 
 migrate-up:
-	set -a; . ./.env; set +a; migrate -path $(API_DIR)/migrations -database "mysql://$${MYSQL_DSN}" up
+	cd $(API_DIR) && go run ./cmd/migrate --direction up --path migrations
 
 migrate-down:
-	set -a; . ./.env; set +a; migrate -path $(API_DIR)/migrations -database "mysql://$${MYSQL_DSN}" down 1
+	cd $(API_DIR) && go run ./cmd/migrate --direction down --steps 1 --path migrations
 
 api-test:
 	cd $(API_DIR) && go test ./...
