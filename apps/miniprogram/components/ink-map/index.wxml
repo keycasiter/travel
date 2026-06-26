@@ -1,4 +1,4 @@
-<view class="ink-map" bindtouchstart="touchStart" bindtouchmove="touchMove">
+<view class="ink-map" bindtouchstart="touchStart" bindtouchmove="touchMove" bindtouchend="touchEnd" bindtouchcancel="touchEnd">
   <canvas id="inkCanvas" type="2d" class="ink-canvas"></canvas>
   <view class="map-top">
     <view class="search-pill">搜索城市 / 景点 / 避坑</view>
@@ -10,8 +10,9 @@
     <view class="chip">便利</view>
   </view>
   <view
-    wx:for="{{regions}}"
+    wx:for="{{displayRegions}}"
     wx:key="id"
+    hidden="{{!item.markerVisible}}"
     class="marker {{selectedRegionId === item.id ? 'marker-active' : ''}}"
     style="left: {{item.markerLeft || 50}}%; top: {{item.markerTop || 45}}%;"
     data-id="{{item.id}}"

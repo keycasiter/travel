@@ -25,7 +25,9 @@ const runtimeFiles = [
   'components/ink-map/index.js',
   'components/bottom-sheet/index.js',
   'utils/api.js',
-  'utils/config.js'
+  'utils/config.js',
+  'utils/map-geometry.js',
+  'data/china-provinces.js'
 ];
 
 const includeValues = new Set(((config.packOptions && config.packOptions.include) || []).map((rule) => rule.value));
@@ -50,4 +52,9 @@ for (const tab of appConfig.tabBar.list || []) {
 
 if (missingTabIcons.length > 0) {
   throw new Error(`tabBar icon files are missing: ${missingTabIcons.join(', ')}`);
+}
+
+const mapData = require(path.join(root, 'data/china-provinces.js'));
+if (!Array.isArray(mapData.chinaProvinces) || mapData.chinaProvinces.length < 34) {
+  throw new Error('data/china-provinces.js must contain province-level China map data');
 }

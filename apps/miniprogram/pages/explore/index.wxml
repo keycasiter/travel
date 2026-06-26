@@ -1,5 +1,6 @@
 <view class="explore-page">
   <ink-map
+    id="inkMap"
     regions="{{regions}}"
     selectedRegionId="{{selectedRegionId}}"
     bind:regiontap="onRegionTap"
