@@ -135,6 +135,23 @@
   color: #fffdf8;
 }
 
+.area-search-button {
+  position: absolute;
+  top: 232rpx;
+  left: 50%;
+  z-index: 2;
+  width: 192rpx;
+  height: 62rpx;
+  line-height: 60rpx;
+  padding: 0;
+  margin: 0 0 0 -96rpx;
+  border-radius: 31rpx;
+  background: #22322d;
+  color: #fffdf8;
+  font-size: 24rpx;
+  box-shadow: 0 12rpx 30rpx rgba(34, 50, 45, 0.2);
+}
+
 .zoom-controls {
   position: absolute;
   right: 32rpx;
@@ -157,4 +174,132 @@
   font-size: 34rpx;
   font-weight: 700;
   box-shadow: 0 10rpx 28rpx rgba(34, 50, 45, 0.14);
+}
+
+.explore-card {
+  position: absolute;
+  left: 32rpx;
+  right: 32rpx;
+  bottom: 34rpx;
+  z-index: 3;
+  box-sizing: border-box;
+  padding: 24rpx;
+  border: 1rpx solid rgba(34, 50, 45, 0.12);
+  border-radius: 8rpx;
+  background: rgba(255, 253, 248, 0.96);
+  box-shadow: 0 18rpx 48rpx rgba(34, 50, 45, 0.18);
+}
+
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 18rpx;
+}
+
+.card-title {
+  flex: 1;
+  color: #22322d;
+  font-size: 31rpx;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.card-close {
+  width: 48rpx;
+  height: 48rpx;
+  line-height: 44rpx;
+  padding: 0;
+  margin: 0;
+  border-radius: 50%;
+  background: rgba(34, 50, 45, 0.08);
+  color: #22322d;
+  font-size: 30rpx;
+}
+
+.card-meta,
+.card-address,
+.card-distance {
+  margin-top: 8rpx;
+  color: #64716b;
+  font-size: 23rpx;
+  line-height: 1.4;
+}
+
+.card-address {
+  color: #45534d;
+}
+
+.route-strip {
+  display: flex;
+  gap: 10rpx;
+  margin-top: 18rpx;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.route-chip {
+  flex: 0 0 auto;
+  min-width: 120rpx;
+  height: 48rpx;
+  line-height: 48rpx;
+  padding: 0 16rpx;
+  border-radius: 24rpx;
+  background: #eef1ec;
+  color: #33443d;
+  font-size: 22rpx;
+  text-align: center;
+}
+
+.card-actions {
+  display: flex;
+  gap: 12rpx;
+  margin-top: 20rpx;
+}
+
+.action-button {
+  flex: 1;
+  height: 58rpx;
+  line-height: 56rpx;
+  padding: 0 8rpx;
+  margin: 0;
+  border-radius: 6rpx;
+  background: #eef1ec;
+  color: #22322d;
+  font-size: 23rpx;
+}
+
+.primary-action {
+  background: #22564b;
+  color: #fffdf8;
+}
+
+.context-card {
+  bottom: 34rpx;
+}
+
+.context-kicker {
+  margin-bottom: 6rpx;
+  color: #22564b;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+.context-pois {
+  display: flex;
+  gap: 10rpx;
+  margin-top: 16rpx;
+  overflow-x: auto;
+}
+
+.context-poi {
+  flex: 0 0 auto;
+  max-width: 220rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 10rpx 14rpx;
+  border-radius: 6rpx;
+  background: #f4efe4;
+  color: #33443d;
+  font-size: 22rpx;
 }

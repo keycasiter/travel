@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const api_1 = require("../../utils/api");
 const tencent_map_1 = require("../../utils/tencent-map");
 const DEFAULT_LONGITUDE = 104.1954;
 const DEFAULT_LATITUDE = 35.8617;
@@ -12,8 +13,10 @@ const MAX_NATIVE_SCALE = 20;
 const SEARCH_MARKER_ID_OFFSET = 10000;
 const CURRENT_LOCATION_MARKER_ID = 900000;
 const SUGGESTION_DELAY_MS = 320;
+const DEFAULT_AREA_KEYWORD = '景点';
 let suggestionTimer;
 let suggestionSequence = 0;
+let lastContextKey = '';
 Component({
     properties: {
         regions: {
@@ -40,11 +43,22 @@ Component({
         activeCategoryId: '',
         searchCategories: tencent_map_1.MAP_SEARCH_CATEGORIES,
         searchResults: [],
-        searchSuggestions: []
+        searchSuggestions: [],
+        viewportDirty: false,
+        activePlace: null,
+        routePlans: [],
+        routeLoading: false,
+        areaContext: null,
+        areaHeadline: '',
+        areaSummary: ''
     },
     lifetimes: {
         ready() {
             this.syncMapMarkers(true);
+            const currentLocation = getCurrentLocation(this);
+            if (isValidLocation(currentLocation)) {
+                this.loadLocationContext(currentLocation);
+            }
         }
     },
     observers: {
@@ -109,7 +123,8 @@ Component({
                     }
                     this.setData({
                         longitude: res.longitude,
-                        latitude: res.latitude
+                        latitude: res.latitude,
+                        viewportDirty: true
                     });
                 }
             });
@@ -130,6 +145,12 @@ Component({
             }
             this.setData({ searchSuggestions: [] });
             this.runPlaceSearch(keyword, '', { radiusMeters: 1000 });
+        },
+        searchThisArea() {
+            const activeCategoryId = String(this.data.activeCategoryId || '');
+            const category = tencent_map_1.MAP_SEARCH_CATEGORIES.find((item) => item.id === activeCategoryId);
+            const keyword = category?.keyword || String(this.data.searchKeyword || '').trim() || DEFAULT_AREA_KEYWORD;
+            this.runPlaceSearch(keyword, activeCategoryId, { categories: category?.categories, useViewport: true });
         },
         tapSearchCategory(event) {
             const categoryId = String(event.currentTarget.dataset.id || '');
@@ -158,6 +179,7 @@ Component({
                     pageSize: 20
                 });
                 this.applySearchResults(searchResults, activeCategoryId);
+                this.setData({ viewportDirty: false });
                 if (searchResults.length === 0) {
                     wx.showToast({ title: '附近暂未找到结果', icon: 'none' });
                 }
@@ -216,6 +238,9 @@ Component({
             const nextData = {
                 searchResults,
                 activeCategoryId,
+                activePlace: searchResults.length === 1 ? searchResults[0] : null,
+                routePlans: [],
+                routeLoading: false,
                 markers: buildMapMarkers(getRegions(this), String(this.data.selectedRegionId || ''), getCurrentLocation(this), searchResults),
                 includePoints,
                 hasIncludePoints: includePoints.length > 0
@@ -228,6 +253,9 @@ Component({
                 nextData.hasIncludePoints = false;
             }
             this.setData(nextData);
+            if (searchResults.length === 1) {
+                this.loadRoutePreview(searchResults[0]);
+            }
         },
         getVisibleViewport() {
             return new Promise((resolve) => {
@@ -270,21 +298,113 @@ Component({
                 scale: clampNativeScale(scale),
                 searchResults: [],
                 searchSuggestions: [],
+                activePlace: null,
+                routePlans: [],
+                routeLoading: false,
+                viewportDirty: false,
                 activeCategoryId: '',
                 includePoints: [],
                 hasIncludePoints: false,
                 markers: buildMapMarkers(getRegions(this), String(this.data.selectedRegionId || ''), location, [])
             });
+            this.loadLocationContext(location);
         },
         focusSearchResult(result) {
             this.setData({
                 longitude: result.location.lng,
                 latitude: result.location.lat,
                 scale: SEARCH_SCALE,
+                activePlace: result,
+                routePlans: [],
+                routeLoading: false,
                 includePoints: [],
                 hasIncludePoints: false
             });
-            wx.showToast({ title: result.title, icon: 'none' });
+            this.loadRoutePreview(result);
+        },
+        async loadLocationContext(location) {
+            const contextKey = `${location.lat.toFixed(4)},${location.lng.toFixed(4)}`;
+            if (contextKey === lastContextKey) {
+                return;
+            }
+            lastContextKey = contextKey;
+            try {
+                const areaContext = await (0, tencent_map_1.getTencentLocationContext)({
+                    center: { lat: location.lat, lng: location.lng },
+                    radiusMeters: 3000,
+                    pageSize: 6
+                });
+                this.setData({
+                    areaContext,
+                    areaHeadline: locationContextHeadline(areaContext),
+                    areaSummary: locationContextSummary(areaContext)
+                });
+            }
+            catch (_error) {
+                this.setData({
+                    areaContext: null,
+                    areaHeadline: '',
+                    areaSummary: ''
+                });
+            }
+        },
+        async loadRoutePreview(place) {
+            const currentLocation = getCurrentLocation(this);
+            if (!isValidLocation(currentLocation)) {
+                this.setData({ routePlans: [], routeLoading: false });
+                return;
+            }
+            this.setData({ routeLoading: true });
+            try {
+                const routePlans = await (0, tencent_map_1.previewTencentRoutes)({
+                    from: { lat: currentLocation.lat, lng: currentLocation.lng },
+                    to: place.location,
+                    modes: ['walking', 'transit', 'driving']
+                });
+                this.setData({ routePlans, routeLoading: false });
+            }
+            catch (_error) {
+                this.setData({ routePlans: [], routeLoading: false });
+            }
+        },
+        favoriteActivePlace() {
+            const activePlace = getActivePlace(this);
+            if (!activePlace) {
+                return;
+            }
+            (0, api_1.request)('/api/v1/favorites', 'POST', { targetType: 'map_poi', targetId: activePlace.id })
+                .then(() => wx.showToast({ title: '已收藏', icon: 'success' }))
+                .catch((error) => wx.showToast({ title: messageOf(error), icon: 'none' }));
+        },
+        joinItinerary() {
+            const activePlace = getActivePlace(this);
+            if (!activePlace) {
+                return;
+            }
+            wx.setStorageSync('pendingItineraryPlace', {
+                id: activePlace.id,
+                title: activePlace.title,
+                address: activePlace.address,
+                category: activePlace.category,
+                location: activePlace.location
+            });
+            wx.switchTab({ url: '/pages/itinerary/index' });
+        },
+        nearbyActivePlace() {
+            const activePlace = getActivePlace(this);
+            if (!activePlace) {
+                return;
+            }
+            this.setData({
+                longitude: activePlace.location.lng,
+                latitude: activePlace.location.lat,
+                searchKeyword: '附近继续逛',
+                searchSuggestions: []
+            });
+            this.runPlaceSearch('景点 美食', '', { radiusMeters: 1000 });
+        },
+        closeExploreCard() {
+            this.setData({ activePlace: null, routePlans: [], routeLoading: false });
         },
         zoomBy(event) {
             const delta = Number(event.currentTarget.dataset.delta || 0);
@@ -323,6 +443,10 @@ function getSearchResults(instance) {
 }
 function getSearchSuggestions(instance) {
     return (instance.data.searchSuggestions || []).filter(isValidSearchResult);
+}
+function getActivePlace(instance) {
+    const activePlace = instance.data.activePlace || null;
+    return activePlace && isValidSearchResult(activePlace) ? activePlace : null;
 }
 function buildMapMarkers(regions, selectedRegionId, currentLocation, searchResults) {
     const markers = buildRegionMarkers(regions, selectedRegionId);
@@ -438,6 +562,23 @@ function regionToViewport(region) {
         southwest: { lat: Number(southwest.latitude), lng: Number(southwest.longitude) },
         northeast: { lat: Number(northeast.latitude), lng: Number(northeast.longitude) }
     };
+}
+function locationContextHeadline(context) {
+    return context.recommendAddress || context.district || context.city || context.address || '当前位置附近';
+}
+function locationContextSummary(context) {
+    const area = [context.city, context.district, context.street].filter(Boolean).join(' · ');
+    const poiCount = context.pois.length;
+    if (area && poiCount > 0) {
+        return `${area}，附近有 ${poiCount} 个可探索点位`;
+    }
+    if (area) {
+        return area;
+    }
+    if (poiCount > 0) {
+        return `附近有 ${poiCount} 个可探索点位`;
+    }
+    return context.address || '可拖动地图搜索周边内容';
 }
 function messageOf(error) {
     return error instanceof Error ? error.message : String(error);

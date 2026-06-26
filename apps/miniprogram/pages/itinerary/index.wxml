@@ -2,6 +2,12 @@
   <view class="page-title">行程规划</view>
   <view class="page-subtitle">{{status}}</view>
 
+  <view wx:if="{{pendingPlace}}" class="pending-place">
+    <view class="pending-label">待规划点位</view>
+    <view class="pending-title">{{pendingPlace.title}}</view>
+    <view class="pending-address">{{pendingPlace.address}}</view>
+  </view>
+
   <view class="panel">
     <view class="field-label">目的地</view>
     <picker mode="selector" range="{{destinationNames}}" value="{{selectedDestinationIndex}}" bindchange="onDestinationChange">

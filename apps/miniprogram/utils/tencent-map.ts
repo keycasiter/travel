@@ -30,6 +30,27 @@ export interface TencentPoi {
   distance?: number;
 }
 
+export interface TencentLocationContext {
+  location: MapSearchCenter;
+  address: string;
+  recommendAddress: string;
+  province: string;
+  city: string;
+  district: string;
+  street: string;
+  pois: TencentPoi[];
+}
+
+export type TencentRouteMode = 'walking' | 'transit' | 'driving';
+
+export interface TencentRoutePlan {
+  mode: TencentRouteMode;
+  distanceMeters: number;
+  durationMinutes: number;
+  direction?: string;
+  taxiFareYuan?: number;
+}
+
 interface SearchTencentPlacesOptions {
   keyword: string;
   center?: MapSearchCenter;
@@ -44,6 +65,18 @@ interface SuggestTencentPlacesOptions {
   center?: MapSearchCenter;
   categories?: readonly string[];
   pageSize?: number;
+}
+
+interface LocationContextOptions {
+  center: MapSearchCenter;
+  radiusMeters?: number;
+  pageSize?: number;
+}
+
+interface RoutePreviewOptions {
+  from: MapSearchCenter;
+  to: MapSearchCenter;
+  modes?: readonly TencentRouteMode[];
 }
 
 export function searchTencentPlaces(options: SearchTencentPlacesOptions): Promise<TencentPoi[]> {
@@ -94,6 +127,32 @@ export function suggestTencentPlaces(options: SuggestTencentPlacesOptions): Prom
   });
 
   return request<TencentPoi[]>(`/api/v1/map/places/suggest?${query}`);
+}
+
+export function getTencentLocationContext(options: LocationContextOptions): Promise<TencentLocationContext> {
+  const radiusMeters = clampInteger(options.radiusMeters || 3000, 1, 5000);
+  const pageSize = clampInteger(options.pageSize || 8, 1, 20);
+  const query = toQueryString({
+    lat: options.center.lat,
+    lng: options.center.lng,
+    radiusMeters,
+    pageSize
+  });
+
+  return request<TencentLocationContext>(`/api/v1/map/location/context?${query}`);
+}
+
+export function previewTencentRoutes(options: RoutePreviewOptions): Promise<TencentRoutePlan[]> {
+  const modes = (options.modes || ['walking', 'transit', 'driving']).join(',');
+  const query = toQueryString({
+    fromLat: options.from.lat,
+    fromLng: options.from.lng,
+    toLat: options.to.lat,
+    toLng: options.to.lng,
+    modes
+  });
+
+  return request<TencentRoutePlan[]>(`/api/v1/map/routes/preview?${query}`);
 }
 
 function clampInteger(value: number, min: number, max: number): number {

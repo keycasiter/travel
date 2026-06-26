@@ -70,9 +70,48 @@
     >{{item.label}}</button>
   </view>
 
+  <button wx:if="{{viewportDirty}}" class="area-search-button" catchtap="searchThisArea">搜索此区域</button>
+
   <view class="zoom-controls">
     <button class="map-control-button" aria-label="放大地图" data-delta="1" catchtap="zoomBy">+</button>
     <button class="map-control-button" aria-label="缩小地图" data-delta="-1" catchtap="zoomBy">-</button>
     <button class="map-control-button" aria-label="回到全国视角" catchtap="resetView">⌂</button>
+  </view>
+
+  <view wx:if="{{activePlace}}" class="explore-card">
+    <view class="card-header">
+      <view class="card-title">{{activePlace.title}}</view>
+      <button class="card-close" catchtap="closeExploreCard">×</button>
+    </view>
+    <view class="card-meta">{{activePlace.category}}</view>
+    <view class="card-address">{{activePlace.address}}</view>
+    <view wx:if="{{activePlace.distance}}" class="card-distance">距离约 {{activePlace.distance}} 米</view>
+
+    <view class="route-strip">
+      <view wx:if="{{routeLoading}}" class="route-chip">路线计算中</view>
+      <view wx:for="{{routePlans}}" wx:key="mode" class="route-chip">
+        <text wx:if="{{item.mode === 'walking'}}">步行</text>
+        <text wx:elif="{{item.mode === 'transit'}}">公交</text>
+        <text wx:else>驾车</text>
+        <text> {{item.durationMinutes}} 分钟</text>
+      </view>
+    </view>
+
+    <view class="card-actions">
+      <button class="action-button primary-action" catchtap="joinItinerary">加入行程</button>
+      <button class="action-button" catchtap="favoriteActivePlace">收藏</button>
+      <button class="action-button" catchtap="nearbyActivePlace">附近继续逛</button>
+    </view>
+  </view>
+
+  <view wx:if="{{areaContext && !activePlace}}" class="explore-card context-card">
+    <view class="context-kicker">当前位置灵感</view>
+    <view class="card-title">{{areaHeadline}}</view>
+    <view class="card-address">{{areaSummary}}</view>
+    <view class="context-pois">
+      <view wx:for="{{areaContext.pois}}" wx:key="id" wx:for-index="index" wx:if="{{index < 3}}" class="context-poi">
+        {{item.title}}
+      </view>
+    </view>
   </view>
 </view>

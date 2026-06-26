@@ -1,6 +1,17 @@
 import { request } from '../../utils/api';
 import type { Itinerary, ItineraryDetail, Region, ShareView, WeatherSummary } from '../../utils/types';
 
+interface PendingItineraryPlace {
+  id: string;
+  title: string;
+  address: string;
+  category: string;
+  location: {
+    lat: number;
+    lng: number;
+  };
+}
+
 Page({
   data: {
     destinations: [] as Region[],
@@ -12,6 +23,7 @@ Page({
     currentItinerary: null as ItineraryDetail | null,
     itineraries: [] as Itinerary[],
     weather: null as WeatherSummary | null,
+    pendingPlace: null as PendingItineraryPlace | null,
     status: '选择目的地和天数，生成你的自由行计划。'
   },
 
@@ -19,8 +31,29 @@ Page({
     this.loadInitialData();
   },
 
+  onShow() {
+    this.consumePendingPlace();
+  },
+
   async loadInitialData() {
     await Promise.all([this.loadDestinations(), this.loadItineraries()]);
+    this.consumePendingPlace();
+  },
+
+  consumePendingPlace() {
+    const pendingPlace = wx.getStorageSync('pendingItineraryPlace') as PendingItineraryPlace | '';
+    if (!pendingPlace || !pendingPlace.id) {
+      return;
+    }
+    wx.removeStorageSync('pendingItineraryPlace');
+    const preference = `想去:${pendingPlace.title}`;
+    const preferences = this.data.preferencesText.split(',').map((item) => item.trim()).filter(Boolean);
+    const preferencesText = preferences.includes(preference) ? this.data.preferencesText : [...preferences, preference].join(',');
+    this.setData({
+      pendingPlace,
+      preferencesText,
+      status: `已加入待规划点位：${pendingPlace.title}`
+    });
   },
 
   async loadDestinations() {

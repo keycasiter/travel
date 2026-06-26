@@ -38,6 +38,8 @@ func (a *App) Router() *gin.Engine {
 	}))
 	api.GET("/map/places/search", mapHandler.searchPlaces)
 	api.GET("/map/places/suggest", mapHandler.suggestPlaces)
+	api.GET("/map/location/context", mapHandler.locationContext)
+	api.GET("/map/routes/preview", mapHandler.routePreview)
 
 	itineraryHandler := itinerary.NewHandler(itinerary.NewRepository(a.DB))
 	api.POST("/itineraries/generate", itineraryHandler.Generate)

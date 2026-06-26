@@ -37,6 +37,11 @@ assert.ok(componentSource.includes('tapSearchCategory'), 'explore map component 
 assert.ok(componentSource.includes('getCenterLocation'), 'explore map component should search around the current visible map center');
 assert.ok(componentSource.includes('getRegion'), 'explore map component should search category POIs inside the current visible map viewport');
 assert.ok(componentSource.includes('suggestTencentPlaces'), 'explore map component should request Tencent suggestions while typing');
+assert.ok(componentSource.includes('getTencentLocationContext'), 'explore map component should describe the current location with Tencent reverse geocoding');
+assert.ok(componentSource.includes('previewTencentRoutes'), 'explore map component should preview Tencent route plans for selected POIs');
+assert.ok(componentSource.includes('searchThisArea'), 'explore map component should expose a search-this-area action after map movement');
+assert.ok(componentSource.includes('activePlace'), 'explore map component should keep the selected POI for the exploration card');
+assert.ok(componentSource.includes('routePlans'), 'explore map component should keep route previews for selected POIs');
 assert.ok(componentSource.includes('searchSuggestions'), 'explore map component should keep Tencent suggestion results');
 assert.ok(componentSource.includes('selectSuggestion'), 'explore map component should let users pick a Tencent suggestion');
 assert.ok(componentSource.includes('searchResults'), 'explore map component should keep Tencent POI results for highlighted markers');
@@ -54,6 +59,12 @@ assert.ok(componentMarkup.includes('bindinput="handleSearchInput"'), 'explore ma
 assert.ok(componentMarkup.includes('bindconfirm="submitSearch"'), 'explore map search input should submit through Tencent search');
 assert.ok(componentMarkup.includes('searchSuggestions'), 'explore map should render Tencent search suggestions');
 assert.ok(componentMarkup.includes('selectSuggestion'), 'explore map should allow selecting a Tencent search suggestion');
+assert.ok(componentMarkup.includes('searchThisArea'), 'explore map should render a search-this-area button after map movement');
+assert.ok(componentMarkup.includes('activePlace'), 'explore map should render a selected POI exploration card');
+assert.ok(componentMarkup.includes('routePlans'), 'explore map should render Tencent route previews');
+assert.ok(componentMarkup.includes('areaContext'), 'explore map should render current-location context');
+assert.ok(componentMarkup.includes('joinItinerary'), 'explore map should expose an add-to-itinerary action');
+assert.ok(componentMarkup.includes('favoriteActivePlace'), 'explore map should expose a favorite action for selected POIs');
 assert.ok(componentMarkup.includes('tapSearchCategory'), 'explore map should expose nearby category buttons');
 
 assert.ok(!exploreSource.includes('chinaProvinces'), 'explore page must not import GeoJSON province data');
@@ -70,6 +81,8 @@ assert.ok(!tencentMapSource.includes('apis.map.qq.com'), 'mini program must not 
 assert.ok(!tencentMapSource.includes('wx.request'), 'Tencent search helper should use the local API request wrapper');
 assert.ok(tencentMapSource.includes('/api/v1/map/places/search'), 'Tencent search helper should call the signed Go API proxy');
 assert.ok(tencentMapSource.includes('/api/v1/map/places/suggest'), 'Tencent search helper should call the signed Go API suggestion proxy');
+assert.ok(tencentMapSource.includes('/api/v1/map/location/context'), 'Tencent search helper should call the signed Go API reverse geocoder proxy');
+assert.ok(tencentMapSource.includes('/api/v1/map/routes/preview'), 'Tencent search helper should call the signed Go API route preview proxy');
 assert.ok(tencentMapSource.includes('lat'), 'Tencent search helper should pass the current map center latitude');
 assert.ok(tencentMapSource.includes('lng'), 'Tencent search helper should pass the current map center longitude');
 assert.ok(tencentMapSource.includes('swLat'), 'Tencent search helper should pass the viewport southwest latitude for rectangle search');

@@ -206,6 +206,92 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/MapPlace"
+  /api/v1/map/location/context:
+    get:
+      summary: Describe a location through Tencent reverse geocoder and nearby POIs
+      parameters:
+        - in: query
+          name: lat
+          required: true
+          schema:
+            type: number
+            format: double
+        - in: query
+          name: lng
+          required: true
+          schema:
+            type: number
+            format: double
+        - in: query
+          name: radiusMeters
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 5000
+            default: 3000
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 10
+      responses:
+        "200":
+          description: Reverse geocoder result with nearby POIs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/MapLocationContext"
+  /api/v1/map/routes/preview:
+    get:
+      summary: Preview travel route durations through signed Tencent Map direction proxy
+      parameters:
+        - in: query
+          name: fromLat
+          required: true
+          schema:
+            type: number
+            format: double
+        - in: query
+          name: fromLng
+          required: true
+          schema:
+            type: number
+            format: double
+        - in: query
+          name: toLat
+          required: true
+          schema:
+            type: number
+            format: double
+        - in: query
+          name: toLng
+          required: true
+          schema:
+            type: number
+            format: double
+        - in: query
+          name: modes
+          description: Comma-separated route modes.
+          schema:
+            type: string
+            default: walking,transit,driving
+      responses:
+        "200":
+          description: Route preview list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/MapRoutePlan"
   /api/v1/itineraries/generate:
     post:
       summary: Generate itinerary from destination, days, and preferences
@@ -392,6 +478,49 @@ components:
               type: number
               format: double
         distance:
+          type: number
+          format: double
+    MapLocationContext:
+      type: object
+      properties:
+        location:
+          type: object
+          properties:
+            lat:
+              type: number
+              format: double
+            lng:
+              type: number
+              format: double
+        address:
+          type: string
+        recommendAddress:
+          type: string
+        province:
+          type: string
+        city:
+          type: string
+        district:
+          type: string
+        street:
+          type: string
+        pois:
+          type: array
+          items:
+            $ref: "#/components/schemas/MapPlace"
+    MapRoutePlan:
+      type: object
+      properties:
+        mode:
+          type: string
+          enum: [walking, transit, driving]
+        distanceMeters:
+          type: integer
+        durationMinutes:
+          type: integer
+        direction:
+          type: string
+        taxiFareYuan:
           type: number
           format: double
     GenerateItineraryRequest:

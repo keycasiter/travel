@@ -108,3 +108,44 @@ func TestSuggestPlacesInputFromQueryRequiresKeyword(t *testing.T) {
 		t.Fatalf("expected keyword error, got %v", err)
 	}
 }
+
+func TestLocationContextInputFromQueryParsesLocation(t *testing.T) {
+	values, err := url.ParseQuery("lat=30.2&lng=120.1&radiusMeters=5000&pageSize=6")
+	if err != nil {
+		t.Fatalf("parse query: %v", err)
+	}
+
+	input, err := locationContextInputFromQuery(values)
+	if err != nil {
+		t.Fatalf("locationContextInputFromQuery returned error: %v", err)
+	}
+
+	if input.Location.Lat != 30.2 || input.Location.Lng != 120.1 {
+		t.Fatalf("unexpected location: %+v", input.Location)
+	}
+	if input.RadiusMeters != 5000 || input.PageSize != 6 {
+		t.Fatalf("unexpected context options: %+v", input)
+	}
+}
+
+func TestRoutePreviewInputFromQueryParsesModes(t *testing.T) {
+	values, err := url.ParseQuery("fromLat=30.2&fromLng=120.1&toLat=30.221378&toLng=120.121431&modes=walking,transit,driving")
+	if err != nil {
+		t.Fatalf("parse query: %v", err)
+	}
+
+	input, err := routePreviewInputFromQuery(values)
+	if err != nil {
+		t.Fatalf("routePreviewInputFromQuery returned error: %v", err)
+	}
+
+	if input.From.Lat != 30.2 || input.From.Lng != 120.1 {
+		t.Fatalf("unexpected from location: %+v", input.From)
+	}
+	if input.To.Lat != 30.221378 || input.To.Lng != 120.121431 {
+		t.Fatalf("unexpected to location: %+v", input.To)
+	}
+	if len(input.Modes) != 3 || input.Modes[0] != tencentmap.RouteModeWalking || input.Modes[1] != tencentmap.RouteModeTransit || input.Modes[2] != tencentmap.RouteModeDriving {
+		t.Fatalf("unexpected modes: %+v", input.Modes)
+	}
+}

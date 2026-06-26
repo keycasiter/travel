@@ -67,6 +67,52 @@ func (h *mapHandler) suggestPlaces(c *gin.Context) {
 	httpx.Fail(c, 502, "TENCENT_MAP_SUGGEST_FAILED", err.Error())
 }
 
+func (h *mapHandler) locationContext(c *gin.Context) {
+	input, err := locationContextInputFromQuery(c.Request.URL.Query())
+	if err != nil {
+		httpx.Fail(c, 400, "BAD_REQUEST", err.Error())
+		return
+	}
+
+	context, err := h.client.DescribeLocation(c.Request.Context(), input)
+	if err == nil {
+		httpx.OK(c, context)
+		return
+	}
+	if errors.Is(err, tencentmap.ErrInvalidInput) {
+		httpx.Fail(c, 400, "BAD_REQUEST", "lat and lng are required")
+		return
+	}
+	if errors.Is(err, tencentmap.ErrMissingConfig) {
+		httpx.Fail(c, 503, "MAP_CONFIG_MISSING", "TENCENT_MAP_KEY and TENCENT_MAP_SECRET are required")
+		return
+	}
+	httpx.Fail(c, 502, "TENCENT_MAP_GEOCODER_FAILED", err.Error())
+}
+
+func (h *mapHandler) routePreview(c *gin.Context) {
+	input, err := routePreviewInputFromQuery(c.Request.URL.Query())
+	if err != nil {
+		httpx.Fail(c, 400, "BAD_REQUEST", err.Error())
+		return
+	}
+
+	routes, err := h.client.PreviewRoutes(c.Request.Context(), input)
+	if err == nil {
+		httpx.OK(c, routes)
+		return
+	}
+	if errors.Is(err, tencentmap.ErrInvalidInput) {
+		httpx.Fail(c, 400, "BAD_REQUEST", "fromLat, fromLng, toLat and toLng are required")
+		return
+	}
+	if errors.Is(err, tencentmap.ErrMissingConfig) {
+		httpx.Fail(c, 503, "MAP_CONFIG_MISSING", "TENCENT_MAP_KEY and TENCENT_MAP_SECRET are required")
+		return
+	}
+	httpx.Fail(c, 502, "TENCENT_MAP_ROUTE_FAILED", err.Error())
+}
+
 func searchPlacesInputFromQuery(values url.Values) (tencentmap.SearchPlacesInput, error) {
 	keyword := strings.TrimSpace(values.Get("keyword"))
 	if keyword == "" {
@@ -130,6 +176,54 @@ func searchPlacesInputFromQuery(values url.Values) (tencentmap.SearchPlacesInput
 		}, nil
 	}
 	return tencentmap.SearchPlacesInput{}, fmt.Errorf("boundary must be nearby or rectangle")
+}
+
+func locationContextInputFromQuery(values url.Values) (tencentmap.LocationContextInput, error) {
+	lat, err := parseRequiredFloatValue(values, "lat")
+	if err != nil {
+		return tencentmap.LocationContextInput{}, err
+	}
+	lng, err := parseRequiredFloatValue(values, "lng")
+	if err != nil {
+		return tencentmap.LocationContextInput{}, err
+	}
+	radiusMeters, err := parseOptionalIntValue(values, "radiusMeters")
+	if err != nil {
+		return tencentmap.LocationContextInput{}, err
+	}
+	pageSize, err := parseOptionalIntValue(values, "pageSize")
+	if err != nil {
+		return tencentmap.LocationContextInput{}, err
+	}
+	return tencentmap.LocationContextInput{
+		Location:     tencentmap.Location{Lat: lat, Lng: lng},
+		RadiusMeters: radiusMeters,
+		PageSize:     pageSize,
+	}, nil
+}
+
+func routePreviewInputFromQuery(values url.Values) (tencentmap.RoutePreviewInput, error) {
+	fromLat, err := parseRequiredFloatValue(values, "fromLat")
+	if err != nil {
+		return tencentmap.RoutePreviewInput{}, err
+	}
+	fromLng, err := parseRequiredFloatValue(values, "fromLng")
+	if err != nil {
+		return tencentmap.RoutePreviewInput{}, err
+	}
+	toLat, err := parseRequiredFloatValue(values, "toLat")
+	if err != nil {
+		return tencentmap.RoutePreviewInput{}, err
+	}
+	toLng, err := parseRequiredFloatValue(values, "toLng")
+	if err != nil {
+		return tencentmap.RoutePreviewInput{}, err
+	}
+	return tencentmap.RoutePreviewInput{
+		From:  tencentmap.Location{Lat: fromLat, Lng: fromLng},
+		To:    tencentmap.Location{Lat: toLat, Lng: toLng},
+		Modes: parseRouteModes(values),
+	}, nil
 }
 
 func suggestPlacesInputFromQuery(values url.Values) (tencentmap.SuggestPlacesInput, error) {
@@ -205,6 +299,25 @@ func parseCategories(values url.Values) []string {
 		}
 	}
 	return categories
+}
+
+func parseRouteModes(values url.Values) []tencentmap.RouteMode {
+	rawValues := append([]string{}, values["mode"]...)
+	rawValues = append(rawValues, values["modes"]...)
+	modes := make([]tencentmap.RouteMode, 0, len(rawValues))
+	for _, raw := range rawValues {
+		for _, part := range strings.Split(raw, ",") {
+			switch strings.ToLower(strings.TrimSpace(part)) {
+			case string(tencentmap.RouteModeWalking):
+				modes = append(modes, tencentmap.RouteModeWalking)
+			case string(tencentmap.RouteModeTransit):
+				modes = append(modes, tencentmap.RouteModeTransit)
+			case string(tencentmap.RouteModeDriving):
+				modes = append(modes, tencentmap.RouteModeDriving)
+			}
+		}
+	}
+	return modes
 }
 
 func parseBoolValue(value string) bool {

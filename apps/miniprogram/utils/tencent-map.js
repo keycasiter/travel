@@ -3,6 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MAP_SEARCH_CATEGORIES = void 0;
 exports.searchTencentPlaces = searchTencentPlaces;
 exports.suggestTencentPlaces = suggestTencentPlaces;
+exports.getTencentLocationContext = getTencentLocationContext;
+exports.previewTencentRoutes = previewTencentRoutes;
 const api_1 = require("./api");
 exports.MAP_SEARCH_CATEGORIES = [
     { id: 'landmark', label: '地标', keyword: '地标', categories: ['旅游景点', '文化场馆'] },
@@ -55,6 +57,28 @@ function suggestTencentPlaces(options) {
         pageSize
     });
     return (0, api_1.request)(`/api/v1/map/places/suggest?${query}`);
+}
+function getTencentLocationContext(options) {
+    const radiusMeters = clampInteger(options.radiusMeters || 3000, 1, 5000);
+    const pageSize = clampInteger(options.pageSize || 8, 1, 20);
+    const query = toQueryString({
+        lat: options.center.lat,
+        lng: options.center.lng,
+        radiusMeters,
+        pageSize
+    });
+    return (0, api_1.request)(`/api/v1/map/location/context?${query}`);
+}
+function previewTencentRoutes(options) {
+    const modes = (options.modes || ['walking', 'transit', 'driving']).join(',');
+    const query = toQueryString({
+        fromLat: options.from.lat,
+        fromLng: options.from.lng,
+        toLat: options.to.lat,
+        toLng: options.to.lng,
+        modes
+    });
+    return (0, api_1.request)(`/api/v1/map/routes/preview?${query}`);
 }
 function clampInteger(value, min, max) {
     if (!Number.isFinite(value)) {

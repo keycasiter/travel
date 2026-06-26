@@ -7,6 +7,34 @@
   background: #fffdf8;
 }
 
+.pending-place {
+  margin-top: 28rpx;
+  padding: 24rpx;
+  border-left: 6rpx solid #22564b;
+  border-radius: 8rpx;
+  background: #eef1ec;
+}
+
+.pending-label {
+  color: #22564b;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+.pending-title {
+  margin-top: 8rpx;
+  color: #22322d;
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.pending-address {
+  margin-top: 6rpx;
+  color: #64716b;
+  font-size: 23rpx;
+  line-height: 1.45;
+}
+
 .compact-panel {
   margin-top: 24rpx;
 }
