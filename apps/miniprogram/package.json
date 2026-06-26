@@ -5,6 +5,7 @@
   "scripts": {
     "build:runtime": "tsc --rootDir . --sourceMap false --declaration false",
     "check:devtools": "node scripts/check-devtools-config.js",
+    "test:components": "node scripts/test-component-events.js",
     "test:map": "npm run build:runtime && node scripts/test-map-geometry.js",
     "typecheck": "tsc --noEmit"
   },
