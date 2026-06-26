@@ -5,6 +5,7 @@
     selectedRegionId="{{selectedRegionId}}"
     currentLocation="{{currentLocation}}"
     bind:regiontap="onRegionTap"
+    bind:featuretap="onFeatureTap"
     bind:locate="onLocate"
   />
   <view class="status-card">{{locationStatus}}</view>

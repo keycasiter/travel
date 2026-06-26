@@ -108,6 +108,38 @@ Component({
                 this.triggerEvent('regiontap', { regionId });
             }
         },
+        tapMap(event) {
+            const touch = event.changedTouches[0];
+            if (!touch) {
+                return;
+            }
+            const query = this.createSelectorQuery();
+            query.select('#inkCanvas').boundingClientRect().exec((res) => {
+                const rect = res?.[0];
+                if (!rect) {
+                    return;
+                }
+                const width = Number(rect.width || 320);
+                const height = Number(rect.height || 520);
+                const viewport = {
+                    width,
+                    height,
+                    padding: Math.max(width * 0.075, 24),
+                    scale: this.data.scale,
+                    offsetX: this.data.offsetX,
+                    offsetY: this.data.offsetY
+                };
+                const feature = (0, map_geometry_1.findMapFeatureAtViewportPoint)(china_provinces_1.chinaProvinces, CHINA_BOUNDS, viewport, {
+                    x: touch.clientX - Number(rect.left || 0),
+                    y: touch.clientY - Number(rect.top || 0)
+                });
+                if (!feature?.center) {
+                    return;
+                }
+                this.triggerEvent('featuretap', { name: feature.name, code: feature.code });
+                this.focusLocation({ lng: feature.center[0], lat: feature.center[1], label: feature.name }, Math.max(this.data.scale, 1.68));
+            });
+        },
         locate() {
             this.triggerEvent('locate');
         },

@@ -38,6 +38,7 @@ export interface ViewportProjector {
   bounds: GeoBounds;
   viewport: MapViewport;
   project(point: GeoPoint): ProjectedPoint;
+  unproject(point: ProjectedPoint): GeoPoint;
 }
 
 export interface RegionPoint {
@@ -98,6 +99,14 @@ export function createViewportProjector(bounds: GeoBounds, viewport: MapViewport
       return {
         x: centerX + (rawX - centerX) * viewport.scale + viewport.offsetX,
         y: centerY + (rawY - centerY) * viewport.scale + viewport.offsetY
+      };
+    },
+    unproject(point: ProjectedPoint): GeoPoint {
+      const rawX = centerX + (point.x - viewport.offsetX - centerX) / viewport.scale;
+      const rawY = centerY + (point.y - viewport.offsetY - centerY) / viewport.scale;
+      return {
+        lng: (rawX - baseX) / baseScale,
+        lat: (baseY - rawY) / baseScale
       };
     }
   };
@@ -179,6 +188,16 @@ export function findContainingMapFeature(features: ChinaMapFeature[], point: Geo
   }
 
   return null;
+}
+
+export function findMapFeatureAtViewportPoint(
+  features: ChinaMapFeature[],
+  bounds: GeoBounds,
+  viewport: MapViewport,
+  point: ProjectedPoint
+): ChinaMapFeature | null {
+  const projector = createViewportProjector(bounds, viewport);
+  return findContainingMapFeature(features, projector.unproject(point));
 }
 
 export function distanceKm(a: GeoPoint, b: GeoPoint): number {

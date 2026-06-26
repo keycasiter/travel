@@ -7,6 +7,7 @@ exports.createFocusedViewport = createFocusedViewport;
 exports.projectRegionMarkers = projectRegionMarkers;
 exports.findNearestRegion = findNearestRegion;
 exports.findContainingMapFeature = findContainingMapFeature;
+exports.findMapFeatureAtViewportPoint = findMapFeatureAtViewportPoint;
 exports.distanceKm = distanceKm;
 exports.forEachTuple = forEachTuple;
 const MIN_MAP_SCALE = 0.78;
@@ -47,6 +48,14 @@ function createViewportProjector(bounds, viewport) {
             return {
                 x: centerX + (rawX - centerX) * viewport.scale + viewport.offsetX,
                 y: centerY + (rawY - centerY) * viewport.scale + viewport.offsetY
+            };
+        },
+        unproject(point) {
+            const rawX = centerX + (point.x - viewport.offsetX - centerX) / viewport.scale;
+            const rawY = centerY + (point.y - viewport.offsetY - centerY) / viewport.scale;
+            return {
+                lng: (rawX - baseX) / baseScale,
+                lat: (baseY - rawY) / baseScale
             };
         }
     };
@@ -112,6 +121,10 @@ function findContainingMapFeature(features, point) {
         }
     }
     return null;
+}
+function findMapFeatureAtViewportPoint(features, bounds, viewport, point) {
+    const projector = createViewportProjector(bounds, viewport);
+    return findContainingMapFeature(features, projector.unproject(point));
 }
 function distanceKm(a, b) {
     const earthRadiusKm = 6371;

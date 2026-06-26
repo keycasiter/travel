@@ -8,6 +8,7 @@ const {
   createViewportProjector,
   distanceKm,
   findContainingMapFeature,
+  findMapFeatureAtViewportPoint,
   findNearestRegion,
   projectRegionMarkers
 } = require('../utils/map-geometry.js');
@@ -74,3 +75,7 @@ const focusedProjector = createViewportProjector(bounds, focusedViewport);
 const focusedPoint = focusedProjector.project({ lng: 120.15507, lat: 30.274084 });
 assert.ok(Math.abs(focusedPoint.x - 187.5) < 0.01, `focused point x should be centered, got ${focusedPoint.x}`);
 assert.ok(Math.abs(focusedPoint.y - 320.16) < 0.01, `focused point y should use map focus anchor, got ${focusedPoint.y}`);
+
+const hangzhouScreenPoint = projector.project({ lng: 120.15507, lat: 30.274084 });
+const viewportHit = findMapFeatureAtViewportPoint(chinaProvinces, bounds, projector.viewport, hangzhouScreenPoint);
+assert.strictEqual(viewportHit && viewportHit.name, '浙江', 'clicking the projected Hangzhou screen point should hit Zhejiang');

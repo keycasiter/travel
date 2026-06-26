@@ -59,6 +59,20 @@ Page({
     }
   },
 
+  onFeatureTap(event: WechatMiniprogram.CustomEvent<{ name: string; code: string }>) {
+    const featureName = event.detail.name;
+    if (!featureName) {
+      return;
+    }
+
+    const supported = this.data.regions.some((region) => region.name.includes(featureName) || featureName.includes(region.name));
+    this.setData({
+      locationStatus: supported
+        ? `已放大到${featureName}，可点击城市热点查看内容。`
+        : `已放大到${featureName}，该地区灵感待完善，可搜索或选择已支持城市。`
+    });
+  },
+
   onLocate() {
     this.requestLocation();
   },

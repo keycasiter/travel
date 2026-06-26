@@ -1,8 +1,8 @@
-<view class="ink-map" bindtouchstart="touchStart" bindtouchmove="touchMove" bindtouchend="touchEnd" bindtouchcancel="touchEnd">
+<view class="ink-map" bindtap="tapMap" bindtouchstart="touchStart" bindtouchmove="touchMove" bindtouchend="touchEnd" bindtouchcancel="touchEnd">
   <canvas id="inkCanvas" type="2d" class="ink-canvas"></canvas>
   <view class="map-top">
     <view class="search-pill">搜索城市 / 景点 / 避坑</view>
-    <button class="locate-button" bindtap="locate">定位</button>
+    <button class="locate-button" catchtap="locate">定位</button>
   </view>
   <view class="chips">
     <view class="chip">附近灵感</view>
@@ -10,9 +10,9 @@
     <view class="chip">便利</view>
   </view>
   <view class="zoom-controls">
-    <button class="map-control-button" aria-label="放大地图" data-delta="1" bindtap="zoomBy">+</button>
-    <button class="map-control-button" aria-label="缩小地图" data-delta="-1" bindtap="zoomBy">-</button>
-    <button class="map-control-button" aria-label="回到全国视角" bindtap="resetView">⌂</button>
+    <button class="map-control-button" aria-label="放大地图" data-delta="1" catchtap="zoomBy">+</button>
+    <button class="map-control-button" aria-label="缩小地图" data-delta="-1" catchtap="zoomBy">-</button>
+    <button class="map-control-button" aria-label="回到全国视角" catchtap="resetView">⌂</button>
   </view>
   <view
     wx:for="{{displayRegions}}"
@@ -21,7 +21,7 @@
     class="marker {{selectedRegionId === item.id ? 'marker-active' : ''}}"
     style="left: {{item.markerLeft || 50}}%; top: {{item.markerTop || 45}}%;"
     data-id="{{item.id}}"
-    bindtap="tapRegion"
+    catchtap="tapRegion"
   >
     <view class="marker-dot"></view>
     <view class="marker-label">{{item.name}}</view>
