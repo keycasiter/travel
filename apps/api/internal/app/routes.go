@@ -3,8 +3,10 @@ package app
 import (
 	"travel/apps/api/internal/auth"
 	"travel/apps/api/internal/content"
+	"travel/apps/api/internal/favorite"
 	"travel/apps/api/internal/httpx"
 	"travel/apps/api/internal/itinerary"
+	"travel/apps/api/internal/weather"
 
 	"github.com/gin-gonic/gin"
 )
@@ -34,6 +36,17 @@ func (a *App) Router() *gin.Engine {
 	api.GET("/itineraries/:id", itineraryHandler.Detail)
 	api.PATCH("/itineraries/:id", itineraryHandler.PatchItinerary)
 	api.PATCH("/itinerary-items/:id", itineraryHandler.PatchItem)
+	api.POST("/itineraries/:id/share", itineraryHandler.CreateShare)
+	api.GET("/shares/:shareCode", itineraryHandler.GetShare)
+	api.POST("/shares/:shareCode/copy", itineraryHandler.CopyShare)
+
+	favoriteHandler := favorite.NewHandler(favorite.NewRepository(a.DB))
+	api.GET("/favorites", favoriteHandler.List)
+	api.POST("/favorites", favoriteHandler.Create)
+	api.DELETE("/favorites/:id", favoriteHandler.Delete)
+
+	weatherHandler := weather.NewHandler(a.DB)
+	api.GET("/weather/summary", weatherHandler.Summary)
 
 	return router
 }

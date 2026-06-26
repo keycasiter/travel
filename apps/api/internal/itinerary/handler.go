@@ -125,6 +125,33 @@ func (h *Handler) PatchItem(c *gin.Context) {
 	respondItinerary(c, item, err)
 }
 
+func (h *Handler) CreateShare(c *gin.Context) {
+	userID, ok := httpx.RequireUserID(c)
+	if !ok {
+		return
+	}
+	id, ok := parseUintParam(c, "id")
+	if !ok {
+		return
+	}
+	share, err := h.repo.CreateShare(c.Request.Context(), userID, id)
+	respondItinerary(c, share, err)
+}
+
+func (h *Handler) GetShare(c *gin.Context) {
+	share, err := h.repo.GetShare(c.Request.Context(), c.Param("shareCode"))
+	respondItinerary(c, share, err)
+}
+
+func (h *Handler) CopyShare(c *gin.Context) {
+	userID, ok := httpx.RequireUserID(c)
+	if !ok {
+		return
+	}
+	detail, err := h.repo.CopyShare(c.Request.Context(), userID, c.Param("shareCode"))
+	respondItinerary(c, detail, err)
+}
+
 func parseUintParam(c *gin.Context, key string) (uint64, bool) {
 	id, err := strconv.ParseUint(c.Param(key), 10, 64)
 	if err != nil || id == 0 {
