@@ -4,6 +4,7 @@ import (
 	"travel/apps/api/internal/auth"
 	"travel/apps/api/internal/content"
 	"travel/apps/api/internal/httpx"
+	"travel/apps/api/internal/itinerary"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,6 +27,13 @@ func (a *App) Router() *gin.Engine {
 	api.GET("/regions/:id/services", contentHandler.ListServices)
 	api.GET("/regions/:id/pois", contentHandler.ListPOIs)
 	api.GET("/regions/:id/guides", contentHandler.ListGuides)
+
+	itineraryHandler := itinerary.NewHandler(itinerary.NewRepository(a.DB))
+	api.POST("/itineraries/generate", itineraryHandler.Generate)
+	api.GET("/itineraries", itineraryHandler.List)
+	api.GET("/itineraries/:id", itineraryHandler.Detail)
+	api.PATCH("/itineraries/:id", itineraryHandler.PatchItinerary)
+	api.PATCH("/itinerary-items/:id", itineraryHandler.PatchItem)
 
 	return router
 }
