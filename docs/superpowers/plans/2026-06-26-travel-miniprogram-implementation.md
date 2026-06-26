@@ -217,7 +217,7 @@ require (
 Run:
 
 ```bash
-cd apps/api && go mod tidy
+cd apps/api && go mod download
 ```
 
 Expected: `go.sum` is created and command exits 0.

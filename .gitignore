@@ -1,3 +1,6 @@
 .env
 .superpowers/
-
+apps/api/tmp/
+apps/api/bin/
+apps/miniprogram/miniprogram_npm/
+apps/miniprogram/node_modules/

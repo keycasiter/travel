@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "CommonJS",
+    "strict": true,
+    "noImplicitAny": true,
+    "types": ["miniprogram-api-typings"],
+    "typeRoots": ["./node_modules/@types", "./node_modules/miniprogram-api-typings"]
+  },
+  "include": ["./**/*.ts"]
+}
