@@ -63,7 +63,8 @@ Component({
     latitude: DEFAULT_LATITUDE,
     scale: DEFAULT_SCALE,
     markers: [] as NativeMapMarker[],
-    includePoints: [] as MapPoint[]
+    includePoints: [] as MapPoint[],
+    hasIncludePoints: false
   },
 
   lifetimes: {
@@ -91,6 +92,7 @@ Component({
       const nextData: Partial<{
         markers: NativeMapMarker[];
         includePoints: MapPoint[];
+        hasIncludePoints: boolean;
         longitude: number;
         latitude: number;
         scale: number;
@@ -100,6 +102,7 @@ Component({
         const includePoints = regionPoints(regions);
         const center = centerOf(includePoints);
         nextData.includePoints = includePoints;
+        nextData.hasIncludePoints = includePoints.length > 0;
         if (center) {
           nextData.longitude = center.longitude;
           nextData.latitude = center.latitude;
@@ -141,7 +144,8 @@ Component({
         longitude: region.centerLng,
         latitude: region.centerLat,
         scale: CITY_SCALE,
-        includePoints: []
+        includePoints: [],
+        hasIncludePoints: false
       });
     },
 
@@ -153,7 +157,8 @@ Component({
         longitude: location.lng,
         latitude: location.lat,
         scale: clampNativeScale(scale),
-        includePoints: []
+        includePoints: [],
+        hasIncludePoints: false
       });
     },
 
@@ -161,7 +166,8 @@ Component({
       const delta = Number(event.currentTarget.dataset.delta || 0);
       this.setData({
         scale: clampNativeScale(this.data.scale + delta),
-        includePoints: []
+        includePoints: [],
+        hasIncludePoints: false
       });
     },
 
@@ -173,7 +179,8 @@ Component({
         longitude: center?.longitude || DEFAULT_LONGITUDE,
         latitude: center?.latitude || DEFAULT_LATITUDE,
         scale: DEFAULT_SCALE,
-        includePoints
+        includePoints,
+        hasIncludePoints: includePoints.length > 0
       });
     }
   }

@@ -1,5 +1,6 @@
 <view class="region-map-page">
   <map
+    wx:if="{{hasIncludePoints}}"
     id="streetMap"
     class="native-map"
     longitude="{{longitude}}"
@@ -7,6 +8,21 @@
     scale="{{scale}}"
     markers="{{markers}}"
     include-points="{{includePoints}}"
+    show-location
+    enable-zoom
+    enable-scroll
+    enable-rotate
+    enable-3D
+    bindmarkertap="onMarkerTap"
+  />
+  <map
+    wx:else
+    id="streetMap"
+    class="native-map"
+    longitude="{{longitude}}"
+    latitude="{{latitude}}"
+    scale="{{scale}}"
+    markers="{{markers}}"
     show-location
     enable-zoom
     enable-scroll
