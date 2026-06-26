@@ -1,3 +1,4 @@
+.DS_Store
 .env
 .local/
 .superpowers/
@@ -5,3 +6,8 @@ apps/api/tmp/
 apps/api/bin/
 apps/miniprogram/miniprogram_npm/
 apps/miniprogram/node_modules/
+apps/miniprogram/project.private.config.json
+apps/miniprogram/app.js
+apps/miniprogram/pages/**/*.js
+apps/miniprogram/components/**/*.js
+apps/miniprogram/utils/**/*.js

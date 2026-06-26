@@ -1,12 +1,39 @@
 {
-  "appid": "touristappid",
+  "appid": "wx44f8b8c3d6c0a580",
   "compileType": "miniprogram",
   "miniprogramRoot": ".",
+  "srcMiniprogramRoot": ".",
   "projectname": "travel-miniprogram",
   "setting": {
     "es6": true,
     "minified": true,
     "postcss": true,
-    "enhance": true
-  }
+    "enhance": true,
+    "compileWorklet": false,
+    "uglifyFileName": false,
+    "uploadWithSourceMap": true,
+    "packNpmManually": false,
+    "packNpmRelationList": [],
+    "minifyWXSS": true,
+    "minifyWXML": true,
+    "localPlugins": false,
+    "disableUseStrict": false,
+    "useCompilerPlugins": [
+      "typescript"
+    ],
+    "condition": false,
+    "swc": false,
+    "disableSWC": true,
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    }
+  },
+  "simulatorPluginLibVersion": {},
+  "packOptions": {
+    "ignore": [],
+    "include": []
+  },
+  "editorSetting": {}
 }

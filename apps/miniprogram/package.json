@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "scripts": {
+    "check:devtools": "node scripts/check-devtools-config.js",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
