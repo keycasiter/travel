@@ -1,0 +1,11 @@
+DROP TABLE IF EXISTS weather_summaries;
+DROP TABLE IF EXISTS share_snapshots;
+DROP TABLE IF EXISTS favorites;
+DROP TABLE IF EXISTS itinerary_items;
+DROP TABLE IF EXISTS itinerary_days;
+DROP TABLE IF EXISTS itineraries;
+DROP TABLE IF EXISTS guides;
+DROP TABLE IF EXISTS pois;
+DROP TABLE IF EXISTS travel_services;
+DROP TABLE IF EXISTS regions;
+DROP TABLE IF EXISTS users;
