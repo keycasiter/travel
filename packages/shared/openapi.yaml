@@ -1,0 +1,285 @@
+openapi: 3.0.3
+info:
+  title: Travel Miniprogram API
+  version: 0.1.0
+servers:
+  - url: http://127.0.0.1:8080
+paths:
+  /healthz:
+    get:
+      summary: Health check
+      responses:
+        "200":
+          description: API is healthy
+  /api/v1/auth/wechat-login:
+    post:
+      summary: Local WeChat login exchange
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Local user identity
+  /api/v1/regions:
+    get:
+      summary: List regions
+      parameters:
+        - in: query
+          name: level
+          schema:
+            type: string
+        - in: query
+          name: parentId
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Region list
+  /api/v1/regions/{id}/overview:
+    get:
+      summary: Get region overview
+      parameters:
+        - $ref: "#/components/parameters/PathID"
+      responses:
+        "200":
+          description: Region with services, POIs, and guides
+  /api/v1/regions/{id}/services:
+    get:
+      summary: List region services
+      parameters:
+        - $ref: "#/components/parameters/PathID"
+        - in: query
+          name: type
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Travel service list
+  /api/v1/regions/{id}/pois:
+    get:
+      summary: List region POIs
+      parameters:
+        - $ref: "#/components/parameters/PathID"
+        - in: query
+          name: type
+          schema:
+            type: string
+      responses:
+        "200":
+          description: POI list
+  /api/v1/regions/{id}/guides:
+    get:
+      summary: List region guides
+      parameters:
+        - $ref: "#/components/parameters/PathID"
+      responses:
+        "200":
+          description: Guide list
+  /api/v1/itineraries/generate:
+    post:
+      summary: Generate itinerary from destination, days, and preferences
+      parameters:
+        - $ref: "#/components/parameters/UserID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateItineraryRequest"
+      responses:
+        "200":
+          description: Generated itinerary detail
+  /api/v1/itineraries:
+    get:
+      summary: List current user's itineraries
+      parameters:
+        - $ref: "#/components/parameters/UserID"
+      responses:
+        "200":
+          description: Itinerary list
+  /api/v1/itineraries/{id}:
+    get:
+      summary: Get itinerary detail
+      parameters:
+        - $ref: "#/components/parameters/UserID"
+        - $ref: "#/components/parameters/NumericID"
+      responses:
+        "200":
+          description: Itinerary detail
+    patch:
+      summary: Update itinerary metadata
+      parameters:
+        - $ref: "#/components/parameters/UserID"
+        - $ref: "#/components/parameters/NumericID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchItineraryRequest"
+      responses:
+        "200":
+          description: Updated itinerary detail
+  /api/v1/itinerary-items/{id}:
+    patch:
+      summary: Update itinerary item state
+      parameters:
+        - $ref: "#/components/parameters/UserID"
+        - $ref: "#/components/parameters/NumericID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchItineraryItemRequest"
+      responses:
+        "200":
+          description: Updated itinerary item
+  /api/v1/favorites:
+    get:
+      summary: List favorites
+      parameters:
+        - $ref: "#/components/parameters/UserID"
+      responses:
+        "200":
+          description: Favorite list
+    post:
+      summary: Create favorite
+      parameters:
+        - $ref: "#/components/parameters/UserID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateFavoriteRequest"
+      responses:
+        "200":
+          description: Favorite
+  /api/v1/favorites/{id}:
+    delete:
+      summary: Delete favorite
+      parameters:
+        - $ref: "#/components/parameters/UserID"
+        - $ref: "#/components/parameters/NumericID"
+      responses:
+        "200":
+          description: Delete result
+  /api/v1/itineraries/{id}/share:
+    post:
+      summary: Create read-only share snapshot
+      parameters:
+        - $ref: "#/components/parameters/UserID"
+        - $ref: "#/components/parameters/NumericID"
+      responses:
+        "200":
+          description: Share snapshot
+  /api/v1/shares/{shareCode}:
+    get:
+      summary: Get read-only share snapshot
+      parameters:
+        - in: path
+          name: shareCode
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Share snapshot
+  /api/v1/shares/{shareCode}/copy:
+    post:
+      summary: Copy share snapshot as independent itinerary
+      parameters:
+        - $ref: "#/components/parameters/UserID"
+        - in: path
+          name: shareCode
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Copied itinerary detail
+  /api/v1/weather/summary:
+    get:
+      summary: Get static weather summary
+      parameters:
+        - in: query
+          name: regionId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Weather summary
+components:
+  parameters:
+    PathID:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+    NumericID:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: integer
+        format: uint64
+    UserID:
+      in: header
+      name: X-User-ID
+      required: true
+      schema:
+        type: integer
+        format: uint64
+  schemas:
+    LoginRequest:
+      type: object
+      required: [code]
+      properties:
+        code:
+          type: string
+    GenerateItineraryRequest:
+      type: object
+      required: [destinationRegionId, days]
+      properties:
+        destinationRegionId:
+          type: string
+        days:
+          type: integer
+          minimum: 1
+          maximum: 14
+        preferences:
+          type: array
+          items:
+            type: string
+    PatchItineraryRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        status:
+          type: string
+        budgetCents:
+          type: integer
+    PatchItineraryItemRequest:
+      type: object
+      properties:
+        sortOrder:
+          type: integer
+        note:
+          type: string
+        done:
+          type: boolean
+    CreateFavoriteRequest:
+      type: object
+      required: [targetType, targetId]
+      properties:
+        targetType:
+          type: string
+        targetId:
+          type: string
