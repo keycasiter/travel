@@ -14,6 +14,7 @@
     enable-rotate
     enable-3D
     bindmarkertap="onMarkerTap"
+    bindregionchange="onRegionChange"
   />
   <map
     wx:else
@@ -29,17 +30,29 @@
     enable-rotate
     enable-3D
     bindmarkertap="onMarkerTap"
+    bindregionchange="onRegionChange"
   />
 
   <view class="map-top">
-    <view class="search-pill">搜索城市 / 景点 / 避坑</view>
+    <input
+      class="search-input"
+      value="{{searchKeyword}}"
+      placeholder="搜索好玩的"
+      confirm-type="search"
+      bindinput="handleSearchInput"
+      bindconfirm="submitSearch"
+    />
     <button class="locate-button" catchtap="locate">定位</button>
   </view>
 
   <view class="chips">
-    <view class="chip">附近灵感</view>
-    <view class="chip">避坑</view>
-    <view class="chip">便利</view>
+    <button
+      wx:for="{{searchCategories}}"
+      wx:key="id"
+      class="chip {{activeCategoryId === item.id ? 'chip-active' : ''}}"
+      data-id="{{item.id}}"
+      catchtap="tapSearchCategory"
+    >{{item.label}}</button>
   </view>
 
   <view class="zoom-controls">

@@ -85,6 +85,10 @@
       {
         "type": "file",
         "value": "utils/map-geometry.js"
+      },
+      {
+        "type": "file",
+        "value": "utils/tencent-map.js"
       }
     ]
   },

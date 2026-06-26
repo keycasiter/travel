@@ -27,7 +27,8 @@ const runtimeFiles = [
   'components/bottom-sheet/index.js',
   'utils/api.js',
   'utils/config.js',
-  'utils/map-geometry.js'
+  'utils/map-geometry.js',
+  'utils/tencent-map.js'
 ];
 
 const includeValues = new Set(((config.packOptions && config.packOptions.include) || []).map((rule) => rule.value));

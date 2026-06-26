@@ -1,4 +1,10 @@
 import type { Region } from '../../utils/types';
+import {
+  MAP_SEARCH_CATEGORIES,
+  searchTencentPlaces,
+  type MapSearchCategoryId,
+  type TencentPoi
+} from '../../utils/tencent-map';
 
 interface CurrentLocation {
   lng: number;
@@ -34,8 +40,10 @@ const DEFAULT_LATITUDE = 35.8617;
 const DEFAULT_SCALE = 4;
 const CITY_SCALE = 10;
 const LOCATION_SCALE = 14;
+const SEARCH_SCALE = 15;
 const MIN_NATIVE_SCALE = 4;
 const MAX_NATIVE_SCALE = 20;
+const SEARCH_MARKER_ID_OFFSET = 10000;
 const CURRENT_LOCATION_MARKER_ID = 900000;
 
 type ComponentDataHost = {
@@ -64,7 +72,11 @@ Component({
     scale: DEFAULT_SCALE,
     markers: [] as NativeMapMarker[],
     includePoints: [] as MapPoint[],
-    hasIncludePoints: false
+    hasIncludePoints: false,
+    searchKeyword: '',
+    activeCategoryId: '' as MapSearchCategoryId | '',
+    searchCategories: MAP_SEARCH_CATEGORIES,
+    searchResults: [] as TencentPoi[]
   },
 
   lifetimes: {
@@ -84,10 +96,8 @@ Component({
       const regions = getRegions(this);
       const selectedRegionId = String(this.data.selectedRegionId || '');
       const currentLocation = getCurrentLocation(this);
-      const markers = buildRegionMarkers(regions, selectedRegionId);
-      if (isValidLocation(currentLocation)) {
-        markers.push(buildCurrentLocationMarker(currentLocation));
-      }
+      const searchResults = getSearchResults(this);
+      const markers = buildMapMarkers(regions, selectedRegionId, currentLocation, searchResults);
 
       const nextData: Partial<{
         markers: NativeMapMarker[];
@@ -123,6 +133,14 @@ Component({
         return;
       }
 
+      if (markerId >= SEARCH_MARKER_ID_OFFSET && markerId < CURRENT_LOCATION_MARKER_ID) {
+        const result = getSearchResults(this)[markerId - SEARCH_MARKER_ID_OFFSET];
+        if (result) {
+          this.focusSearchResult(result);
+        }
+        return;
+      }
+
       const region = getRegions(this)[markerId - 1];
       if (!region) {
         return;
@@ -131,8 +149,95 @@ Component({
       this.triggerEvent('regiontap', { regionId: region.id });
     },
 
+    onRegionChange(event: WechatMiniprogram.CustomEvent<{ type?: string }>) {
+      const changeType = event.detail?.type || event.type;
+      if (changeType === 'begin') {
+        return;
+      }
+      const mapContext = wx.createMapContext('nativeExploreMap', this);
+      mapContext.getCenterLocation({
+        success: (res) => {
+          if (!Number.isFinite(res.longitude) || !Number.isFinite(res.latitude)) {
+            return;
+          }
+          this.setData({
+            longitude: res.longitude,
+            latitude: res.latitude
+          });
+        }
+      });
+    },
+
     locate() {
       this.triggerEvent('locate');
+    },
+
+    handleSearchInput(event: WechatMiniprogram.Input) {
+      this.setData({ searchKeyword: String(event.detail.value || '') });
+    },
+
+    submitSearch() {
+      const keyword = String(this.data.searchKeyword || '').trim();
+      if (!keyword) {
+        wx.showToast({ title: '输入想找的地点', icon: 'none' });
+        return;
+      }
+      this.runPlaceSearch(keyword, '');
+    },
+
+    tapSearchCategory(event: WechatMiniprogram.TouchEvent) {
+      const categoryId = String(event.currentTarget.dataset.id || '') as MapSearchCategoryId;
+      const category = MAP_SEARCH_CATEGORIES.find((item) => item.id === categoryId);
+      if (!category) {
+        return;
+      }
+      this.setData({ searchKeyword: category.label });
+      this.runPlaceSearch(category.keyword, category.id);
+    },
+
+    async runPlaceSearch(keyword: string, activeCategoryId: MapSearchCategoryId | '') {
+      const center = { lng: Number(this.data.longitude), lat: Number(this.data.latitude) };
+      if (!isValidSearchCenter(center)) {
+        wx.showToast({ title: '地图中心不可用', icon: 'none' });
+        return;
+      }
+
+      wx.showLoading({ title: '搜索中' });
+      try {
+        const searchResults = await searchTencentPlaces({ keyword, center, radiusMeters: 6000, pageSize: 20 });
+        const includePoints = searchResultPoints(searchResults);
+        const nextData: Partial<{
+          searchResults: TencentPoi[];
+          activeCategoryId: MapSearchCategoryId | '';
+          markers: NativeMapMarker[];
+          includePoints: MapPoint[];
+          hasIncludePoints: boolean;
+          longitude: number;
+          latitude: number;
+          scale: number;
+        }> = {
+          searchResults,
+          activeCategoryId,
+          markers: buildMapMarkers(getRegions(this), String(this.data.selectedRegionId || ''), getCurrentLocation(this), searchResults),
+          includePoints,
+          hasIncludePoints: includePoints.length > 0
+        };
+
+        if (searchResults.length === 1) {
+          nextData.longitude = searchResults[0].location.lng;
+          nextData.latitude = searchResults[0].location.lat;
+          nextData.scale = SEARCH_SCALE;
+        }
+
+        this.setData(nextData);
+        if (searchResults.length === 0) {
+          wx.showToast({ title: '附近暂未找到结果', icon: 'none' });
+        }
+      } catch (error) {
+        wx.showToast({ title: messageOf(error), icon: 'none' });
+      } finally {
+        wx.hideLoading();
+      }
     },
 
     focusRegion(regionId: string) {
@@ -144,8 +249,11 @@ Component({
         longitude: region.centerLng,
         latitude: region.centerLat,
         scale: CITY_SCALE,
+        searchResults: [],
+        activeCategoryId: '',
         includePoints: [],
-        hasIncludePoints: false
+        hasIncludePoints: false,
+        markers: buildMapMarkers(getRegions(this), region.id, getCurrentLocation(this), [])
       });
     },
 
@@ -157,9 +265,23 @@ Component({
         longitude: location.lng,
         latitude: location.lat,
         scale: clampNativeScale(scale),
+        searchResults: [],
+        activeCategoryId: '',
+        includePoints: [],
+        hasIncludePoints: false,
+        markers: buildMapMarkers(getRegions(this), String(this.data.selectedRegionId || ''), location, [])
+      });
+    },
+
+    focusSearchResult(result: TencentPoi) {
+      this.setData({
+        longitude: result.location.lng,
+        latitude: result.location.lat,
+        scale: SEARCH_SCALE,
         includePoints: [],
         hasIncludePoints: false
       });
+      wx.showToast({ title: result.title, icon: 'none' });
     },
 
     zoomBy(event: WechatMiniprogram.TouchEvent) {
@@ -179,8 +301,11 @@ Component({
         longitude: center?.longitude || DEFAULT_LONGITUDE,
         latitude: center?.latitude || DEFAULT_LATITUDE,
         scale: DEFAULT_SCALE,
+        searchResults: [],
+        activeCategoryId: '',
         includePoints,
-        hasIncludePoints: includePoints.length > 0
+        hasIncludePoints: includePoints.length > 0,
+        markers: buildMapMarkers(regions, String(this.data.selectedRegionId || ''), getCurrentLocation(this), [])
       });
     }
   }
@@ -192,6 +317,24 @@ function getRegions(instance: ComponentDataHost): Region[] {
 
 function getCurrentLocation(instance: ComponentDataHost): CurrentLocation | null {
   return ((instance.data as unknown as { currentLocation?: CurrentLocation }).currentLocation || null);
+}
+
+function getSearchResults(instance: ComponentDataHost): TencentPoi[] {
+  return ((instance.data as unknown as { searchResults?: TencentPoi[] }).searchResults || []).filter(isValidSearchResult);
+}
+
+function buildMapMarkers(
+  regions: Region[],
+  selectedRegionId: string,
+  currentLocation: CurrentLocation | null,
+  searchResults: TencentPoi[]
+): NativeMapMarker[] {
+  const markers = buildRegionMarkers(regions, selectedRegionId);
+  markers.push(...buildSearchMarkers(searchResults));
+  if (isValidLocation(currentLocation)) {
+    markers.push(buildCurrentLocationMarker(currentLocation));
+  }
+  return markers;
 }
 
 function buildRegionMarkers(regions: Region[], selectedRegionId: string): NativeMapMarker[] {
@@ -217,6 +360,26 @@ function buildRegionMarkers(regions: Region[], selectedRegionId: string): Native
   });
 }
 
+function buildSearchMarkers(results: TencentPoi[]): NativeMapMarker[] {
+  return results.map((result, index) => ({
+    id: SEARCH_MARKER_ID_OFFSET + index,
+    latitude: result.location.lat,
+    longitude: result.location.lng,
+    title: result.title,
+    width: 30,
+    height: 36,
+    callout: {
+      content: result.title,
+      color: '#fffdf8',
+      fontSize: 12,
+      borderRadius: 4,
+      bgColor: index === 0 ? '#b5522d' : '#22564b',
+      padding: 6,
+      display: index === 0 ? 'ALWAYS' : 'BYCLICK'
+    }
+  }));
+}
+
 function buildCurrentLocationMarker(location: CurrentLocation): NativeMapMarker {
   return {
     id: CURRENT_LOCATION_MARKER_ID,
@@ -235,6 +398,10 @@ function buildCurrentLocationMarker(location: CurrentLocation): NativeMapMarker 
       display: 'ALWAYS'
     }
   };
+}
+
+function searchResultPoints(results: TencentPoi[]): MapPoint[] {
+  return results.map((result) => ({ latitude: result.location.lat, longitude: result.location.lng }));
 }
 
 function regionPoints(regions: Region[]): MapPoint[] {
@@ -264,6 +431,18 @@ function isValidRegion(region: Region | undefined): region is Region {
 
 function isValidLocation(location: CurrentLocation | null): location is CurrentLocation {
   return !!location && Number.isFinite(location.lng) && Number.isFinite(location.lat);
+}
+
+function isValidSearchCenter(center: { lng: number; lat: number }): center is CurrentLocation {
+  return Number.isFinite(center.lng) && Number.isFinite(center.lat);
+}
+
+function isValidSearchResult(result: TencentPoi): boolean {
+  return Number.isFinite(result.location?.lng) && Number.isFinite(result.location?.lat);
+}
+
+function messageOf(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }
 
 function clampNativeScale(scale: number): number {

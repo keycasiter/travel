@@ -14,8 +14,7 @@ Page({
     selectedRegionId: '',
     currentLocation: null as CurrentLocation | null,
     activeOverview: null as RegionOverview | null,
-    sheetVisible: false,
-    locationStatus: '正在获取当前位置，用于定位附近旅行灵感。'
+    sheetVisible: false
   },
 
   onLoad() {
@@ -34,7 +33,7 @@ Page({
       const result = await request<LoginResult>('/api/v1/auth/wechat-login', 'POST', { code: login.code || 'dev-code' });
       wx.setStorageSync('userId', result.userId);
     } catch (error) {
-      this.setData({ locationStatus: `本地 API 未连接：${messageOf(error)}` });
+      wx.showToast({ title: `本地 API 未连接：${messageOf(error)}`, icon: 'none' });
     }
   },
 
@@ -43,7 +42,7 @@ Page({
       const regions = await request<Region[]>('/api/v1/regions?level=city');
       this.setData({ regions });
     } catch (error) {
-      this.setData({ locationStatus: `城市内容加载失败：${messageOf(error)}` });
+      wx.showToast({ title: `城市内容加载失败：${messageOf(error)}`, icon: 'none' });
     }
   },
 
@@ -54,7 +53,7 @@ Page({
       const activeOverview = await request<RegionOverview>(`/api/v1/regions/${regionId}/overview`);
       this.setData({ activeOverview, sheetVisible: true });
     } catch (error) {
-      this.setData({ locationStatus: `区域内容加载失败：${messageOf(error)}` });
+      wx.showToast({ title: `区域内容加载失败：${messageOf(error)}`, icon: 'none' });
     }
   },
 
@@ -63,14 +62,13 @@ Page({
   },
 
   requestLocation() {
-    this.setData({ locationStatus: '正在获取当前位置...' });
     wx.getLocation({
       type: 'gcj02',
       success: (res) => {
         this.handleLocationSuccess({ lng: res.longitude, lat: res.latitude });
       },
       fail: () => {
-        this.setData({ locationStatus: '未授权定位，已保持地图浏览视角；可手动搜索或选择已支持城市。' });
+        wx.showToast({ title: '未授权定位，可手动搜索', icon: 'none' });
       }
     });
   },
@@ -82,21 +80,17 @@ Page({
     };
 
     let selectedRegionId = '';
-    let locationStatus = `已定位到 ${point.lat.toFixed(2)}, ${point.lng.toFixed(2)}，地图已聚焦当前位置。`;
 
     try {
       const nearest = findNearestRegion(this.data.regions, point);
       if (nearest.distanceKm <= 120) {
         selectedRegionId = nearest.region.id;
-        locationStatus = `已定位到当前位置，附近支持 ${nearest.region.name} 内容。`;
-      } else {
-        locationStatus = `${locationStatus} 附近灵感待完善，可搜索或选择已支持城市。`;
       }
     } catch (error) {
-      locationStatus = `${locationStatus} 城市内容仍在加载。`;
+      selectedRegionId = '';
     }
 
-    this.setData({ currentLocation: location, selectedRegionId, locationStatus });
+    this.setData({ currentLocation: location, selectedRegionId });
     this.focusMapLocation(location);
   },
 
@@ -111,7 +105,7 @@ Page({
   goRegionMap() {
     const regionId = this.data.activeOverview?.region.id || this.data.selectedRegionId;
     if (!regionId) {
-      this.setData({ locationStatus: '请先选择一个已支持城市。' });
+      wx.showToast({ title: '请先选择城市', icon: 'none' });
       return;
     }
     wx.navigateTo({ url: `/pages/region-map/index?regionId=${encodeURIComponent(regionId)}` });

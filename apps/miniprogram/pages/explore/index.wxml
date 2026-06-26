@@ -7,7 +7,6 @@
     bind:regiontap="onRegionTap"
     bind:locate="onLocate"
   />
-  <view class="status-card">{{locationStatus}}</view>
   <button class="plan-button" bindtap="goPlan">规划行程</button>
   <bottom-sheet
     visible="{{sheetVisible}}"
