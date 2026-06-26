@@ -11,6 +11,9 @@ const MIN_NATIVE_SCALE = 4;
 const MAX_NATIVE_SCALE = 20;
 const SEARCH_MARKER_ID_OFFSET = 10000;
 const CURRENT_LOCATION_MARKER_ID = 900000;
+const SUGGESTION_DELAY_MS = 320;
+let suggestionTimer;
+let suggestionSequence = 0;
 Component({
     properties: {
         regions: {
@@ -36,7 +39,8 @@ Component({
         searchKeyword: '',
         activeCategoryId: '',
         searchCategories: tencent_map_1.MAP_SEARCH_CATEGORIES,
-        searchResults: []
+        searchResults: [],
+        searchSuggestions: []
     },
     lifetimes: {
         ready() {
@@ -114,7 +118,9 @@ Component({
             this.triggerEvent('locate');
         },
         handleSearchInput(event) {
-            this.setData({ searchKeyword: String(event.detail.value || '') });
+            const searchKeyword = String(event.detail.value || '');
+            this.setData({ searchKeyword, activeCategoryId: '' });
+            this.queueSuggestions(searchKeyword);
         },
         submitSearch() {
             const keyword = String(this.data.searchKeyword || '').trim();
@@ -122,7 +128,8 @@ Component({
                 wx.showToast({ title: '输入想找的地点', icon: 'none' });
                 return;
             }
-            this.runPlaceSearch(keyword, '');
+            this.setData({ searchSuggestions: [] });
+            this.runPlaceSearch(keyword, '', { radiusMeters: 1000 });
         },
         tapSearchCategory(event) {
             const categoryId = String(event.currentTarget.dataset.id || '');
@@ -130,32 +137,27 @@ Component({
             if (!category) {
                 return;
             }
-            this.setData({ searchKeyword: category.label });
-            this.runPlaceSearch(category.keyword, category.id);
+            this.setData({ searchKeyword: category.label, searchSuggestions: [] });
+            this.runPlaceSearch(category.keyword, category.id, { categories: category.categories, useViewport: true });
         },
-        async runPlaceSearch(keyword, activeCategoryId) {
+        async runPlaceSearch(keyword, activeCategoryId, options = {}) {
             const center = { lng: Number(this.data.longitude), lat: Number(this.data.latitude) };
-            if (!isValidSearchCenter(center)) {
+            if (!isValidSearchCenter(center) && !options.useViewport) {
                 wx.showToast({ title: '地图中心不可用', icon: 'none' });
                 return;
             }
             wx.showLoading({ title: '搜索中' });
             try {
-                const searchResults = await (0, tencent_map_1.searchTencentPlaces)({ keyword, center, radiusMeters: 6000, pageSize: 20 });
-                const includePoints = searchResultPoints(searchResults);
-                const nextData = {
-                    searchResults,
-                    activeCategoryId,
-                    markers: buildMapMarkers(getRegions(this), String(this.data.selectedRegionId || ''), getCurrentLocation(this), searchResults),
-                    includePoints,
-                    hasIncludePoints: includePoints.length > 0
-                };
-                if (searchResults.length === 1) {
-                    nextData.longitude = searchResults[0].location.lng;
-                    nextData.latitude = searchResults[0].location.lat;
-                    nextData.scale = SEARCH_SCALE;
-                }
-                this.setData(nextData);
+                const viewport = options.useViewport ? await this.getVisibleViewport() : null;
+                const searchResults = await (0, tencent_map_1.searchTencentPlaces)({
+                    keyword,
+                    center: isValidSearchCenter(center) ? center : undefined,
+                    viewport,
+                    categories: options.categories,
+                    radiusMeters: options.radiusMeters || 1000,
+                    pageSize: 20
+                });
+                this.applySearchResults(searchResults, activeCategoryId);
                 if (searchResults.length === 0) {
                     wx.showToast({ title: '附近暂未找到结果', icon: 'none' });
                 }
@@ -167,6 +169,80 @@ Component({
                 wx.hideLoading();
             }
         },
+        queueSuggestions(keyword) {
+            if (suggestionTimer !== undefined) {
+                clearTimeout(suggestionTimer);
+            }
+            const trimmed = keyword.trim();
+            const sequence = ++suggestionSequence;
+            if (trimmed.length < 2) {
+                this.setData({ searchSuggestions: [] });
+                return;
+            }
+            suggestionTimer = setTimeout(() => {
+                this.loadSuggestions(trimmed, sequence);
+            }, SUGGESTION_DELAY_MS);
+        },
+        async loadSuggestions(keyword, sequence) {
+            const center = { lng: Number(this.data.longitude), lat: Number(this.data.latitude) };
+            try {
+                const searchSuggestions = await (0, tencent_map_1.suggestTencentPlaces)({
+                    keyword,
+                    center: isValidSearchCenter(center) ? center : undefined,
+                    pageSize: 6
+                });
+                if (sequence !== suggestionSequence) {
+                    return;
+                }
+                this.setData({ searchSuggestions });
+            }
+            catch (_error) {
+                if (sequence === suggestionSequence) {
+                    this.setData({ searchSuggestions: [] });
+                }
+            }
+        },
+        selectSuggestion(event) {
+            const index = Number(event.currentTarget.dataset.index || 0);
+            const suggestion = getSearchSuggestions(this)[index];
+            if (!suggestion) {
+                return;
+            }
+            this.setData({ searchKeyword: suggestion.title, searchSuggestions: [] });
+            this.applySearchResults([suggestion], '');
+        },
+        applySearchResults(searchResults, activeCategoryId) {
+            const includePoints = searchResultPoints(searchResults);
+            const nextData = {
+                searchResults,
+                activeCategoryId,
+                markers: buildMapMarkers(getRegions(this), String(this.data.selectedRegionId || ''), getCurrentLocation(this), searchResults),
+                includePoints,
+                hasIncludePoints: includePoints.length > 0
+            };
+            if (searchResults.length === 1) {
+                nextData.longitude = searchResults[0].location.lng;
+                nextData.latitude = searchResults[0].location.lat;
+                nextData.scale = SEARCH_SCALE;
+                nextData.includePoints = [];
+                nextData.hasIncludePoints = false;
+            }
+            this.setData(nextData);
+        },
+        getVisibleViewport() {
+            return new Promise((resolve) => {
+                const mapContext = wx.createMapContext('nativeExploreMap', this);
+                const regionGetter = mapContext.getRegion;
+                if (!regionGetter) {
+                    resolve(null);
+                    return;
+                }
+                regionGetter.call(mapContext, {
+                    success: (res) => resolve(regionToViewport(res)),
+                    fail: () => resolve(null)
+                });
+            });
+        },
         focusRegion(regionId) {
             const region = getRegions(this).find((item) => item.id === regionId);
             if (!isValidRegion(region)) {
@@ -177,6 +253,7 @@ Component({
                 latitude: region.centerLat,
                 scale: CITY_SCALE,
                 searchResults: [],
+                searchSuggestions: [],
                 activeCategoryId: '',
                 includePoints: [],
                 hasIncludePoints: false,
@@ -192,6 +269,7 @@ Component({
                 latitude: location.lat,
                 scale: clampNativeScale(scale),
                 searchResults: [],
+                searchSuggestions: [],
                 activeCategoryId: '',
                 includePoints: [],
                 hasIncludePoints: false,
@@ -225,6 +303,7 @@ Component({
                 latitude: center?.latitude || DEFAULT_LATITUDE,
                 scale: DEFAULT_SCALE,
                 searchResults: [],
+                searchSuggestions: [],
                 activeCategoryId: '',
                 includePoints,
                 hasIncludePoints: includePoints.length > 0,
@@ -241,6 +320,9 @@ function getCurrentLocation(instance) {
 }
 function getSearchResults(instance) {
     return (instance.data.searchResults || []).filter(isValidSearchResult);
+}
+function getSearchSuggestions(instance) {
+    return (instance.data.searchSuggestions || []).filter(isValidSearchResult);
 }
 function buildMapMarkers(regions, selectedRegionId, currentLocation, searchResults) {
     const markers = buildRegionMarkers(regions, selectedRegionId);
@@ -340,6 +422,22 @@ function isValidSearchCenter(center) {
 }
 function isValidSearchResult(result) {
     return Number.isFinite(result.location?.lng) && Number.isFinite(result.location?.lat);
+}
+function regionToViewport(region) {
+    const southwest = region.southwest;
+    const northeast = region.northeast;
+    if (!southwest ||
+        !northeast ||
+        !Number.isFinite(southwest.latitude) ||
+        !Number.isFinite(southwest.longitude) ||
+        !Number.isFinite(northeast.latitude) ||
+        !Number.isFinite(northeast.longitude)) {
+        return null;
+    }
+    return {
+        southwest: { lat: Number(southwest.latitude), lng: Number(southwest.longitude) },
+        northeast: { lat: Number(northeast.latitude), lng: Number(northeast.longitude) }
+    };
 }
 function messageOf(error) {
     return error instanceof Error ? error.message : String(error);

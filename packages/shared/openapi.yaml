@@ -80,7 +80,7 @@ paths:
           description: Guide list
   /api/v1/map/places/search:
     get:
-      summary: Search nearby places through signed Tencent Map WebService proxy
+      summary: Search places through signed Tencent Map WebService proxy
       parameters:
         - in: query
           name: keyword
@@ -88,14 +88,39 @@ paths:
           schema:
             type: string
         - in: query
+          name: boundary
+          description: nearby searches around lat/lng; rectangle searches the visible map viewport.
+          schema:
+            type: string
+            enum: [nearby, rectangle]
+            default: nearby
+        - in: query
           name: lat
-          required: true
           schema:
             type: number
             format: double
         - in: query
           name: lng
-          required: true
+          schema:
+            type: number
+            format: double
+        - in: query
+          name: swLat
+          schema:
+            type: number
+            format: double
+        - in: query
+          name: swLng
+          schema:
+            type: number
+            format: double
+        - in: query
+          name: neLat
+          schema:
+            type: number
+            format: double
+        - in: query
+          name: neLng
           schema:
             type: number
             format: double
@@ -103,9 +128,14 @@ paths:
           name: radiusMeters
           schema:
             type: integer
-            minimum: 500
-            maximum: 20000
-            default: 6000
+            minimum: 100
+            maximum: 1000
+            default: 1000
+        - in: query
+          name: categories
+          description: Comma-separated Tencent POI category filter, up to 5 categories.
+          schema:
+            type: string
         - in: query
           name: pageSize
           schema:
@@ -115,7 +145,58 @@ paths:
             default: 20
       responses:
         "200":
-          description: Tencent nearby place search result list
+          description: Tencent place search result list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/MapPlace"
+  /api/v1/map/places/suggest:
+    get:
+      summary: Suggest places for map search input through signed Tencent Map WebService proxy
+      parameters:
+        - in: query
+          name: keyword
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: lat
+          schema:
+            type: number
+            format: double
+        - in: query
+          name: lng
+          schema:
+            type: number
+            format: double
+        - in: query
+          name: region
+          schema:
+            type: string
+        - in: query
+          name: regionFix
+          schema:
+            type: boolean
+        - in: query
+          name: categories
+          description: Comma-separated Tencent POI category filter, up to 5 categories.
+          schema:
+            type: string
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 10
+      responses:
+        "200":
+          description: Tencent place suggestion result list
           content:
             application/json:
               schema:

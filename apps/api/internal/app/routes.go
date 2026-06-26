@@ -37,6 +37,7 @@ func (a *App) Router() *gin.Engine {
 		BaseURL: a.Config.TencentMapBaseURL,
 	}))
 	api.GET("/map/places/search", mapHandler.searchPlaces)
+	api.GET("/map/places/suggest", mapHandler.suggestPlaces)
 
 	itineraryHandler := itinerary.NewHandler(itinerary.NewRepository(a.DB))
 	api.POST("/itineraries/generate", itineraryHandler.Generate)

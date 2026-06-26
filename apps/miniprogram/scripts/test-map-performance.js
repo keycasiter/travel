@@ -35,6 +35,10 @@ assert.ok(componentSource.includes('handleSearchInput'), 'explore map component 
 assert.ok(componentSource.includes('submitSearch'), 'explore map component should submit Tencent map searches');
 assert.ok(componentSource.includes('tapSearchCategory'), 'explore map component should handle nearby category searches');
 assert.ok(componentSource.includes('getCenterLocation'), 'explore map component should search around the current visible map center');
+assert.ok(componentSource.includes('getRegion'), 'explore map component should search category POIs inside the current visible map viewport');
+assert.ok(componentSource.includes('suggestTencentPlaces'), 'explore map component should request Tencent suggestions while typing');
+assert.ok(componentSource.includes('searchSuggestions'), 'explore map component should keep Tencent suggestion results');
+assert.ok(componentSource.includes('selectSuggestion'), 'explore map component should let users pick a Tencent suggestion');
 assert.ok(componentSource.includes('searchResults'), 'explore map component should keep Tencent POI results for highlighted markers');
 assert.ok(componentSource.includes('activeCategoryId'), 'explore map component should reflect the active nearby search category');
 assert.ok(componentSource.includes('hasIncludePoints: false'), 'explore map should default to no include-points guard');
@@ -48,6 +52,8 @@ assert.ok(!componentStyles.includes('.ink-canvas'), 'explore map styles should n
 assert.ok(componentMarkup.includes('placeholder="搜索好玩的"'), 'explore map search input should use the requested placeholder');
 assert.ok(componentMarkup.includes('bindinput="handleSearchInput"'), 'explore map search input should update search text');
 assert.ok(componentMarkup.includes('bindconfirm="submitSearch"'), 'explore map search input should submit through Tencent search');
+assert.ok(componentMarkup.includes('searchSuggestions'), 'explore map should render Tencent search suggestions');
+assert.ok(componentMarkup.includes('selectSuggestion'), 'explore map should allow selecting a Tencent search suggestion');
 assert.ok(componentMarkup.includes('tapSearchCategory'), 'explore map should expose nearby category buttons');
 
 assert.ok(!exploreSource.includes('chinaProvinces'), 'explore page must not import GeoJSON province data');
@@ -63,15 +69,23 @@ assert.ok(!configSource.includes('TENCENT_MAP_SEARCH_URL'), 'mini program config
 assert.ok(!tencentMapSource.includes('apis.map.qq.com'), 'mini program must not call Tencent WebService directly');
 assert.ok(!tencentMapSource.includes('wx.request'), 'Tencent search helper should use the local API request wrapper');
 assert.ok(tencentMapSource.includes('/api/v1/map/places/search'), 'Tencent search helper should call the signed Go API proxy');
+assert.ok(tencentMapSource.includes('/api/v1/map/places/suggest'), 'Tencent search helper should call the signed Go API suggestion proxy');
 assert.ok(tencentMapSource.includes('lat'), 'Tencent search helper should pass the current map center latitude');
 assert.ok(tencentMapSource.includes('lng'), 'Tencent search helper should pass the current map center longitude');
+assert.ok(tencentMapSource.includes('swLat'), 'Tencent search helper should pass the viewport southwest latitude for rectangle search');
+assert.ok(tencentMapSource.includes('neLng'), 'Tencent search helper should pass the viewport northeast longitude for rectangle search');
+assert.ok(tencentMapSource.includes('categories'), 'Tencent search helper should pass Tencent category filters');
+assert.ok(tencentMapSource.includes('boundary'), 'Tencent search helper should select Tencent boundary mode');
 assert.ok(tencentMapSource.includes('radiusMeters'), 'Tencent search helper should pass the nearby search radius');
 assert.ok(tencentMapSource.includes('pageSize'), 'Tencent search helper should bound API proxy result count');
 for (const label of ['地标', '景观', '美食', '交通', '灵感']) {
   assert.ok(tencentMapSource.includes(label), `Tencent search categories should include ${label}`);
 }
-for (const keyword of ['地标 建筑', '名胜古迹 景区 公园', '餐厅 小吃街 美食', '地铁站 公交站 汽车站 机场 火车站', '景点 美食 地标']) {
+for (const keyword of ['地标', '景点', '美食', '交通', '灵感']) {
   assert.ok(tencentMapSource.includes(keyword), `Tencent search category keyword should include ${keyword}`);
+}
+for (const category of ['旅游景点', '文化场馆', '美食', '交通设施']) {
+  assert.ok(tencentMapSource.includes(category), `Tencent category filters should include ${category}`);
 }
 
 function assertNativeMapIncludePointsGuard(markup, label) {

@@ -16,7 +16,10 @@ import (
 	"time"
 )
 
-const placeSearchPath = "/ws/place/v1/search"
+const (
+	placeSearchPath     = "/ws/place/v1/search"
+	placeSuggestionPath = "/ws/place/v1/suggestion"
+)
 
 var (
 	ErrMissingConfig = errors.New("tencent map key and secret are required")
@@ -43,6 +46,31 @@ type SearchPlacesInput struct {
 	CenterLng    float64
 	RadiusMeters int
 	PageSize     int
+	Boundary     SearchBoundary
+	Categories   []string
+	AutoExtend   bool
+}
+
+type BoundaryMode string
+
+const (
+	BoundaryNearby    BoundaryMode = "nearby"
+	BoundaryRectangle BoundaryMode = "rectangle"
+)
+
+type SearchBoundary struct {
+	Mode      BoundaryMode
+	Southwest Location
+	Northeast Location
+}
+
+type SuggestPlacesInput struct {
+	Keyword    string
+	Center     *Location
+	Region     string
+	RegionFix  bool
+	Categories []string
+	PageSize   int
 }
 
 type Place struct {
@@ -97,7 +125,20 @@ func (c *Client) SearchPlaces(ctx context.Context, input SearchPlacesInput) ([]P
 		return nil, err
 	}
 
-	endpoint, err := url.Parse(c.baseURL + placeSearchPath)
+	return c.requestPlaces(ctx, placeSearchPath, params)
+}
+
+func (c *Client) SuggestPlaces(ctx context.Context, input SuggestPlacesInput) ([]Place, error) {
+	params, err := c.suggestionParams(input)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.requestPlaces(ctx, placeSuggestionPath, params)
+}
+
+func (c *Client) requestPlaces(ctx context.Context, path string, params map[string]string) ([]Place, error) {
+	endpoint, err := url.Parse(c.baseURL + path)
 	if err != nil {
 		return nil, fmt.Errorf("parse tencent map url: %w", err)
 	}
@@ -105,7 +146,7 @@ func (c *Client) SearchPlaces(ctx context.Context, input SearchPlacesInput) ([]P
 	for key, value := range params {
 		query.Set(key, value)
 	}
-	query.Set("sig", signQuery(placeSearchPath, params, c.secret))
+	query.Set("sig", signQuery(path, params, c.secret))
 	endpoint.RawQuery = query.Encode()
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint.String(), nil)
@@ -138,19 +179,89 @@ func (c *Client) searchParams(input SearchPlacesInput) (map[string]string, error
 		return nil, ErrMissingConfig
 	}
 	keyword := strings.TrimSpace(input.Keyword)
-	if keyword == "" || !isFiniteCoord(input.CenterLat) || !isFiniteCoord(input.CenterLng) {
+	if keyword == "" {
 		return nil, ErrInvalidInput
 	}
-	radiusMeters := clampInt(input.RadiusMeters, 500, 20000, 6000)
 	pageSize := clampInt(input.PageSize, 1, 20, 20)
-	return map[string]string{
-		"boundary":   fmt.Sprintf("nearby(%s,%s,%d)", formatFloat(input.CenterLat), formatFloat(input.CenterLng), radiusMeters),
+	params := map[string]string{
 		"key":        c.key,
 		"keyword":    keyword,
-		"orderby":    "_distance",
 		"page_index": "1",
 		"page_size":  strconv.Itoa(pageSize),
-	}, nil
+	}
+	if categories := normalizeCategories(input.Categories); len(categories) > 0 {
+		params["filter"] = "category=" + strings.Join(categories, ",")
+	}
+
+	switch input.Boundary.Mode {
+	case BoundaryRectangle:
+		if !isFiniteCoord(input.Boundary.Southwest.Lat) ||
+			!isFiniteCoord(input.Boundary.Southwest.Lng) ||
+			!isFiniteCoord(input.Boundary.Northeast.Lat) ||
+			!isFiniteCoord(input.Boundary.Northeast.Lng) {
+			return nil, ErrInvalidInput
+		}
+		params["boundary"] = fmt.Sprintf(
+			"rectangle(%s,%s,%s,%s)",
+			formatFloat(input.Boundary.Southwest.Lat),
+			formatFloat(input.Boundary.Southwest.Lng),
+			formatFloat(input.Boundary.Northeast.Lat),
+			formatFloat(input.Boundary.Northeast.Lng),
+		)
+	case "", BoundaryNearby:
+		if !isFiniteCoord(input.CenterLat) || !isFiniteCoord(input.CenterLng) {
+			return nil, ErrInvalidInput
+		}
+		radiusMeters := clampInt(input.RadiusMeters, 100, 1000, 1000)
+		autoExtend := 0
+		if input.AutoExtend {
+			autoExtend = 1
+		}
+		params["boundary"] = fmt.Sprintf(
+			"nearby(%s,%s,%d,%d)",
+			formatFloat(input.CenterLat),
+			formatFloat(input.CenterLng),
+			radiusMeters,
+			autoExtend,
+		)
+		params["orderby"] = "_distance"
+	default:
+		return nil, ErrInvalidInput
+	}
+
+	return params, nil
+}
+
+func (c *Client) suggestionParams(input SuggestPlacesInput) (map[string]string, error) {
+	if c.key == "" || c.secret == "" {
+		return nil, ErrMissingConfig
+	}
+	keyword := strings.TrimSpace(input.Keyword)
+	if keyword == "" {
+		return nil, ErrInvalidInput
+	}
+	pageSize := clampInt(input.PageSize, 1, 20, 10)
+	params := map[string]string{
+		"key":       c.key,
+		"keyword":   keyword,
+		"page_size": strconv.Itoa(pageSize),
+	}
+	if input.Center != nil {
+		if !isFiniteCoord(input.Center.Lat) || !isFiniteCoord(input.Center.Lng) {
+			return nil, ErrInvalidInput
+		}
+		params["location"] = formatFloat(input.Center.Lat) + "," + formatFloat(input.Center.Lng)
+	}
+	if region := strings.TrimSpace(input.Region); region != "" {
+		params["region"] = region
+		if input.RegionFix {
+			params["region_fix"] = "1"
+		}
+	}
+	if categories := normalizeCategories(input.Categories); len(categories) > 0 {
+		params["filter"] = "category=" + strings.Join(categories, ",")
+	}
+	return params, nil
 }
 
 func signQuery(path string, params map[string]string, secret string) string {
@@ -196,6 +307,26 @@ func clampInt(value int, min int, max int, fallback int) int {
 		return max
 	}
 	return value
+}
+
+func normalizeCategories(categories []string) []string {
+	seen := make(map[string]struct{}, len(categories))
+	normalized := make([]string, 0, len(categories))
+	for _, category := range categories {
+		value := strings.TrimSpace(category)
+		if value == "" {
+			continue
+		}
+		if _, ok := seen[value]; ok {
+			continue
+		}
+		seen[value] = struct{}{}
+		normalized = append(normalized, value)
+		if len(normalized) == 5 {
+			break
+		}
+	}
+	return normalized
 }
 
 func formatFloat(value float64) string {

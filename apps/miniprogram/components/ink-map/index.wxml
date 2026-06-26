@@ -34,14 +34,29 @@
   />
 
   <view class="map-top">
-    <input
-      class="search-input"
-      value="{{searchKeyword}}"
-      placeholder="搜索好玩的"
-      confirm-type="search"
-      bindinput="handleSearchInput"
-      bindconfirm="submitSearch"
-    />
+    <view class="search-panel">
+      <input
+        class="search-input"
+        value="{{searchKeyword}}"
+        placeholder="搜索好玩的"
+        confirm-type="search"
+        bindinput="handleSearchInput"
+        bindconfirm="submitSearch"
+      />
+      <view wx:if="{{searchSuggestions.length > 0}}" class="search-suggestions">
+        <button
+          wx:for="{{searchSuggestions}}"
+          wx:key="id"
+          class="suggestion-item"
+          data-index="{{index}}"
+          catchtap="selectSuggestion"
+        >
+          <text class="suggestion-title">{{item.title}}</text>
+          <text wx:if="{{item.address}}" class="suggestion-meta">{{item.address}}</text>
+          <text wx:else class="suggestion-meta">{{item.category}}</text>
+        </button>
+      </view>
+    </view>
     <button class="locate-button" catchtap="locate">定位</button>
   </view>
 

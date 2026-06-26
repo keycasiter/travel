@@ -2,7 +2,9 @@ import type { Region } from '../../utils/types';
 import {
   MAP_SEARCH_CATEGORIES,
   searchTencentPlaces,
+  suggestTencentPlaces,
   type MapSearchCategoryId,
+  type MapViewport,
   type TencentPoi
 } from '../../utils/tencent-map';
 
@@ -15,6 +17,16 @@ interface CurrentLocation {
 interface MapPoint {
   latitude: number;
   longitude: number;
+}
+
+interface NativeMapRegionPoint {
+  latitude?: number;
+  longitude?: number;
+}
+
+interface NativeMapRegionResult {
+  southwest?: NativeMapRegionPoint;
+  northeast?: NativeMapRegionPoint;
 }
 
 interface NativeMapMarker {
@@ -45,10 +57,14 @@ const MIN_NATIVE_SCALE = 4;
 const MAX_NATIVE_SCALE = 20;
 const SEARCH_MARKER_ID_OFFSET = 10000;
 const CURRENT_LOCATION_MARKER_ID = 900000;
+const SUGGESTION_DELAY_MS = 320;
 
 type ComponentDataHost = {
   data: Record<string, unknown>;
 };
+
+let suggestionTimer: number | undefined;
+let suggestionSequence = 0;
 
 Component({
   properties: {
@@ -76,7 +92,8 @@ Component({
     searchKeyword: '',
     activeCategoryId: '' as MapSearchCategoryId | '',
     searchCategories: MAP_SEARCH_CATEGORIES,
-    searchResults: [] as TencentPoi[]
+    searchResults: [] as TencentPoi[],
+    searchSuggestions: [] as TencentPoi[]
   },
 
   lifetimes: {
@@ -173,7 +190,9 @@ Component({
     },
 
     handleSearchInput(event: WechatMiniprogram.Input) {
-      this.setData({ searchKeyword: String(event.detail.value || '') });
+      const searchKeyword = String(event.detail.value || '');
+      this.setData({ searchKeyword, activeCategoryId: '' });
+      this.queueSuggestions(searchKeyword);
     },
 
     submitSearch() {
@@ -182,7 +201,8 @@ Component({
         wx.showToast({ title: '输入想找的地点', icon: 'none' });
         return;
       }
-      this.runPlaceSearch(keyword, '');
+      this.setData({ searchSuggestions: [] });
+      this.runPlaceSearch(keyword, '', { radiusMeters: 1000 });
     },
 
     tapSearchCategory(event: WechatMiniprogram.TouchEvent) {
@@ -191,45 +211,33 @@ Component({
       if (!category) {
         return;
       }
-      this.setData({ searchKeyword: category.label });
-      this.runPlaceSearch(category.keyword, category.id);
+      this.setData({ searchKeyword: category.label, searchSuggestions: [] });
+      this.runPlaceSearch(category.keyword, category.id, { categories: category.categories, useViewport: true });
     },
 
-    async runPlaceSearch(keyword: string, activeCategoryId: MapSearchCategoryId | '') {
+    async runPlaceSearch(
+      keyword: string,
+      activeCategoryId: MapSearchCategoryId | '',
+      options: { categories?: readonly string[]; radiusMeters?: number; useViewport?: boolean } = {}
+    ) {
       const center = { lng: Number(this.data.longitude), lat: Number(this.data.latitude) };
-      if (!isValidSearchCenter(center)) {
+      if (!isValidSearchCenter(center) && !options.useViewport) {
         wx.showToast({ title: '地图中心不可用', icon: 'none' });
         return;
       }
 
       wx.showLoading({ title: '搜索中' });
       try {
-        const searchResults = await searchTencentPlaces({ keyword, center, radiusMeters: 6000, pageSize: 20 });
-        const includePoints = searchResultPoints(searchResults);
-        const nextData: Partial<{
-          searchResults: TencentPoi[];
-          activeCategoryId: MapSearchCategoryId | '';
-          markers: NativeMapMarker[];
-          includePoints: MapPoint[];
-          hasIncludePoints: boolean;
-          longitude: number;
-          latitude: number;
-          scale: number;
-        }> = {
-          searchResults,
-          activeCategoryId,
-          markers: buildMapMarkers(getRegions(this), String(this.data.selectedRegionId || ''), getCurrentLocation(this), searchResults),
-          includePoints,
-          hasIncludePoints: includePoints.length > 0
-        };
-
-        if (searchResults.length === 1) {
-          nextData.longitude = searchResults[0].location.lng;
-          nextData.latitude = searchResults[0].location.lat;
-          nextData.scale = SEARCH_SCALE;
-        }
-
-        this.setData(nextData);
+        const viewport = options.useViewport ? await this.getVisibleViewport() : null;
+        const searchResults = await searchTencentPlaces({
+          keyword,
+          center: isValidSearchCenter(center) ? center : undefined,
+          viewport,
+          categories: options.categories,
+          radiusMeters: options.radiusMeters || 1000,
+          pageSize: 20
+        });
+        this.applySearchResults(searchResults, activeCategoryId);
         if (searchResults.length === 0) {
           wx.showToast({ title: '附近暂未找到结果', icon: 'none' });
         }
@@ -238,6 +246,100 @@ Component({
       } finally {
         wx.hideLoading();
       }
+    },
+
+    queueSuggestions(keyword: string) {
+      if (suggestionTimer !== undefined) {
+        clearTimeout(suggestionTimer);
+      }
+      const trimmed = keyword.trim();
+      const sequence = ++suggestionSequence;
+      if (trimmed.length < 2) {
+        this.setData({ searchSuggestions: [] });
+        return;
+      }
+      suggestionTimer = setTimeout(() => {
+        this.loadSuggestions(trimmed, sequence);
+      }, SUGGESTION_DELAY_MS) as unknown as number;
+    },
+
+    async loadSuggestions(keyword: string, sequence: number) {
+      const center = { lng: Number(this.data.longitude), lat: Number(this.data.latitude) };
+      try {
+        const searchSuggestions = await suggestTencentPlaces({
+          keyword,
+          center: isValidSearchCenter(center) ? center : undefined,
+          pageSize: 6
+        });
+        if (sequence !== suggestionSequence) {
+          return;
+        }
+        this.setData({ searchSuggestions });
+      } catch (_error) {
+        if (sequence === suggestionSequence) {
+          this.setData({ searchSuggestions: [] });
+        }
+      }
+    },
+
+    selectSuggestion(event: WechatMiniprogram.TouchEvent) {
+      const index = Number(event.currentTarget.dataset.index || 0);
+      const suggestion = getSearchSuggestions(this)[index];
+      if (!suggestion) {
+        return;
+      }
+      this.setData({ searchKeyword: suggestion.title, searchSuggestions: [] });
+      this.applySearchResults([suggestion], '');
+    },
+
+    applySearchResults(searchResults: TencentPoi[], activeCategoryId: MapSearchCategoryId | '') {
+      const includePoints = searchResultPoints(searchResults);
+      const nextData: Partial<{
+        searchResults: TencentPoi[];
+        activeCategoryId: MapSearchCategoryId | '';
+        markers: NativeMapMarker[];
+        includePoints: MapPoint[];
+        hasIncludePoints: boolean;
+        longitude: number;
+        latitude: number;
+        scale: number;
+      }> = {
+        searchResults,
+        activeCategoryId,
+        markers: buildMapMarkers(getRegions(this), String(this.data.selectedRegionId || ''), getCurrentLocation(this), searchResults),
+        includePoints,
+        hasIncludePoints: includePoints.length > 0
+      };
+
+      if (searchResults.length === 1) {
+        nextData.longitude = searchResults[0].location.lng;
+        nextData.latitude = searchResults[0].location.lat;
+        nextData.scale = SEARCH_SCALE;
+        nextData.includePoints = [];
+        nextData.hasIncludePoints = false;
+      }
+
+      this.setData(nextData);
+    },
+
+    getVisibleViewport(): Promise<MapViewport | null> {
+      return new Promise((resolve) => {
+        const mapContext = wx.createMapContext('nativeExploreMap', this);
+        const regionGetter = (mapContext as unknown as {
+          getRegion?: (options: {
+            success?: (res: NativeMapRegionResult) => void;
+            fail?: () => void;
+          }) => void;
+        }).getRegion;
+        if (!regionGetter) {
+          resolve(null);
+          return;
+        }
+        regionGetter.call(mapContext, {
+          success: (res) => resolve(regionToViewport(res)),
+          fail: () => resolve(null)
+        });
+      });
     },
 
     focusRegion(regionId: string) {
@@ -250,6 +352,7 @@ Component({
         latitude: region.centerLat,
         scale: CITY_SCALE,
         searchResults: [],
+        searchSuggestions: [],
         activeCategoryId: '',
         includePoints: [],
         hasIncludePoints: false,
@@ -266,6 +369,7 @@ Component({
         latitude: location.lat,
         scale: clampNativeScale(scale),
         searchResults: [],
+        searchSuggestions: [],
         activeCategoryId: '',
         includePoints: [],
         hasIncludePoints: false,
@@ -302,6 +406,7 @@ Component({
         latitude: center?.latitude || DEFAULT_LATITUDE,
         scale: DEFAULT_SCALE,
         searchResults: [],
+        searchSuggestions: [],
         activeCategoryId: '',
         includePoints,
         hasIncludePoints: includePoints.length > 0,
@@ -321,6 +426,10 @@ function getCurrentLocation(instance: ComponentDataHost): CurrentLocation | null
 
 function getSearchResults(instance: ComponentDataHost): TencentPoi[] {
   return ((instance.data as unknown as { searchResults?: TencentPoi[] }).searchResults || []).filter(isValidSearchResult);
+}
+
+function getSearchSuggestions(instance: ComponentDataHost): TencentPoi[] {
+  return ((instance.data as unknown as { searchSuggestions?: TencentPoi[] }).searchSuggestions || []).filter(isValidSearchResult);
 }
 
 function buildMapMarkers(
@@ -439,6 +548,25 @@ function isValidSearchCenter(center: { lng: number; lat: number }): center is Cu
 
 function isValidSearchResult(result: TencentPoi): boolean {
   return Number.isFinite(result.location?.lng) && Number.isFinite(result.location?.lat);
+}
+
+function regionToViewport(region: NativeMapRegionResult): MapViewport | null {
+  const southwest = region.southwest;
+  const northeast = region.northeast;
+  if (
+    !southwest ||
+    !northeast ||
+    !Number.isFinite(southwest.latitude) ||
+    !Number.isFinite(southwest.longitude) ||
+    !Number.isFinite(northeast.latitude) ||
+    !Number.isFinite(northeast.longitude)
+  ) {
+    return null;
+  }
+  return {
+    southwest: { lat: Number(southwest.latitude), lng: Number(southwest.longitude) },
+    northeast: { lat: Number(northeast.latitude), lng: Number(northeast.longitude) }
+  };
 }
 
 function messageOf(error: unknown): string {
