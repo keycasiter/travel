@@ -4,6 +4,7 @@ const path = require('path');
 const root = path.resolve(__dirname, '..');
 const projectConfigPath = path.join(root, 'project.config.json');
 const config = JSON.parse(fs.readFileSync(projectConfigPath, 'utf8'));
+const appConfig = JSON.parse(fs.readFileSync(path.join(root, 'app.json'), 'utf8'));
 
 const compilerPlugins = config.setting && config.setting.useCompilerPlugins;
 if (compilerPlugins !== false) {
@@ -36,4 +37,17 @@ if (missingIncludes.length > 0) {
 const missingRuntimeFiles = runtimeFiles.filter((file) => !fs.existsSync(path.join(root, file)));
 if (missingRuntimeFiles.length > 0) {
   throw new Error(`run npm run build:runtime to generate runtime JS files: ${missingRuntimeFiles.join(', ')}`);
+}
+
+const missingTabIcons = [];
+for (const tab of appConfig.tabBar.list || []) {
+  for (const key of ['iconPath', 'selectedIconPath']) {
+    if (!tab[key] || !fs.existsSync(path.join(root, tab[key]))) {
+      missingTabIcons.push(`${tab.pagePath}:${key}`);
+    }
+  }
+}
+
+if (missingTabIcons.length > 0) {
+  throw new Error(`tabBar icon files are missing: ${missingTabIcons.join(', ')}`);
 }
