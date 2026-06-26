@@ -1,6 +1,5 @@
 import { request } from '../../utils/api';
-import { chinaProvinces } from '../../data/china-provinces';
-import { findContainingMapFeature, findNearestRegion } from '../../utils/map-geometry';
+import { findNearestRegion } from '../../utils/map-geometry';
 import type { LoginResult, Region, RegionOverview } from '../../utils/types';
 
 interface CurrentLocation {
@@ -59,20 +58,6 @@ Page({
     }
   },
 
-  onFeatureTap(event: WechatMiniprogram.CustomEvent<{ name: string; code: string }>) {
-    const featureName = event.detail.name;
-    if (!featureName) {
-      return;
-    }
-
-    const supported = this.data.regions.some((region) => region.name.includes(featureName) || featureName.includes(region.name));
-    this.setData({
-      locationStatus: supported
-        ? `已放大到${featureName}，可点击城市热点查看内容。`
-        : `已放大到${featureName}，该地区灵感待完善，可搜索或选择已支持城市。`
-    });
-  },
-
   onLocate() {
     this.requestLocation();
   },
@@ -85,30 +70,25 @@ Page({
         this.handleLocationSuccess({ lng: res.longitude, lat: res.latitude });
       },
       fail: () => {
-        this.setData({ locationStatus: '未授权定位，已保持全国探索视角；可手动搜索或选择已支持城市。' });
+        this.setData({ locationStatus: '未授权定位，已保持地图浏览视角；可手动搜索或选择已支持城市。' });
       }
     });
   },
 
   handleLocationSuccess(point: { lng: number; lat: number }) {
-    const feature = findContainingMapFeature(chinaProvinces, point);
     const location: CurrentLocation = {
       ...point,
-      label: feature ? feature.name : '当前位置'
+      label: '当前位置'
     };
 
     let selectedRegionId = '';
-    let locationStatus = feature
-      ? `已定位到${feature.name}，地图已聚焦当前位置。`
-      : `已定位到 ${point.lat.toFixed(2)}, ${point.lng.toFixed(2)}，地图已聚焦当前位置。`;
+    let locationStatus = `已定位到 ${point.lat.toFixed(2)}, ${point.lng.toFixed(2)}，地图已聚焦当前位置。`;
 
     try {
       const nearest = findNearestRegion(this.data.regions, point);
       if (nearest.distanceKm <= 120) {
         selectedRegionId = nearest.region.id;
-        locationStatus = feature
-          ? `已定位到${feature.name}，附近支持 ${nearest.region.name} 内容。`
-          : `已定位到附近，附近支持 ${nearest.region.name} 内容。`;
+        locationStatus = `已定位到当前位置，附近支持 ${nearest.region.name} 内容。`;
       } else {
         locationStatus = `${locationStatus} 附近灵感待完善，可搜索或选择已支持城市。`;
       }
@@ -147,7 +127,7 @@ Page({
   focusMapLocation(location: CurrentLocation) {
     const map = this.selectComponent('#inkMap') as { focusLocation?: (location: CurrentLocation, scale?: number) => void } | null;
     if (map?.focusLocation) {
-      map.focusLocation(location, 1.75);
+      map.focusLocation(location, 14);
     }
   }
 });

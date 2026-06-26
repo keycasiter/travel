@@ -2,31 +2,31 @@ const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 
-const { chinaProvinces } = require('../data/china-provinces.js');
+const root = path.resolve(__dirname, '..');
+const componentSource = fs.readFileSync(path.join(root, 'components/ink-map/index.ts'), 'utf8');
+const componentMarkup = fs.readFileSync(path.join(root, 'components/ink-map/index.wxml'), 'utf8');
+const componentStyles = fs.readFileSync(path.join(root, 'components/ink-map/index.wxss'), 'utf8');
+const exploreSource = fs.readFileSync(path.join(root, 'pages/explore/index.ts'), 'utf8');
+const geometrySource = fs.readFileSync(path.join(root, 'utils/map-geometry.ts'), 'utf8');
+const projectConfig = JSON.parse(fs.readFileSync(path.join(root, 'project.config.json'), 'utf8'));
+const includeValues = new Set(((projectConfig.packOptions && projectConfig.packOptions.include) || []).map((rule) => rule.value));
 
-const pointCount = chinaProvinces.reduce((total, feature) => {
-  const ringPoints = (feature.rings || []).reduce((sum, ring) => sum + ring.length, 0);
-  const linePoints = (feature.lines || []).reduce((sum, line) => sum + line.length, 0);
-  return total + ringPoints + linePoints;
-}, 0);
-assert.ok(pointCount <= 2600, `ink map should keep simplified map data under 2600 points, got ${pointCount}`);
+assert.ok(componentMarkup.includes('<map'), 'explore map component should use native WeChat map');
+assert.ok(componentMarkup.includes('bindmarkertap="onMarkerTap"'), 'native explore map should handle city marker taps');
+assert.ok(componentMarkup.includes('show-location'), 'native explore map should show authorized user location');
+assert.ok(!componentMarkup.includes('<canvas'), 'explore map component must not render a canvas map');
 
-const componentSource = fs.readFileSync(path.resolve(__dirname, '../components/ink-map/index.ts'), 'utf8');
-const backgroundSource = sliceBetween(componentSource, 'function drawBackground', 'function drawChinaLayer');
-assert.ok(!backgroundSource.includes('ellipse('), 'ink map background should not draw oval shadows');
+assert.ok(!componentSource.includes('chinaProvinces'), 'explore map component must not depend on GeoJSON province data');
+assert.ok(!componentSource.includes('CanvasRuntime'), 'explore map component should not keep canvas rendering runtime');
+assert.ok(!componentSource.includes('drawChinaLayer'), 'explore map component should not draw GeoJSON layers');
+assert.ok(componentSource.includes('buildRegionMarkers'), 'explore map component should convert seed regions into native map markers');
+assert.ok(componentSource.includes('focusLocation'), 'explore map component should expose a location focus method');
+assert.ok(componentSource.includes('focusRegion'), 'explore map component should expose a city focus method');
 
-const touchMoveStart = componentSource.indexOf('touchMove(event: WechatMiniprogram.TouchEvent)');
-assert.ok(touchMoveStart >= 0, 'ink-map component should define touchMove');
-const touchMoveEnd = componentSource.indexOf('touchEnd()', touchMoveStart);
-assert.ok(touchMoveEnd > touchMoveStart, 'ink-map component should define touchEnd after touchMove');
-const touchMoveSource = componentSource.slice(touchMoveStart, touchMoveEnd);
-assert.ok(!touchMoveSource.includes('setData('), 'touchMove must not call setData on every frame');
-assert.ok(touchMoveSource.includes('drawInkMap(false)'), 'touchMove should schedule a non-marker canvas redraw');
+assert.ok(componentStyles.includes('.native-map'), 'explore map component should style the native map surface');
+assert.ok(!componentStyles.includes('.ink-canvas'), 'explore map styles should not keep canvas surface styles');
 
-function sliceBetween(text, startNeedle, endNeedle) {
-  const start = text.indexOf(startNeedle);
-  assert.ok(start >= 0, `missing ${startNeedle}`);
-  const end = text.indexOf(endNeedle, start + startNeedle.length);
-  assert.ok(end > start, `missing ${endNeedle} after ${startNeedle}`);
-  return text.slice(start, end);
-}
+assert.ok(!exploreSource.includes('chinaProvinces'), 'explore page must not import GeoJSON province data');
+assert.ok(!geometrySource.includes('ChinaMapFeature'), 'map geometry utilities should not keep GeoJSON feature types');
+assert.ok(!geometrySource.includes('findContainingMapFeature'), 'map geometry utilities should not keep GeoJSON hit testing');
+assert.ok(!includeValues.has('data/china-provinces.js'), 'DevTools package should not force-include abandoned GeoJSON data');

@@ -85,10 +85,6 @@
       {
         "type": "file",
         "value": "utils/map-geometry.js"
-      },
-      {
-        "type": "file",
-        "value": "data/china-provinces.js"
       }
     ]
   },

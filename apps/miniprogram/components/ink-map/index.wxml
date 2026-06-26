@@ -1,37 +1,34 @@
-<view class="ink-map" bindtap="tapMap" bindtouchstart="touchStart" bindtouchmove="touchMove" bindtouchend="touchEnd" bindtouchcancel="touchEnd">
-  <canvas id="inkCanvas" type="2d" class="ink-canvas"></canvas>
+<view class="ink-map">
+  <map
+    id="nativeExploreMap"
+    class="native-map"
+    longitude="{{longitude}}"
+    latitude="{{latitude}}"
+    scale="{{scale}}"
+    markers="{{markers}}"
+    include-points="{{includePoints}}"
+    show-location
+    enable-zoom
+    enable-scroll
+    enable-rotate
+    enable-3D
+    bindmarkertap="onMarkerTap"
+  />
+
   <view class="map-top">
     <view class="search-pill">搜索城市 / 景点 / 避坑</view>
     <button class="locate-button" catchtap="locate">定位</button>
   </view>
+
   <view class="chips">
     <view class="chip">附近灵感</view>
     <view class="chip">避坑</view>
     <view class="chip">便利</view>
   </view>
+
   <view class="zoom-controls">
     <button class="map-control-button" aria-label="放大地图" data-delta="1" catchtap="zoomBy">+</button>
     <button class="map-control-button" aria-label="缩小地图" data-delta="-1" catchtap="zoomBy">-</button>
     <button class="map-control-button" aria-label="回到全国视角" catchtap="resetView">⌂</button>
-  </view>
-  <view
-    wx:for="{{displayRegions}}"
-    wx:key="id"
-    hidden="{{isInteracting || !item.markerVisible}}"
-    class="marker {{selectedRegionId === item.id ? 'marker-active' : ''}}"
-    style="left: {{item.markerLeft || 50}}%; top: {{item.markerTop || 45}}%;"
-    data-id="{{item.id}}"
-    catchtap="tapRegion"
-  >
-    <view class="marker-dot"></view>
-    <view class="marker-label">{{item.name}}</view>
-  </view>
-  <view
-    wx:if="{{!isInteracting && displayCurrentLocation && displayCurrentLocation.markerVisible}}"
-    class="current-marker"
-    style="left: {{displayCurrentLocation.markerLeft}}%; top: {{displayCurrentLocation.markerTop}}%;"
-  >
-    <view class="current-pulse"></view>
-    <view class="current-label">{{displayCurrentLocation.label}}</view>
   </view>
 </view>
