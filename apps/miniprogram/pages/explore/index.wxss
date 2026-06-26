@@ -4,66 +4,18 @@
   overflow: hidden;
 }
 
-.hero-map {
-  min-height: 100vh;
-  position: relative;
-  background:
-    radial-gradient(circle at 36% 24%, rgba(42, 88, 77, 0.45), transparent 20%),
-    radial-gradient(circle at 70% 58%, rgba(188, 154, 86, 0.24), transparent 22%),
-    linear-gradient(180deg, #fbf6e8, #e7dcc3);
-}
-
-.map-glow {
+.status-card {
   position: absolute;
-  left: 12%;
-  right: 8%;
-  top: 18%;
-  height: 45vh;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.38);
-  filter: blur(18rpx);
-}
-
-.china-shape {
-  position: absolute;
-  left: 50%;
-  top: 42%;
-  width: 520rpx;
-  height: 380rpx;
-  transform: translate(-50%, -50%) rotate(-8deg) skew(-12deg);
-  border-radius: 45% 38% 34% 50%;
-  background:
-    radial-gradient(circle at 64% 34%, rgba(70, 115, 98, 0.55), transparent 20%),
-    radial-gradient(circle at 34% 60%, rgba(30, 68, 61, 0.45), transparent 28%),
-    linear-gradient(140deg, rgba(23, 75, 67, 0.92), rgba(146, 153, 128, 0.35));
-  box-shadow: 0 70rpx 120rpx rgba(31, 54, 49, 0.26);
-}
-
-.hotspot {
-  position: absolute;
-  width: 24rpx;
-  height: 24rpx;
-  border-radius: 50%;
-  border: 6rpx solid #fffdf8;
-  background: #b9583d;
-  box-shadow: 0 10rpx 28rpx rgba(0, 0, 0, 0.24);
-}
-
-.hotspot-hz {
-  left: 56%;
-  top: 43%;
-}
-
-.hotspot-bj {
-  left: 49%;
-  top: 33%;
-}
-
-.map-copy {
-  position: absolute;
-  left: 40rpx;
-  right: 40rpx;
-  top: 112rpx;
+  left: 32rpx;
+  right: 32rpx;
+  bottom: 250rpx;
+  padding: 22rpx 26rpx;
+  border: 1rpx solid rgba(34, 50, 45, 0.12);
+  border-radius: 8rpx;
+  background: rgba(255, 253, 248, 0.9);
+  color: #4f5e57;
+  font-size: 24rpx;
+  line-height: 1.45;
 }
 
 .plan-button {
@@ -77,4 +29,34 @@
   color: #fffdf8;
   font-size: 28rpx;
   box-shadow: 0 16rpx 40rpx rgba(34, 50, 45, 0.24);
+}
+
+.sheet-content {
+  margin-top: 24rpx;
+  padding-bottom: 30rpx;
+}
+
+.section-title {
+  margin: 28rpx 0 14rpx;
+  color: #22564b;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+
+.content-row {
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid rgba(34, 50, 45, 0.08);
+}
+
+.row-title {
+  color: #22322d;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.row-summary {
+  margin-top: 8rpx;
+  color: #64716b;
+  font-size: 24rpx;
+  line-height: 1.45;
 }

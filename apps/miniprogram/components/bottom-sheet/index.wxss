@@ -1,0 +1,51 @@
+.sheet-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: rgba(18, 28, 24, 0.18);
+  display: flex;
+  align-items: flex-end;
+}
+
+.sheet {
+  width: 100%;
+  max-height: 72vh;
+  box-sizing: border-box;
+  padding: 18rpx 28rpx 48rpx;
+  border-radius: 24rpx 24rpx 0 0;
+  background: #fffdf8;
+  box-shadow: 0 -16rpx 42rpx rgba(20, 32, 28, 0.18);
+}
+
+.sheet-handle {
+  width: 72rpx;
+  height: 8rpx;
+  margin: 0 auto 22rpx;
+  border-radius: 4rpx;
+  background: #d8d1c2;
+}
+
+.sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
+.sheet-title {
+  min-width: 0;
+  color: #22322d;
+  font-size: 34rpx;
+  font-weight: 700;
+}
+
+.sheet-close {
+  width: 112rpx;
+  height: 56rpx;
+  line-height: 56rpx;
+  padding: 0;
+  border-radius: 28rpx;
+  background: #edf0ea;
+  color: #4e5a54;
+  font-size: 24rpx;
+}

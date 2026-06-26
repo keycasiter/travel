@@ -1,0 +1,91 @@
+.ink-map {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.ink-canvas {
+  width: 100%;
+  height: 100vh;
+}
+
+.map-top {
+  position: absolute;
+  top: 72rpx;
+  left: 32rpx;
+  right: 32rpx;
+  display: flex;
+  gap: 14rpx;
+  align-items: center;
+}
+
+.search-pill {
+  flex: 1;
+  height: 76rpx;
+  box-sizing: border-box;
+  padding: 0 28rpx;
+  border: 1rpx solid rgba(34, 50, 45, 0.12);
+  border-radius: 38rpx;
+  background: rgba(255, 253, 248, 0.9);
+  color: #5f6b65;
+  font-size: 26rpx;
+  line-height: 76rpx;
+}
+
+.locate-button {
+  width: 116rpx;
+  height: 76rpx;
+  line-height: 76rpx;
+  padding: 0;
+  border-radius: 38rpx;
+  background: #22322d;
+  color: #fffdf8;
+  font-size: 24rpx;
+}
+
+.chips {
+  position: absolute;
+  top: 162rpx;
+  left: 32rpx;
+  right: 32rpx;
+  display: flex;
+  gap: 12rpx;
+}
+
+.chip {
+  padding: 14rpx 20rpx;
+  border: 1rpx solid rgba(34, 50, 45, 0.12);
+  border-radius: 28rpx;
+  background: rgba(255, 253, 248, 0.82);
+  color: #33443d;
+  font-size: 24rpx;
+}
+
+.marker {
+  position: absolute;
+  min-width: 120rpx;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.marker-dot {
+  width: 24rpx;
+  height: 24rpx;
+  margin: 0 auto 8rpx;
+  border: 6rpx solid #fffdf8;
+  border-radius: 50%;
+  background: #b9583d;
+  box-shadow: 0 10rpx 28rpx rgba(0, 0, 0, 0.24);
+}
+
+.marker-active .marker-dot {
+  background: #22564b;
+}
+
+.marker-label {
+  padding: 6rpx 12rpx;
+  border-radius: 18rpx;
+  background: rgba(255, 253, 248, 0.9);
+  color: #22322d;
+  font-size: 22rpx;
+}

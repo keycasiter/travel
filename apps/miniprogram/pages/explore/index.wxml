@@ -1,13 +1,33 @@
-<view class="page explore-page">
-  <view class="hero-map">
-    <view class="map-glow"></view>
-    <view class="china-shape"></view>
-    <view class="hotspot hotspot-hz"></view>
-    <view class="hotspot hotspot-bj"></view>
-    <view class="map-copy">
-      <view class="page-title">{{title}}</view>
-      <view class="page-subtitle">{{subtitle}}</view>
-    </view>
-  </view>
+<view class="explore-page">
+  <ink-map
+    regions="{{regions}}"
+    selectedRegionId="{{selectedRegionId}}"
+    bind:regiontap="onRegionTap"
+    bind:locate="onLocate"
+  />
+  <view class="status-card">{{locationStatus}}</view>
   <button class="plan-button" bindtap="goPlan">规划行程</button>
+  <bottom-sheet
+    visible="{{sheetVisible}}"
+    title="{{activeOverview ? activeOverview.region.name : ''}}"
+    bind:close="closeSheet"
+  >
+    <view wx:if="{{activeOverview}}" class="sheet-content">
+      <view class="section-title">旅行便利</view>
+      <view wx:for="{{activeOverview.services}}" wx:key="id" class="content-row">
+        <view class="row-title">{{item.title}}</view>
+        <view class="row-summary">{{item.summary}}</view>
+      </view>
+      <view class="section-title">推荐点位</view>
+      <view wx:for="{{activeOverview.pois}}" wx:key="id" class="content-row">
+        <view class="row-title">{{item.name}}</view>
+        <view class="row-summary">{{item.summary}}</view>
+      </view>
+      <view class="section-title">精选攻略</view>
+      <view wx:for="{{activeOverview.guides}}" wx:key="id" class="content-row">
+        <view class="row-title">{{item.title}}</view>
+        <view class="row-summary">{{item.content}}</view>
+      </view>
+    </view>
+  </bottom-sheet>
 </view>

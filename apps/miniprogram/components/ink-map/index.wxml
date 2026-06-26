@@ -1,0 +1,23 @@
+<view class="ink-map" bindtouchstart="touchStart" bindtouchmove="touchMove">
+  <canvas id="inkCanvas" type="2d" class="ink-canvas"></canvas>
+  <view class="map-top">
+    <view class="search-pill">搜索城市 / 景点 / 避坑</view>
+    <button class="locate-button" bindtap="locate">定位</button>
+  </view>
+  <view class="chips">
+    <view class="chip">附近灵感</view>
+    <view class="chip">避坑</view>
+    <view class="chip">便利</view>
+  </view>
+  <view
+    wx:for="{{regions}}"
+    wx:key="id"
+    class="marker {{selectedRegionId === item.id ? 'marker-active' : ''}}"
+    style="left: {{item.markerLeft || 50}}%; top: {{item.markerTop || 45}}%;"
+    data-id="{{item.id}}"
+    bindtap="tapRegion"
+  >
+    <view class="marker-dot"></view>
+    <view class="marker-label">{{item.name}}</view>
+  </view>
+</view>
