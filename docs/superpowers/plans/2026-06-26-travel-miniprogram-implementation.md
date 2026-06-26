@@ -205,10 +205,10 @@ go 1.22
 
 require (
 	github.com/gin-gonic/gin v1.10.0
+	github.com/glebarez/sqlite v1.11.0
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/google/uuid v1.6.0
 	gorm.io/driver/mysql v1.5.7
-	gorm.io/driver/sqlite v1.5.7
 	gorm.io/datatypes v1.2.0
 	gorm.io/gorm v1.25.12
 )
@@ -917,7 +917,7 @@ git commit -m "feat(api): add service skeleton and local auth"
 
 - [ ] **Step 1: Write repository tests**
 
-Create tests using SQLite in memory or GORM MySQL test helper. Prefer SQLite only for repository logic that does not depend on MySQL JSON behavior.
+Create tests using the pure Go `github.com/glebarez/sqlite` in-memory driver or a GORM MySQL test helper. Prefer in-memory SQLite only for repository logic that does not depend on MySQL JSON behavior.
 
 Test names:
 

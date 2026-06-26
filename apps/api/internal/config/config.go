@@ -16,6 +16,7 @@ type Config struct {
 
 func Load() Config {
 	loadDotEnv(".env")
+	loadDotEnv("../../.env")
 	return Config{
 		Env:             getEnv("APP_ENV", "local"),
 		HTTPAddr:        getEnv("HTTP_ADDR", ":8080"),
