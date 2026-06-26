@@ -4,7 +4,7 @@ import {
   ChinaMapFeature,
   GeoPoint,
   clampMapScale,
-  computeGeoBounds,
+  computeChinaViewBounds,
   createFocusedViewport,
   createViewportProjector,
   findMapFeatureAtViewportPoint,
@@ -43,7 +43,20 @@ type DisplayCurrentLocation = CurrentLocation & {
   markerVisible: boolean;
 };
 
-const CHINA_BOUNDS = computeGeoBounds(chinaProvinces);
+const CHINA_VIEW_BOUNDS = computeChinaViewBounds(chinaProvinces);
+
+interface CanvasRuntime {
+  canvas?: WechatMiniprogram.Canvas;
+  ctx?: any;
+  width: number;
+  height: number;
+  pixelRatio: number;
+  canvasKey: string;
+  drawTimer: number | null;
+  drawInFlight: boolean;
+  drawQueued: boolean;
+  needsMarkerUpdate: boolean;
+}
 
 Component({
   properties: {
@@ -67,6 +80,7 @@ Component({
     offsetY: 0,
     displayRegions: [] as DisplayRegion[],
     displayCurrentLocation: null as DisplayCurrentLocation | null,
+    isInteracting: false,
     touchState: null as TouchState | null
   },
 
@@ -89,38 +103,87 @@ Component({
   },
 
   methods: {
-    drawInkMap() {
+    drawInkMap(updateMarkers = true) {
+      const runtime = getRuntime(this);
+      runtime.needsMarkerUpdate = runtime.needsMarkerUpdate || updateMarkers;
+      if (runtime.drawTimer !== null || runtime.drawInFlight) {
+        runtime.drawQueued = true;
+        return;
+      }
+
+      runtime.drawTimer = setTimeout(() => {
+        runtime.drawTimer = null;
+        this.flushInkMapDraw();
+      }, updateMarkers ? 0 : 16);
+    },
+
+    flushInkMapDraw() {
+      const runtime = getRuntime(this);
+      runtime.drawInFlight = true;
+      this.resolveCanvasRuntime((resolved) => {
+        const shouldUpdateMarkers = runtime.needsMarkerUpdate;
+        runtime.needsMarkerUpdate = false;
+
+        drawBackground(resolved.ctx, resolved.width, resolved.height);
+        const projector = createViewportProjector(CHINA_VIEW_BOUNDS, {
+          width: resolved.width,
+          height: resolved.height,
+          padding: Math.max(resolved.width * 0.075, 24),
+          scale: this.data.scale,
+          offsetX: this.data.offsetX,
+          offsetY: this.data.offsetY
+        });
+        drawChinaLayer(resolved.ctx, projector.project, chinaProvinces, !shouldUpdateMarkers);
+        if (shouldUpdateMarkers) {
+          this.updateRegionMarkers(resolved.width, resolved.height);
+        }
+
+        runtime.drawInFlight = false;
+        if (runtime.drawQueued) {
+          const nextNeedsMarkerUpdate = runtime.needsMarkerUpdate;
+          runtime.drawQueued = false;
+          this.drawInkMap(nextNeedsMarkerUpdate);
+        }
+      });
+    },
+
+    resolveCanvasRuntime(callback: (runtime: CanvasRuntime) => void) {
+      const runtime = getRuntime(this);
+      if (runtime.canvas && runtime.ctx && runtime.width > 0 && runtime.height > 0) {
+        callback(runtime);
+        return;
+      }
+
       const query = this.createSelectorQuery();
       query.select('#inkCanvas').fields({ node: true, size: true }).exec((res) => {
         const canvas = res?.[0]?.node as WechatMiniprogram.Canvas | undefined;
         if (!canvas) {
+          runtime.drawInFlight = false;
           return;
         }
         const width = Number(res[0].width || 320);
         const height = Number(res[0].height || 520);
         const pixelRatio = getPixelRatio();
-        canvas.width = width * pixelRatio;
-        canvas.height = height * pixelRatio;
+        const canvasKey = `${width}:${height}:${pixelRatio}`;
+        if (runtime.canvasKey !== canvasKey) {
+          canvas.width = width * pixelRatio;
+          canvas.height = height * pixelRatio;
+          runtime.canvasKey = canvasKey;
+        }
         const ctx = canvas.getContext('2d') as any;
         ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
         ctx.clearRect(0, 0, width, height);
-
-        drawBackground(ctx, width, height);
-        const projector = createViewportProjector(CHINA_BOUNDS, {
-          width,
-          height,
-          padding: Math.max(width * 0.075, 24),
-          scale: this.data.scale,
-          offsetX: this.data.offsetX,
-          offsetY: this.data.offsetY
-        });
-        drawChinaLayer(ctx, projector.project, chinaProvinces);
-        this.updateRegionMarkers(width, height);
+        runtime.canvas = canvas;
+        runtime.ctx = ctx;
+        runtime.width = width;
+        runtime.height = height;
+        runtime.pixelRatio = pixelRatio;
+        callback(runtime);
       });
     },
 
     updateRegionMarkers(width: number, height: number) {
-      const projector = createViewportProjector(CHINA_BOUNDS, {
+      const projector = createViewportProjector(CHINA_VIEW_BOUNDS, {
         width,
         height,
         padding: Math.max(width * 0.075, 24),
@@ -181,7 +244,7 @@ Component({
           offsetX: this.data.offsetX,
           offsetY: this.data.offsetY
         };
-        const feature = findMapFeatureAtViewportPoint(chinaProvinces, CHINA_BOUNDS, viewport, {
+        const feature = findMapFeatureAtViewportPoint(chinaProvinces, CHINA_VIEW_BOUNDS, viewport, {
           x: touch.clientX - Number(rect.left || 0),
           y: touch.clientY - Number(rect.top || 0)
         });
@@ -213,7 +276,7 @@ Component({
         const width = Number(res?.[0]?.width || 320);
         const height = Number(res?.[0]?.height || 520);
         const viewport = createFocusedViewport(
-          CHINA_BOUNDS,
+          CHINA_VIEW_BOUNDS,
           {
             width,
             height,
@@ -249,6 +312,7 @@ Component({
       const touches = event.touches as unknown as Point[];
       if (touches.length === 1) {
         this.setData({
+          isInteracting: true,
           touchState: {
             startX: touches[0].clientX,
             startY: touches[0].clientY,
@@ -262,6 +326,7 @@ Component({
       }
       if (touches.length >= 2) {
         this.setData({
+          isInteracting: true,
           touchState: {
             startX: touches[0].clientX,
             startY: touches[0].clientY,
@@ -281,23 +346,29 @@ Component({
       }
       const touches = event.touches as unknown as Point[];
       if (touches.length === 1) {
-        this.setData({
-          offsetX: state.startOffsetX + touches[0].clientX - state.startX,
-          offsetY: state.startOffsetY + touches[0].clientY - state.startY
-        });
-        this.drawInkMap();
+        this.data.offsetX = state.startOffsetX + touches[0].clientX - state.startX;
+        this.data.offsetY = state.startOffsetY + touches[0].clientY - state.startY;
+        this.drawInkMap(false);
         return;
       }
       if (touches.length >= 2 && state.startDistance > 0) {
         const next = distance(touches[0], touches[1]);
-        const scale = clampMapScale(state.startScale * (next / state.startDistance));
-        this.setData({ scale });
-        this.drawInkMap();
+        this.data.scale = clampMapScale(state.startScale * (next / state.startDistance));
+        this.drawInkMap(false);
       }
     },
 
     touchEnd() {
-      this.setData({ touchState: null });
+      this.setData(
+        {
+          scale: this.data.scale,
+          offsetX: this.data.offsetX,
+          offsetY: this.data.offsetY,
+          isInteracting: false,
+          touchState: null
+        },
+        () => this.drawInkMap()
+      );
     }
   }
 });
@@ -312,15 +383,32 @@ function isValidLocation(location: CurrentLocation | null): location is CurrentL
   return !!location && Number.isFinite(location.lng) && Number.isFinite(location.lat);
 }
 
+function getRuntime(instance: unknown): CanvasRuntime {
+  const host = instance as { __inkMapRuntime?: CanvasRuntime };
+  if (!host.__inkMapRuntime) {
+    host.__inkMapRuntime = {
+      width: 0,
+      height: 0,
+      pixelRatio: 1,
+      canvasKey: '',
+      drawTimer: null,
+      drawInFlight: false,
+      drawQueued: false,
+      needsMarkerUpdate: false
+    };
+  }
+  return host.__inkMapRuntime;
+}
+
 function getPixelRatio(): number {
   const wxApi = wx as unknown as {
     getWindowInfo?: () => { pixelRatio?: number };
     getSystemInfoSync: () => { pixelRatio?: number };
   };
   if (wxApi.getWindowInfo) {
-    return wxApi.getWindowInfo().pixelRatio || 1;
+    return Math.min(wxApi.getWindowInfo().pixelRatio || 1, 2);
   }
-  return wxApi.getSystemInfoSync().pixelRatio || 1;
+  return Math.min(wxApi.getSystemInfoSync().pixelRatio || 1, 2);
 }
 
 function drawBackground(ctx: any, width: number, height: number): void {
@@ -348,12 +436,17 @@ function drawBackground(ctx: any, width: number, height: number): void {
 function drawChinaLayer(
   ctx: any,
   project: (point: GeoPoint) => { x: number; y: number },
-  features: ChinaMapFeature[]
+  features: ChinaMapFeature[],
+  fastMode = false
 ): void {
-  drawFilledFeatures(ctx, project, features, 14, 16, 'rgba(79, 68, 43, 0.18)', 'rgba(79, 68, 43, 0)');
-  drawFilledFeatures(ctx, project, features, 7, 8, 'rgba(62, 97, 78, 0.22)', 'rgba(62, 97, 78, 0)');
+  if (!fastMode) {
+    drawFilledFeatures(ctx, project, features, 14, 16, 'rgba(79, 68, 43, 0.18)', 'rgba(79, 68, 43, 0)');
+    drawFilledFeatures(ctx, project, features, 7, 8, 'rgba(62, 97, 78, 0.22)', 'rgba(62, 97, 78, 0)');
+  }
   drawFilledFeatures(ctx, project, features, 0, 0, 'rgba(42, 103, 88, 0.92)', 'rgba(245, 238, 220, 0.5)');
-  drawLineFeatures(ctx, project, features);
+  if (!fastMode) {
+    drawLineFeatures(ctx, project, features);
+  }
 }
 
 function drawFilledFeatures(

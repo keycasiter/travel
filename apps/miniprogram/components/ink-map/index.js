@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const china_provinces_1 = require("../../data/china-provinces");
 const map_geometry_1 = require("../../utils/map-geometry");
-const CHINA_BOUNDS = (0, map_geometry_1.computeGeoBounds)(china_provinces_1.chinaProvinces);
+const CHINA_VIEW_BOUNDS = (0, map_geometry_1.computeChinaViewBounds)(china_provinces_1.chinaProvinces);
 Component({
     properties: {
         regions: {
@@ -24,6 +24,7 @@ Component({
         offsetY: 0,
         displayRegions: [],
         displayCurrentLocation: null,
+        isInteracting: false,
         touchState: null
     },
     lifetimes: {
@@ -43,36 +44,80 @@ Component({
         }
     },
     methods: {
-        drawInkMap() {
+        drawInkMap(updateMarkers = true) {
+            const runtime = getRuntime(this);
+            runtime.needsMarkerUpdate = runtime.needsMarkerUpdate || updateMarkers;
+            if (runtime.drawTimer !== null || runtime.drawInFlight) {
+                runtime.drawQueued = true;
+                return;
+            }
+            runtime.drawTimer = setTimeout(() => {
+                runtime.drawTimer = null;
+                this.flushInkMapDraw();
+            }, updateMarkers ? 0 : 16);
+        },
+        flushInkMapDraw() {
+            const runtime = getRuntime(this);
+            runtime.drawInFlight = true;
+            this.resolveCanvasRuntime((resolved) => {
+                const shouldUpdateMarkers = runtime.needsMarkerUpdate;
+                runtime.needsMarkerUpdate = false;
+                drawBackground(resolved.ctx, resolved.width, resolved.height);
+                const projector = (0, map_geometry_1.createViewportProjector)(CHINA_VIEW_BOUNDS, {
+                    width: resolved.width,
+                    height: resolved.height,
+                    padding: Math.max(resolved.width * 0.075, 24),
+                    scale: this.data.scale,
+                    offsetX: this.data.offsetX,
+                    offsetY: this.data.offsetY
+                });
+                drawChinaLayer(resolved.ctx, projector.project, china_provinces_1.chinaProvinces, !shouldUpdateMarkers);
+                if (shouldUpdateMarkers) {
+                    this.updateRegionMarkers(resolved.width, resolved.height);
+                }
+                runtime.drawInFlight = false;
+                if (runtime.drawQueued) {
+                    const nextNeedsMarkerUpdate = runtime.needsMarkerUpdate;
+                    runtime.drawQueued = false;
+                    this.drawInkMap(nextNeedsMarkerUpdate);
+                }
+            });
+        },
+        resolveCanvasRuntime(callback) {
+            const runtime = getRuntime(this);
+            if (runtime.canvas && runtime.ctx && runtime.width > 0 && runtime.height > 0) {
+                callback(runtime);
+                return;
+            }
             const query = this.createSelectorQuery();
             query.select('#inkCanvas').fields({ node: true, size: true }).exec((res) => {
                 const canvas = res?.[0]?.node;
                 if (!canvas) {
+                    runtime.drawInFlight = false;
                     return;
                 }
                 const width = Number(res[0].width || 320);
                 const height = Number(res[0].height || 520);
                 const pixelRatio = getPixelRatio();
-                canvas.width = width * pixelRatio;
-                canvas.height = height * pixelRatio;
+                const canvasKey = `${width}:${height}:${pixelRatio}`;
+                if (runtime.canvasKey !== canvasKey) {
+                    canvas.width = width * pixelRatio;
+                    canvas.height = height * pixelRatio;
+                    runtime.canvasKey = canvasKey;
+                }
                 const ctx = canvas.getContext('2d');
                 ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
                 ctx.clearRect(0, 0, width, height);
-                drawBackground(ctx, width, height);
-                const projector = (0, map_geometry_1.createViewportProjector)(CHINA_BOUNDS, {
-                    width,
-                    height,
-                    padding: Math.max(width * 0.075, 24),
-                    scale: this.data.scale,
-                    offsetX: this.data.offsetX,
-                    offsetY: this.data.offsetY
-                });
-                drawChinaLayer(ctx, projector.project, china_provinces_1.chinaProvinces);
-                this.updateRegionMarkers(width, height);
+                runtime.canvas = canvas;
+                runtime.ctx = ctx;
+                runtime.width = width;
+                runtime.height = height;
+                runtime.pixelRatio = pixelRatio;
+                callback(runtime);
             });
         },
         updateRegionMarkers(width, height) {
-            const projector = (0, map_geometry_1.createViewportProjector)(CHINA_BOUNDS, {
+            const projector = (0, map_geometry_1.createViewportProjector)(CHINA_VIEW_BOUNDS, {
                 width,
                 height,
                 padding: Math.max(width * 0.075, 24),
@@ -129,7 +174,7 @@ Component({
                     offsetX: this.data.offsetX,
                     offsetY: this.data.offsetY
                 };
-                const feature = (0, map_geometry_1.findMapFeatureAtViewportPoint)(china_provinces_1.chinaProvinces, CHINA_BOUNDS, viewport, {
+                const feature = (0, map_geometry_1.findMapFeatureAtViewportPoint)(china_provinces_1.chinaProvinces, CHINA_VIEW_BOUNDS, viewport, {
                     x: touch.clientX - Number(rect.left || 0),
                     y: touch.clientY - Number(rect.top || 0)
                 });
@@ -156,7 +201,7 @@ Component({
             query.select('#inkCanvas').fields({ size: true }).exec((res) => {
                 const width = Number(res?.[0]?.width || 320);
                 const height = Number(res?.[0]?.height || 520);
-                const viewport = (0, map_geometry_1.createFocusedViewport)(CHINA_BOUNDS, {
+                const viewport = (0, map_geometry_1.createFocusedViewport)(CHINA_VIEW_BOUNDS, {
                     width,
                     height,
                     padding: Math.max(width * 0.075, 24),
@@ -182,6 +227,7 @@ Component({
             const touches = event.touches;
             if (touches.length === 1) {
                 this.setData({
+                    isInteracting: true,
                     touchState: {
                         startX: touches[0].clientX,
                         startY: touches[0].clientY,
@@ -195,6 +241,7 @@ Component({
             }
             if (touches.length >= 2) {
                 this.setData({
+                    isInteracting: true,
                     touchState: {
                         startX: touches[0].clientX,
                         startY: touches[0].clientY,
@@ -213,22 +260,25 @@ Component({
             }
             const touches = event.touches;
             if (touches.length === 1) {
-                this.setData({
-                    offsetX: state.startOffsetX + touches[0].clientX - state.startX,
-                    offsetY: state.startOffsetY + touches[0].clientY - state.startY
-                });
-                this.drawInkMap();
+                this.data.offsetX = state.startOffsetX + touches[0].clientX - state.startX;
+                this.data.offsetY = state.startOffsetY + touches[0].clientY - state.startY;
+                this.drawInkMap(false);
                 return;
             }
             if (touches.length >= 2 && state.startDistance > 0) {
                 const next = distance(touches[0], touches[1]);
-                const scale = (0, map_geometry_1.clampMapScale)(state.startScale * (next / state.startDistance));
-                this.setData({ scale });
-                this.drawInkMap();
+                this.data.scale = (0, map_geometry_1.clampMapScale)(state.startScale * (next / state.startDistance));
+                this.drawInkMap(false);
             }
         },
         touchEnd() {
-            this.setData({ touchState: null });
+            this.setData({
+                scale: this.data.scale,
+                offsetX: this.data.offsetX,
+                offsetY: this.data.offsetY,
+                isInteracting: false,
+                touchState: null
+            }, () => this.drawInkMap());
         }
     }
 });
@@ -240,12 +290,28 @@ function distance(a, b) {
 function isValidLocation(location) {
     return !!location && Number.isFinite(location.lng) && Number.isFinite(location.lat);
 }
+function getRuntime(instance) {
+    const host = instance;
+    if (!host.__inkMapRuntime) {
+        host.__inkMapRuntime = {
+            width: 0,
+            height: 0,
+            pixelRatio: 1,
+            canvasKey: '',
+            drawTimer: null,
+            drawInFlight: false,
+            drawQueued: false,
+            needsMarkerUpdate: false
+        };
+    }
+    return host.__inkMapRuntime;
+}
 function getPixelRatio() {
     const wxApi = wx;
     if (wxApi.getWindowInfo) {
-        return wxApi.getWindowInfo().pixelRatio || 1;
+        return Math.min(wxApi.getWindowInfo().pixelRatio || 1, 2);
     }
-    return wxApi.getSystemInfoSync().pixelRatio || 1;
+    return Math.min(wxApi.getSystemInfoSync().pixelRatio || 1, 2);
 }
 function drawBackground(ctx, width, height) {
     const gradient = ctx.createLinearGradient(0, 0, 0, height);
@@ -267,11 +333,15 @@ function drawBackground(ctx, width, height) {
     ctx.fill();
     ctx.restore();
 }
-function drawChinaLayer(ctx, project, features) {
-    drawFilledFeatures(ctx, project, features, 14, 16, 'rgba(79, 68, 43, 0.18)', 'rgba(79, 68, 43, 0)');
-    drawFilledFeatures(ctx, project, features, 7, 8, 'rgba(62, 97, 78, 0.22)', 'rgba(62, 97, 78, 0)');
+function drawChinaLayer(ctx, project, features, fastMode = false) {
+    if (!fastMode) {
+        drawFilledFeatures(ctx, project, features, 14, 16, 'rgba(79, 68, 43, 0.18)', 'rgba(79, 68, 43, 0)');
+        drawFilledFeatures(ctx, project, features, 7, 8, 'rgba(62, 97, 78, 0.22)', 'rgba(62, 97, 78, 0)');
+    }
     drawFilledFeatures(ctx, project, features, 0, 0, 'rgba(42, 103, 88, 0.92)', 'rgba(245, 238, 220, 0.5)');
-    drawLineFeatures(ctx, project, features);
+    if (!fastMode) {
+        drawLineFeatures(ctx, project, features);
+    }
 }
 function drawFilledFeatures(ctx, project, features, offsetX, offsetY, fillStyle, strokeStyle) {
     ctx.save();

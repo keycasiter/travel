@@ -3,7 +3,7 @@ const path = require('path');
 
 const SOURCE_URL = 'https://geojson.cn/api/china/100000.json';
 const OUTPUT_PATH = path.resolve(__dirname, '../data/china-provinces.ts');
-const EPSILON = 0.035;
+const EPSILON = 0.16;
 const PRECISION = 3;
 
 main().catch((error) => {

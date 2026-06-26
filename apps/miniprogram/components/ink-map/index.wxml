@@ -17,7 +17,7 @@
   <view
     wx:for="{{displayRegions}}"
     wx:key="id"
-    hidden="{{!item.markerVisible}}"
+    hidden="{{isInteracting || !item.markerVisible}}"
     class="marker {{selectedRegionId === item.id ? 'marker-active' : ''}}"
     style="left: {{item.markerLeft || 50}}%; top: {{item.markerTop || 45}}%;"
     data-id="{{item.id}}"
@@ -27,7 +27,7 @@
     <view class="marker-label">{{item.name}}</view>
   </view>
   <view
-    wx:if="{{displayCurrentLocation && displayCurrentLocation.markerVisible}}"
+    wx:if="{{!isInteracting && displayCurrentLocation && displayCurrentLocation.markerVisible}}"
     class="current-marker"
     style="left: {{displayCurrentLocation.markerLeft}}%; top: {{displayCurrentLocation.markerTop}}%;"
   >

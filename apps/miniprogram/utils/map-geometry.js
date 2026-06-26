@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.computeGeoBounds = computeGeoBounds;
+exports.computeChinaViewBounds = computeChinaViewBounds;
 exports.createViewportProjector = createViewportProjector;
 exports.clampMapScale = clampMapScale;
 exports.createFocusedViewport = createFocusedViewport;
@@ -12,6 +13,7 @@ exports.distanceKm = distanceKm;
 exports.forEachTuple = forEachTuple;
 const MIN_MAP_SCALE = 0.78;
 const MAX_MAP_SCALE = 2.35;
+const MIN_VIEW_RING_AREA = 0.2;
 function computeGeoBounds(features) {
     const bounds = {
         minLng: Number.POSITIVE_INFINITY,
@@ -24,6 +26,31 @@ function computeGeoBounds(features) {
     }
     if (!Number.isFinite(bounds.minLng) || !Number.isFinite(bounds.minLat)) {
         throw new Error('China map data has no coordinates');
+    }
+    return bounds;
+}
+function computeChinaViewBounds(features) {
+    const bounds = {
+        minLng: Number.POSITIVE_INFINITY,
+        maxLng: Number.NEGATIVE_INFINITY,
+        minLat: Number.POSITIVE_INFINITY,
+        maxLat: Number.NEGATIVE_INFINITY
+    };
+    for (const feature of features) {
+        if (!feature.rings) {
+            continue;
+        }
+        for (const ring of feature.rings) {
+            if (computeRingArea(ring) < MIN_VIEW_RING_AREA) {
+                continue;
+            }
+            for (const point of ring) {
+                extendBounds(bounds, point);
+            }
+        }
+    }
+    if (!Number.isFinite(bounds.minLng) || !Number.isFinite(bounds.minLat)) {
+        return computeGeoBounds(features);
     }
     return bounds;
 }
@@ -171,6 +198,13 @@ function isPointInRing(point, ring) {
         }
     }
     return inside;
+}
+function computeRingArea(ring) {
+    let area = 0;
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i, i += 1) {
+        area += (ring[j][0] + ring[i][0]) * (ring[j][1] - ring[i][1]);
+    }
+    return Math.abs(area / 2);
 }
 function toRadians(degrees) {
     return (degrees * Math.PI) / 180;

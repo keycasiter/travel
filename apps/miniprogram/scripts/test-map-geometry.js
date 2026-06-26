@@ -3,6 +3,7 @@ const assert = require('assert');
 const { chinaProvinces } = require('../data/china-provinces.js');
 const {
   clampMapScale,
+  computeChinaViewBounds,
   computeGeoBounds,
   createFocusedViewport,
   createViewportProjector,
@@ -32,7 +33,11 @@ assert.ok(bounds.maxLng > 134, `maxLng should cover east China, got ${bounds.max
 assert.ok(bounds.minLat < 18, `minLat should cover south China, got ${bounds.minLat}`);
 assert.ok(bounds.maxLat > 52, `maxLat should cover north China, got ${bounds.maxLat}`);
 
-const projector = createViewportProjector(bounds, {
+const viewBounds = computeChinaViewBounds(chinaProvinces);
+assert.ok(viewBounds.minLat > 17, `view minLat should keep the main China map readable, got ${viewBounds.minLat}`);
+assert.ok(viewBounds.maxLat > 52, `view maxLat should cover north China, got ${viewBounds.maxLat}`);
+
+const projector = createViewportProjector(viewBounds, {
   width: 375,
   height: 667,
   padding: 28,
@@ -63,7 +68,7 @@ assert.strictEqual(beijingFeature && beijingFeature.name, '北京', 'Beijing coo
 assert.strictEqual(clampMapScale(0.2), 0.78, 'zoom out should clamp to minimum map scale');
 assert.strictEqual(clampMapScale(4), 2.35, 'zoom in should clamp to maximum map scale');
 
-const focusedViewport = createFocusedViewport(bounds, {
+const focusedViewport = createFocusedViewport(viewBounds, {
   width: 375,
   height: 667,
   padding: 28,
@@ -71,11 +76,11 @@ const focusedViewport = createFocusedViewport(bounds, {
   offsetX: 0,
   offsetY: 0
 }, { lng: 120.15507, lat: 30.274084 }, 1.7);
-const focusedProjector = createViewportProjector(bounds, focusedViewport);
+const focusedProjector = createViewportProjector(viewBounds, focusedViewport);
 const focusedPoint = focusedProjector.project({ lng: 120.15507, lat: 30.274084 });
 assert.ok(Math.abs(focusedPoint.x - 187.5) < 0.01, `focused point x should be centered, got ${focusedPoint.x}`);
 assert.ok(Math.abs(focusedPoint.y - 320.16) < 0.01, `focused point y should use map focus anchor, got ${focusedPoint.y}`);
 
 const hangzhouScreenPoint = projector.project({ lng: 120.15507, lat: 30.274084 });
-const viewportHit = findMapFeatureAtViewportPoint(chinaProvinces, bounds, projector.viewport, hangzhouScreenPoint);
+const viewportHit = findMapFeatureAtViewportPoint(chinaProvinces, viewBounds, projector.viewport, hangzhouScreenPoint);
 assert.strictEqual(viewportHit && viewportHit.name, '浙江', 'clicking the projected Hangzhou screen point should hit Zhejiang');
