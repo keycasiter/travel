@@ -43,6 +43,15 @@ make migrate-up
 make api-seed
 ```
 
+If the existing local MySQL instance is not usable, start an isolated MySQL 8.0 instance on port `3307` using the bundled helper:
+
+```bash
+make dev-mysql-start
+scripts/dev-mysql.sh dsn
+```
+
+Set `.env` `MYSQL_DSN` to the printed value, then run `make migrate-up` and `make api-seed`.
+
 ## API
 
 Start the Go API:
