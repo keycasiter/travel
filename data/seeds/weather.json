@@ -1,4 +1,10 @@
 [
   {"regionId":"city-hangzhou","summary":"春秋舒适，夏季注意午后阵雨。","temperatureRange":"18-28°C","tips":["带轻薄外套","雨天优先安排室内点位"]},
-  {"regionId":"city-beijing","summary":"春秋适合城市漫步，冬季风大且早晚温差明显。","temperatureRange":"8-26°C","tips":["早晚加外套","热门景点排队时注意防晒或防风"]}
+  {"regionId":"city-beijing","summary":"春秋适合城市漫步，冬季风大且早晚温差明显。","temperatureRange":"8-26°C","tips":["早晚加外套","热门景点排队时注意防晒或防风"]},
+  {"regionId":"city-shanghai","summary":"春秋适合步行，梅雨季和台风季注意雨具。","temperatureRange":"16-29°C","tips":["外滩夜间风大","雨天优先地铁和室内点"]},
+  {"regionId":"city-chengdu","summary":"气候湿润，夏季闷热，冬季阴冷。","temperatureRange":"12-28°C","tips":["轻便雨具常备","重口味餐后安排轻松行程"]},
+  {"regionId":"city-xian","summary":"春秋适合古城步行，夏季日晒强。","temperatureRange":"10-30°C","tips":["城墙骑行注意防晒","远郊景点预留交通时间"]},
+  {"regionId":"city-guangzhou","summary":"温暖湿润，夏季午后雷雨常见。","temperatureRange":"20-32°C","tips":["带伞并关注短时降雨","早茶后安排室内休息点"]},
+  {"regionId":"city-shenzhen","summary":"滨海湿热，夏季注意防晒和补水。","temperatureRange":"22-31°C","tips":["海边步行注意防晒","台风季关注交通调整"]},
+  {"regionId":"city-xiamen","summary":"海风明显，夏秋台风季需关注轮渡。","temperatureRange":"18-30°C","tips":["鼓浪屿船票提前确认","海边日晒强"]}
 ]

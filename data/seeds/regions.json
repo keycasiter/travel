@@ -2,5 +2,17 @@
   {"id":"city-hangzhou","name":"杭州","level":"city","parentId":null,"centerLat":30.2741,"centerLng":120.1551,"enabled":true,"sortOrder":10},
   {"id":"area-hangzhou-westlake","name":"西湖热门片区","level":"district","parentId":"city-hangzhou","centerLat":30.2426,"centerLng":120.1503,"enabled":true,"sortOrder":11},
   {"id":"city-beijing","name":"北京","level":"city","parentId":null,"centerLat":39.9042,"centerLng":116.4074,"enabled":true,"sortOrder":20},
-  {"id":"area-beijing-dongcheng","name":"东城热门片区","level":"district","parentId":"city-beijing","centerLat":39.9175,"centerLng":116.3972,"enabled":true,"sortOrder":21}
+  {"id":"area-beijing-dongcheng","name":"东城热门片区","level":"district","parentId":"city-beijing","centerLat":39.9175,"centerLng":116.3972,"enabled":true,"sortOrder":21},
+  {"id":"city-shanghai","name":"上海","level":"city","parentId":null,"centerLat":31.2304,"centerLng":121.4737,"enabled":true,"sortOrder":30},
+  {"id":"area-shanghai-huangpu","name":"黄浦外滩片区","level":"district","parentId":"city-shanghai","centerLat":31.2400,"centerLng":121.4900,"enabled":true,"sortOrder":31},
+  {"id":"city-chengdu","name":"成都","level":"city","parentId":null,"centerLat":30.5728,"centerLng":104.0668,"enabled":true,"sortOrder":40},
+  {"id":"area-chengdu-qingyang","name":"青羊老城片区","level":"district","parentId":"city-chengdu","centerLat":30.6740,"centerLng":104.0620,"enabled":true,"sortOrder":41},
+  {"id":"city-xian","name":"西安","level":"city","parentId":null,"centerLat":34.3416,"centerLng":108.9398,"enabled":true,"sortOrder":50},
+  {"id":"area-xian-beilin","name":"碑林城墙片区","level":"district","parentId":"city-xian","centerLat":34.2560,"centerLng":108.9450,"enabled":true,"sortOrder":51},
+  {"id":"city-guangzhou","name":"广州","level":"city","parentId":null,"centerLat":23.1291,"centerLng":113.2644,"enabled":true,"sortOrder":60},
+  {"id":"area-guangzhou-yuexiu","name":"越秀老城片区","level":"district","parentId":"city-guangzhou","centerLat":23.1290,"centerLng":113.2670,"enabled":true,"sortOrder":61},
+  {"id":"city-shenzhen","name":"深圳","level":"city","parentId":null,"centerLat":22.5431,"centerLng":114.0579,"enabled":true,"sortOrder":70},
+  {"id":"area-shenzhen-nanshan","name":"南山滨海片区","level":"district","parentId":"city-shenzhen","centerLat":22.5330,"centerLng":113.9300,"enabled":true,"sortOrder":71},
+  {"id":"city-xiamen","name":"厦门","level":"city","parentId":null,"centerLat":24.4798,"centerLng":118.0894,"enabled":true,"sortOrder":80},
+  {"id":"area-xiamen-siming","name":"思明海岸片区","level":"district","parentId":"city-xiamen","centerLat":24.4450,"centerLng":118.0820,"enabled":true,"sortOrder":81}
 ]

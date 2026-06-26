@@ -1,4 +1,10 @@
 [
   {"id":"guide-hangzhou-48h","regionId":"city-hangzhou","title":"杭州 48 小时慢游精选攻略","content":"第一天安排西湖苏堤、湖滨和南山路，第二天早出发去灵隐寺。雨天可把户外湖线缩短，增加浙江省博物馆等室内点位。","tags":["2日游","城市漫步","避坑"],"coverUrl":"seed://hangzhou-48h-cover","official":true},
-  {"id":"guide-beijing-72h","regionId":"city-beijing","title":"北京 72 小时历史文化路线","content":"第一天围绕天安门、故宫和景山，第二天走胡同和中轴线，第三天安排长城或博物馆。故宫、国博等热门点位需要提前预约。","tags":["3日游","历史文化","预约提醒"],"coverUrl":"seed://beijing-72h-cover","official":true}
+  {"id":"guide-beijing-72h","regionId":"city-beijing","title":"北京 72 小时历史文化路线","content":"第一天围绕天安门、故宫和景山，第二天走胡同和中轴线，第三天安排长城或博物馆。故宫、国博等热门点位需要提前预约。","tags":["3日游","历史文化","预约提醒"],"coverUrl":"seed://beijing-72h-cover","official":true},
+  {"id":"guide-shanghai-48h","regionId":"city-shanghai","title":"上海 48 小时城市夜景攻略","content":"第一天安排人民广场、南京东路和外滩夜景，第二天串联豫园和陆家嘴。雨天可增加博物馆和商场。","tags":["2日游","夜景","城市漫步"],"coverUrl":"seed://shanghai-48h-cover","official":true},
+  {"id":"guide-chengdu-72h","regionId":"city-chengdu","title":"成都 72 小时慢生活攻略","content":"宽窄巷子、武侯祠、锦里和火锅适合放慢节奏安排。熊猫基地建议单独早起半日，避免和晚间重餐排得太紧。","tags":["3日游","美食","慢游"],"coverUrl":"seed://chengdu-72h-cover","official":true},
+  {"id":"guide-xian-48h","regionId":"city-xian","title":"西安 48 小时古城路线","content":"城墙、钟楼、碑林和小吃街适合组合成一条古城步行线。兵马俑距离较远，建议另排一天或半天。","tags":["2日游","历史文化","避坑"],"coverUrl":"seed://xian-48h-cover","official":true},
+  {"id":"guide-guangzhou-48h","regionId":"city-guangzhou","title":"广州 48 小时老城早茶路线","content":"早茶、越秀公园、沙面和骑楼街区适合慢节奏串联。午后雷雨季节准备室内替代点。","tags":["2日游","美食","老城"],"coverUrl":"seed://guangzhou-48h-cover","official":true},
+  {"id":"guide-shenzhen-48h","regionId":"city-shenzhen","title":"深圳 48 小时滨海城市路线","content":"南山滨海、公园夜景和南头古城适合组合。周末海边停车压力大，优先地铁和短途打车。","tags":["2日游","海滨","城市漫步"],"coverUrl":"seed://shenzhen-48h-cover","official":true},
+  {"id":"guide-xiamen-48h","regionId":"city-xiamen","title":"厦门 48 小时海岛慢游攻略","content":"鼓浪屿建议留足半天以上，沙坡尾和中山路适合傍晚到夜间。船票和海鲜价格是主要避坑点。","tags":["2日游","海滨","避坑"],"coverUrl":"seed://xiamen-48h-cover","official":true}
 ]
