@@ -44,7 +44,7 @@ func TestClientSearchPlacesSignsTencentRequest(t *testing.T) {
 					"address":   "杭州西湖区",
 					"category":  "旅游景点",
 					"location":  map[string]float64{"lat": 30.2, "lng": 120.1},
-					"_distance": 320,
+					"_distance": 14300.64,
 				},
 			},
 		})
@@ -88,6 +88,9 @@ func TestClientSearchPlacesSignsTencentRequest(t *testing.T) {
 	}
 	if results[0].Title != "西湖" || results[0].Location.Lat != 30.2 || results[0].Location.Lng != 120.1 {
 		t.Fatalf("unexpected result: %+v", results[0])
+	}
+	if results[0].Distance == nil || *results[0].Distance != 14300.64 {
+		t.Fatalf("expected decimal distance, got %+v", results[0].Distance)
 	}
 }
 

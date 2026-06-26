@@ -51,7 +51,7 @@ type Place struct {
 	Address  string   `json:"address"`
 	Category string   `json:"category"`
 	Location Location `json:"location"`
-	Distance *int     `json:"distance,omitempty"`
+	Distance *float64 `json:"distance,omitempty"`
 }
 
 type Location struct {
@@ -71,7 +71,7 @@ type tencentPlace struct {
 	Address  string   `json:"address"`
 	Category string   `json:"category"`
 	Location Location `json:"location"`
-	Distance *int     `json:"_distance"`
+	Distance *float64 `json:"_distance"`
 }
 
 func NewClient(cfg Config) *Client {
