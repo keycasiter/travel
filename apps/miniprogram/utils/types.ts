@@ -53,3 +53,84 @@ export interface LoginResult {
   userId: number;
   token: string;
 }
+
+export interface Itinerary {
+  id: number;
+  userId: number;
+  destinationRegionId: string;
+  title: string;
+  days: number;
+  status: string;
+  budgetCents: number;
+  shareCode?: string;
+}
+
+export interface ItineraryDay {
+  id: number;
+  itineraryId: number;
+  dayIndex: number;
+  summary: string;
+}
+
+export interface ItineraryItem {
+  id: number;
+  dayId: number;
+  poiId: string;
+  sortOrder: number;
+  startHint: string;
+  durationMinutes: number;
+  transportHint: string;
+  note: string;
+  done: boolean;
+}
+
+export interface ItineraryItemDetail {
+  item: ItineraryItem;
+  poi: Poi;
+}
+
+export interface ItineraryDayDetail {
+  day: ItineraryDay;
+  items: ItineraryItemDetail[];
+}
+
+export interface ItineraryDetail {
+  itinerary: Itinerary;
+  days: ItineraryDayDetail[];
+}
+
+export interface Favorite {
+  id: number;
+  userId: number;
+  targetType: string;
+  targetId: string;
+}
+
+export interface WeatherSummary {
+  regionId: string;
+  summary: string;
+  temperatureRange: string;
+  tips: string[];
+}
+
+export interface ShareSnapshot {
+  title: string;
+  destinationRegionId: string;
+  budgetCents: number;
+  days: Array<{
+    dayIndex: number;
+    summary: string;
+    items: Array<{
+      poiId: string;
+      startHint: string;
+      durationMinutes: number;
+      transportHint: string;
+      note: string;
+    }>;
+  }>;
+}
+
+export interface ShareView {
+  shareCode: string;
+  snapshot: ShareSnapshot;
+}

@@ -1,5 +1,9 @@
 <view class="page">
-  <view class="page-title">{{title}}</view>
-  <view class="page-subtitle">{{subtitle}}</view>
-  <view class="empty-panel">登录和用户数据将在 API 接入后展示。</view>
+  <view class="page-title">我的</view>
+  <view class="page-subtitle">{{status}}</view>
+  <view class="empty-panel">
+    <view>用户 ID：{{userId || '未登录'}}</view>
+    <view>已保存行程：{{itineraryCount}}</view>
+    <view>API：{{apiBaseUrl}}</view>
+  </view>
 </view>

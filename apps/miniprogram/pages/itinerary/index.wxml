@@ -1,5 +1,40 @@
 <view class="page">
-  <view class="page-title">{{title}}</view>
-  <view class="page-subtitle">{{subtitle}}</view>
-  <view class="empty-panel">行程生成器将在下一步接入 API。</view>
+  <view class="page-title">行程规划</view>
+  <view class="page-subtitle">{{status}}</view>
+
+  <view class="panel">
+    <view class="field-label">目的地</view>
+    <picker mode="selector" range="{{destinationNames}}" value="{{selectedDestinationIndex}}" bindchange="onDestinationChange">
+      <view class="field-value">{{destinationNames[selectedDestinationIndex] || '加载中'}}</view>
+    </picker>
+    <view class="field-label">天数</view>
+    <input class="field-input" type="number" value="{{days}}" bindinput="onDaysInput" />
+    <view class="field-label">偏好</view>
+    <input class="field-input" value="{{preferencesText}}" bindinput="onPreferencesInput" />
+    <button class="primary-button" bindtap="generate">生成行程</button>
+  </view>
+
+  <view wx:if="{{weather}}" class="panel compact-panel">
+    <view class="panel-title">今日管家</view>
+    <view class="row-summary">{{weather.summary}} · {{weather.temperatureRange}}</view>
+  </view>
+
+  <view wx:if="{{currentItinerary}}" class="itinerary-detail">
+    <view class="panel-title">{{currentItinerary.itinerary.title}}</view>
+    <button class="secondary-button" bindtap="createShare">分享只读行程</button>
+    <view wx:for="{{currentItinerary.days}}" wx:key="day.id" class="day-card">
+      <view class="day-title">第 {{item.day.dayIndex}} 天 · {{item.day.summary}}</view>
+      <view wx:for="{{item.items}}" wx:for-item="entry" wx:key="item.id" class="item-row">
+        <view class="row-title">{{entry.poi.name}}</view>
+        <view class="row-summary">{{entry.item.startHint}} · {{entry.item.transportHint}}</view>
+        <view wx:if="{{entry.item.note}}" class="item-note">{{entry.item.note}}</view>
+        <view class="actions">
+          <button size="mini" data-id="{{entry.item.id}}" data-done="{{!entry.item.done}}" bindtap="toggleDone">
+            {{entry.item.done ? '已完成' : '打勾'}}
+          </button>
+          <button size="mini" data-id="{{entry.item.id}}" bindtap="addNote">备注</button>
+        </view>
+      </view>
+    </view>
+  </view>
 </view>
