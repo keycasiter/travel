@@ -19,3 +19,31 @@ const source = fs.readFileSync(path.join(root, 'pages/region-map/index.ts'), 'ut
 assert.ok(source.includes('scale: 16'), 'region map should default to street-level zoom');
 assert.ok(source.includes('zoomToStreet'), 'region map should expose a street-level zoom action');
 assert.ok(source.includes('openTraffic'), 'region map should expose traffic guidance from selected POI');
+
+const loadOverviewSource = sliceBetween(source, 'async loadOverview', 'onMarkerTap');
+assert.ok(loadOverviewSource.includes('includePoints: []'), 'initial street map load should not fit all POIs');
+assert.ok(!loadOverviewSource.includes('includePoints: pois.map'), 'initial street map load must not override street zoom with POI bounds');
+
+const markerTapSource = sliceBetween(source, 'onMarkerTap', 'zoomToStreet');
+assert.ok(markerTapSource.includes('includePoints: []'), 'marker selection should clear POI bounds before zooming in');
+assert.ok(markerTapSource.includes('scale: 19'), 'marker selection should use street-level zoom');
+
+const streetZoomSource = sliceBetween(source, 'zoomToStreet', 'showAllPois');
+assert.ok(streetZoomSource.includes('includePoints: []'), 'street zoom should clear POI bounds');
+assert.ok(streetZoomSource.includes('scale: 20'), 'street zoom should request the closest street-level scale');
+
+const allPoisSource = sliceBetween(source, 'showAllPois', 'locateMe');
+assert.ok(allPoisSource.includes('includePoints: this.data.pois.map'), 'all POIs view should be the only mode that fits POI bounds');
+assert.ok(allPoisSource.includes('scale: 13'), 'all POIs view should keep overview zoom');
+
+const locateSource = sliceBetween(source, 'locateMe', 'openTraffic');
+assert.ok(locateSource.includes('includePoints: []'), 'user location should clear POI bounds before zooming in');
+assert.ok(locateSource.includes('scale: 19'), 'user location should use street-level zoom');
+
+function sliceBetween(text, startNeedle, endNeedle) {
+  const start = text.indexOf(startNeedle);
+  assert.ok(start >= 0, `missing ${startNeedle}`);
+  const end = text.indexOf(endNeedle, start + startNeedle.length);
+  assert.ok(end > start, `missing ${endNeedle} after ${startNeedle}`);
+  return text.slice(start, end);
+}

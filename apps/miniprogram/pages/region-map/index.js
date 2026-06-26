@@ -40,7 +40,7 @@ Page({
                 pois,
                 selectedPoi,
                 markers: buildMarkers(pois),
-                includePoints: pois.map((poi) => ({ latitude: poi.lat, longitude: poi.lng })),
+                includePoints: [],
                 transportServices: overview.services.filter((service) => service.type === 'transport'),
                 statusText: pois.length > 0 ? `${overview.region.name}街道地图` : `${overview.region.name}暂无点位数据`
             });
@@ -59,20 +59,22 @@ Page({
             selectedPoi,
             latitude: selectedPoi.lat,
             longitude: selectedPoi.lng,
-            scale: 17,
+            scale: 19,
+            includePoints: [],
             statusText: selectedPoi.name
         });
     },
     zoomToStreet() {
         const selectedPoi = this.data.selectedPoi;
         if (!selectedPoi) {
-            this.setData({ scale: 17 });
+            this.setData({ scale: 20, includePoints: [] });
             return;
         }
         this.setData({
             latitude: selectedPoi.lat,
             longitude: selectedPoi.lng,
-            scale: 18,
+            scale: 20,
+            includePoints: [],
             statusText: `${selectedPoi.name}附近`
         });
     },
@@ -85,6 +87,7 @@ Page({
             latitude: firstPoi.lat,
             longitude: firstPoi.lng,
             scale: 13,
+            includePoints: this.data.pois.map((poi) => ({ latitude: poi.lat, longitude: poi.lng })),
             statusText: `${this.data.regionName}点位总览`
         });
     },
@@ -95,7 +98,8 @@ Page({
                 this.setData({
                     latitude: res.latitude,
                     longitude: res.longitude,
-                    scale: 17,
+                    scale: 19,
+                    includePoints: [],
                     statusText: '已定位到当前位置'
                 });
             },

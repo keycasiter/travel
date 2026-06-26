@@ -320,18 +320,6 @@ function drawBackground(ctx, width, height) {
     gradient.addColorStop(1, '#e3d4b8');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, width, height);
-    ctx.save();
-    ctx.globalAlpha = 0.14;
-    ctx.fillStyle = '#91a48f';
-    ctx.beginPath();
-    ctx.ellipse(width * 0.26, height * 0.68, width * 0.34, height * 0.08, -0.38, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.globalAlpha = 0.1;
-    ctx.fillStyle = '#b89159';
-    ctx.beginPath();
-    ctx.ellipse(width * 0.75, height * 0.3, width * 0.28, height * 0.07, 0.18, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
 }
 function drawChinaLayer(ctx, project, features, fastMode = false) {
     if (!fastMode) {
