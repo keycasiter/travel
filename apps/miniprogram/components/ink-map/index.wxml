@@ -9,6 +9,11 @@
     <view class="chip">避坑</view>
     <view class="chip">便利</view>
   </view>
+  <view class="zoom-controls">
+    <button class="map-control-button" aria-label="放大地图" data-delta="1" bindtap="zoomBy">+</button>
+    <button class="map-control-button" aria-label="缩小地图" data-delta="-1" bindtap="zoomBy">-</button>
+    <button class="map-control-button" aria-label="回到全国视角" bindtap="resetView">⌂</button>
+  </view>
   <view
     wx:for="{{displayRegions}}"
     wx:key="id"
@@ -20,5 +25,13 @@
   >
     <view class="marker-dot"></view>
     <view class="marker-label">{{item.name}}</view>
+  </view>
+  <view
+    wx:if="{{displayCurrentLocation && displayCurrentLocation.markerVisible}}"
+    class="current-marker"
+    style="left: {{displayCurrentLocation.markerLeft}}%; top: {{displayCurrentLocation.markerTop}}%;"
+  >
+    <view class="current-pulse"></view>
+    <view class="current-label">{{displayCurrentLocation.label}}</view>
   </view>
 </view>

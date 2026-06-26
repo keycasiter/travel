@@ -3,7 +3,9 @@ import { chinaProvinces } from '../../data/china-provinces';
 import {
   ChinaMapFeature,
   GeoPoint,
+  clampMapScale,
   computeGeoBounds,
+  createFocusedViewport,
   createViewportProjector,
   projectRegionMarkers
 } from '../../utils/map-geometry';
@@ -28,6 +30,18 @@ type DisplayRegion = Region & {
   markerVisible: boolean;
 };
 
+interface CurrentLocation {
+  lng: number;
+  lat: number;
+  label: string;
+}
+
+type DisplayCurrentLocation = CurrentLocation & {
+  markerLeft: number;
+  markerTop: number;
+  markerVisible: boolean;
+};
+
 const CHINA_BOUNDS = computeGeoBounds(chinaProvinces);
 
 Component({
@@ -39,6 +53,10 @@ Component({
     selectedRegionId: {
       type: String,
       value: ''
+    },
+    currentLocation: {
+      type: Object,
+      value: {}
     }
   },
 
@@ -47,6 +65,7 @@ Component({
     offsetX: 0,
     offsetY: 0,
     displayRegions: [] as DisplayRegion[],
+    displayCurrentLocation: null as DisplayCurrentLocation | null,
     touchState: null as TouchState | null
   },
 
@@ -61,6 +80,9 @@ Component({
       this.drawInkMap();
     },
     selectedRegionId() {
+      this.drawInkMap();
+    },
+    currentLocation() {
       this.drawInkMap();
     }
   },
@@ -105,13 +127,27 @@ Component({
         offsetX: this.data.offsetX,
         offsetY: this.data.offsetY
       });
-      const markers = projectRegionMarkers(this.data.regions as Region[], projector).map((marker) => ({
+      const regions = (this.data as unknown as { regions: Region[] }).regions || [];
+      const markers = projectRegionMarkers(regions, projector).map((marker) => ({
         ...marker,
         markerLeft: marker.left,
         markerTop: marker.top,
         markerVisible: marker.left > -8 && marker.left < 108 && marker.top > -8 && marker.top < 108
       }));
-      this.setData({ displayRegions: markers });
+      const currentLocation = (this.data as unknown as { currentLocation?: CurrentLocation }).currentLocation || null;
+      let displayCurrentLocation: DisplayCurrentLocation | null = null;
+      if (isValidLocation(currentLocation)) {
+        const point = projector.project({ lng: currentLocation.lng, lat: currentLocation.lat });
+        const markerLeft = (point.x / width) * 100;
+        const markerTop = (point.y / height) * 100;
+        displayCurrentLocation = {
+          ...currentLocation,
+          markerLeft,
+          markerTop,
+          markerVisible: markerLeft > -8 && markerLeft < 108 && markerTop > -8 && markerTop < 108
+        };
+      }
+      this.setData({ displayRegions: markers, displayCurrentLocation });
     },
 
     tapRegion(event: WechatMiniprogram.TouchEvent) {
@@ -126,34 +162,50 @@ Component({
     },
 
     focusRegion(regionId: string) {
-      const region = (this.data.regions as Region[]).find((item) => item.id === regionId);
+      const regions = (this.data as unknown as { regions: Region[] }).regions || [];
+      const region = regions.find((item) => item.id === regionId);
       if (!region) {
         return;
       }
+      this.focusLocation({ lng: region.centerLng, lat: region.centerLat, label: region.name }, 1.45);
+    },
 
+    focusLocation(location: CurrentLocation, scale = 1.7) {
       const query = this.createSelectorQuery();
       query.select('#inkCanvas').fields({ size: true }).exec((res) => {
         const width = Number(res?.[0]?.width || 320);
         const height = Number(res?.[0]?.height || 520);
-        const nextScale = Math.max(this.data.scale, 1.35);
-        const projector = createViewportProjector(CHINA_BOUNDS, {
-          width,
-          height,
-          padding: Math.max(width * 0.075, 24),
-          scale: nextScale,
-          offsetX: 0,
-          offsetY: 0
-        });
-        const point = projector.project({ lng: region.centerLng, lat: region.centerLat });
+        const viewport = createFocusedViewport(
+          CHINA_BOUNDS,
+          {
+            width,
+            height,
+            padding: Math.max(width * 0.075, 24),
+            scale: this.data.scale,
+            offsetX: this.data.offsetX,
+            offsetY: this.data.offsetY
+          },
+          location,
+          scale
+        );
         this.setData(
           {
-            scale: nextScale,
-            offsetX: width * 0.5 - point.x,
-            offsetY: height * 0.48 - point.y
+            scale: viewport.scale,
+            offsetX: viewport.offsetX,
+            offsetY: viewport.offsetY
           },
           () => this.drawInkMap()
         );
       });
+    },
+
+    zoomBy(event: WechatMiniprogram.TouchEvent) {
+      const delta = Number(event.currentTarget.dataset.delta || 0);
+      this.setData({ scale: clampMapScale(this.data.scale + delta * 0.28) }, () => this.drawInkMap());
+    },
+
+    resetView() {
+      this.setData({ scale: 1, offsetX: 0, offsetY: 0 }, () => this.drawInkMap());
     },
 
     touchStart(event: WechatMiniprogram.TouchEvent) {
@@ -201,7 +253,7 @@ Component({
       }
       if (touches.length >= 2 && state.startDistance > 0) {
         const next = distance(touches[0], touches[1]);
-        const scale = Math.max(0.78, Math.min(2.35, state.startScale * (next / state.startDistance)));
+        const scale = clampMapScale(state.startScale * (next / state.startDistance));
         this.setData({ scale });
         this.drawInkMap();
       }
@@ -217,6 +269,10 @@ function distance(a: Point, b: Point): number {
   const dx = a.clientX - b.clientX;
   const dy = a.clientY - b.clientY;
   return Math.sqrt(dx * dx + dy * dy);
+}
+
+function isValidLocation(location: CurrentLocation | null): location is CurrentLocation {
+  return !!location && Number.isFinite(location.lng) && Number.isFinite(location.lat);
 }
 
 function getPixelRatio(): number {

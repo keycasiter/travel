@@ -61,6 +61,29 @@
   font-size: 24rpx;
 }
 
+.zoom-controls {
+  position: absolute;
+  right: 32rpx;
+  top: 250rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.map-control-button {
+  width: 68rpx;
+  height: 68rpx;
+  line-height: 66rpx;
+  padding: 0;
+  border: 1rpx solid rgba(34, 50, 45, 0.14);
+  border-radius: 50%;
+  background: rgba(255, 253, 248, 0.92);
+  color: #22322d;
+  font-size: 34rpx;
+  font-weight: 700;
+  box-shadow: 0 10rpx 28rpx rgba(34, 50, 45, 0.14);
+}
+
 .marker {
   position: absolute;
   min-width: 120rpx;
@@ -87,5 +110,31 @@
   border-radius: 18rpx;
   background: rgba(255, 253, 248, 0.9);
   color: #22322d;
+  font-size: 22rpx;
+}
+
+.current-marker {
+  position: absolute;
+  min-width: 136rpx;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+}
+
+.current-pulse {
+  width: 30rpx;
+  height: 30rpx;
+  margin: 0 auto 8rpx;
+  border: 6rpx solid rgba(255, 253, 248, 0.96);
+  border-radius: 50%;
+  background: #2d78c4;
+  box-shadow: 0 0 0 12rpx rgba(45, 120, 196, 0.18), 0 12rpx 30rpx rgba(34, 50, 45, 0.24);
+}
+
+.current-label {
+  padding: 6rpx 12rpx;
+  border-radius: 18rpx;
+  background: rgba(34, 50, 45, 0.88);
+  color: #fffdf8;
   font-size: 22rpx;
 }

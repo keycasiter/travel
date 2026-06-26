@@ -2,10 +2,15 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.computeGeoBounds = computeGeoBounds;
 exports.createViewportProjector = createViewportProjector;
+exports.clampMapScale = clampMapScale;
+exports.createFocusedViewport = createFocusedViewport;
 exports.projectRegionMarkers = projectRegionMarkers;
 exports.findNearestRegion = findNearestRegion;
+exports.findContainingMapFeature = findContainingMapFeature;
 exports.distanceKm = distanceKm;
 exports.forEachTuple = forEachTuple;
+const MIN_MAP_SCALE = 0.78;
+const MAX_MAP_SCALE = 2.35;
 function computeGeoBounds(features) {
     const bounds = {
         minLng: Number.POSITIVE_INFINITY,
@@ -46,6 +51,25 @@ function createViewportProjector(bounds, viewport) {
         }
     };
 }
+function clampMapScale(scale) {
+    return Math.max(MIN_MAP_SCALE, Math.min(MAX_MAP_SCALE, scale));
+}
+function createFocusedViewport(bounds, viewport, point, scale, anchorYRatio = 0.48) {
+    const nextScale = clampMapScale(scale);
+    const projector = createViewportProjector(bounds, {
+        ...viewport,
+        scale: nextScale,
+        offsetX: 0,
+        offsetY: 0
+    });
+    const projected = projector.project(point);
+    return {
+        ...viewport,
+        scale: nextScale,
+        offsetX: viewport.width * 0.5 - projected.x,
+        offsetY: viewport.height * anchorYRatio - projected.y
+    };
+}
 function projectRegionMarkers(regions, projector) {
     return regions
         .filter((region) => Number.isFinite(region.centerLng) && Number.isFinite(region.centerLat))
@@ -75,6 +99,19 @@ function findNearestRegion(regions, point) {
         throw new Error('No regions with valid coordinates');
     }
     return nearest;
+}
+function findContainingMapFeature(features, point) {
+    for (const feature of features) {
+        if (!feature.rings) {
+            continue;
+        }
+        for (const ring of feature.rings) {
+            if (isPointInRing(point, ring)) {
+                return feature;
+            }
+        }
+    }
+    return null;
 }
 function distanceKm(a, b) {
     const earthRadiusKm = 6371;
@@ -107,6 +144,20 @@ function extendBounds(bounds, point) {
     bounds.maxLng = Math.max(bounds.maxLng, point[0]);
     bounds.minLat = Math.min(bounds.minLat, point[1]);
     bounds.maxLat = Math.max(bounds.maxLat, point[1]);
+}
+function isPointInRing(point, ring) {
+    let inside = false;
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i, i += 1) {
+        const xi = ring[i][0];
+        const yi = ring[i][1];
+        const xj = ring[j][0];
+        const yj = ring[j][1];
+        const intersects = yi > point.lat !== yj > point.lat && point.lng < ((xj - xi) * (point.lat - yi)) / (yj - yi) + xi;
+        if (intersects) {
+            inside = !inside;
+        }
+    }
+    return inside;
 }
 function toRadians(degrees) {
     return (degrees * Math.PI) / 180;

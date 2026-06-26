@@ -54,6 +54,9 @@ export type ProjectedRegionMarker<T extends RegionPoint = RegionPoint> = T & {
   y: number;
 };
 
+const MIN_MAP_SCALE = 0.78;
+const MAX_MAP_SCALE = 2.35;
+
 export function computeGeoBounds(features: ChinaMapFeature[]): GeoBounds {
   const bounds: GeoBounds = {
     minLng: Number.POSITIVE_INFINITY,
@@ -100,6 +103,33 @@ export function createViewportProjector(bounds: GeoBounds, viewport: MapViewport
   };
 }
 
+export function clampMapScale(scale: number): number {
+  return Math.max(MIN_MAP_SCALE, Math.min(MAX_MAP_SCALE, scale));
+}
+
+export function createFocusedViewport(
+  bounds: GeoBounds,
+  viewport: MapViewport,
+  point: GeoPoint,
+  scale: number,
+  anchorYRatio = 0.48
+): MapViewport {
+  const nextScale = clampMapScale(scale);
+  const projector = createViewportProjector(bounds, {
+    ...viewport,
+    scale: nextScale,
+    offsetX: 0,
+    offsetY: 0
+  });
+  const projected = projector.project(point);
+  return {
+    ...viewport,
+    scale: nextScale,
+    offsetX: viewport.width * 0.5 - projected.x,
+    offsetY: viewport.height * anchorYRatio - projected.y
+  };
+}
+
 export function projectRegionMarkers<T extends RegionPoint>(regions: T[], projector: ViewportProjector): ProjectedRegionMarker<T>[] {
   return regions
     .filter((region) => Number.isFinite(region.centerLng) && Number.isFinite(region.centerLat))
@@ -133,6 +163,22 @@ export function findNearestRegion(regions: RegionPoint[], point: GeoPoint): { re
   }
 
   return nearest;
+}
+
+export function findContainingMapFeature(features: ChinaMapFeature[], point: GeoPoint): ChinaMapFeature | null {
+  for (const feature of features) {
+    if (!feature.rings) {
+      continue;
+    }
+
+    for (const ring of feature.rings) {
+      if (isPointInRing(point, ring)) {
+        return feature;
+      }
+    }
+  }
+
+  return null;
 }
 
 export function distanceKm(a: GeoPoint, b: GeoPoint): number {
@@ -169,6 +215,21 @@ function extendBounds(bounds: GeoBounds, point: LngLatTuple): void {
   bounds.maxLng = Math.max(bounds.maxLng, point[0]);
   bounds.minLat = Math.min(bounds.minLat, point[1]);
   bounds.maxLat = Math.max(bounds.maxLat, point[1]);
+}
+
+function isPointInRing(point: GeoPoint, ring: LngLatTuple[]): boolean {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i, i += 1) {
+    const xi = ring[i][0];
+    const yi = ring[i][1];
+    const xj = ring[j][0];
+    const yj = ring[j][1];
+    const intersects = yi > point.lat !== yj > point.lat && point.lng < ((xj - xi) * (point.lat - yi)) / (yj - yi) + xi;
+    if (intersects) {
+      inside = !inside;
+    }
+  }
+  return inside;
 }
 
 function toRadians(degrees: number): number {

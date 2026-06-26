@@ -2,9 +2,12 @@ const assert = require('assert');
 
 const { chinaProvinces } = require('../data/china-provinces.js');
 const {
+  clampMapScale,
   computeGeoBounds,
+  createFocusedViewport,
   createViewportProjector,
   distanceKm,
+  findContainingMapFeature,
   findNearestRegion,
   projectRegionMarkers
 } = require('../utils/map-geometry.js');
@@ -49,3 +52,25 @@ assert.strictEqual(nearest.region.id, 'city-hangzhou', 'nearest region to Hangzh
 assert.ok(nearest.distanceKm < 1, `Hangzhou self distance should be near zero, got ${nearest.distanceKm}`);
 
 assert.ok(distanceKm({ lng: 116.724502, lat: 39.905023 }, { lng: 121.473667, lat: 31.230525 }) > 900);
+
+const hangzhouFeature = findContainingMapFeature(chinaProvinces, { lng: 120.15507, lat: 30.274084 });
+assert.strictEqual(hangzhouFeature && hangzhouFeature.name, '浙江', 'Hangzhou coordinates should resolve to Zhejiang province');
+
+const beijingFeature = findContainingMapFeature(chinaProvinces, { lng: 116.724502, lat: 39.905023 });
+assert.strictEqual(beijingFeature && beijingFeature.name, '北京', 'Beijing coordinates should resolve to Beijing province-level region');
+
+assert.strictEqual(clampMapScale(0.2), 0.78, 'zoom out should clamp to minimum map scale');
+assert.strictEqual(clampMapScale(4), 2.35, 'zoom in should clamp to maximum map scale');
+
+const focusedViewport = createFocusedViewport(bounds, {
+  width: 375,
+  height: 667,
+  padding: 28,
+  scale: 1,
+  offsetX: 0,
+  offsetY: 0
+}, { lng: 120.15507, lat: 30.274084 }, 1.7);
+const focusedProjector = createViewportProjector(bounds, focusedViewport);
+const focusedPoint = focusedProjector.project({ lng: 120.15507, lat: 30.274084 });
+assert.ok(Math.abs(focusedPoint.x - 187.5) < 0.01, `focused point x should be centered, got ${focusedPoint.x}`);
+assert.ok(Math.abs(focusedPoint.y - 320.16) < 0.01, `focused point y should use map focus anchor, got ${focusedPoint.y}`);

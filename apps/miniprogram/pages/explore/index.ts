@@ -1,14 +1,22 @@
 import { request } from '../../utils/api';
-import { findNearestRegion } from '../../utils/map-geometry';
+import { chinaProvinces } from '../../data/china-provinces';
+import { findContainingMapFeature, findNearestRegion } from '../../utils/map-geometry';
 import type { LoginResult, Region, RegionOverview } from '../../utils/types';
+
+interface CurrentLocation {
+  lng: number;
+  lat: number;
+  label: string;
+}
 
 Page({
   data: {
     regions: [] as Region[],
     selectedRegionId: '',
+    currentLocation: null as CurrentLocation | null,
     activeOverview: null as RegionOverview | null,
     sheetVisible: false,
-    locationStatus: '点击定位，将地图移动到你附近的城市灵感。'
+    locationStatus: '正在获取当前位置，用于定位附近旅行灵感。'
   },
 
   onLoad() {
@@ -18,6 +26,7 @@ Page({
   async bootstrap() {
     await this.login();
     await this.loadRegions();
+    this.requestLocation();
   },
 
   async login() {
@@ -51,25 +60,50 @@ Page({
   },
 
   onLocate() {
+    this.requestLocation();
+  },
+
+  requestLocation() {
+    this.setData({ locationStatus: '正在获取当前位置...' });
     wx.getLocation({
       type: 'gcj02',
       success: (res) => {
-        try {
-          const nearest = findNearestRegion(this.data.regions, { lng: res.longitude, lat: res.latitude });
-          const status =
-            nearest.distanceKm <= 120
-              ? `已定位到附近，地图已聚焦 ${nearest.region.name}。`
-              : `附近灵感待完善，已先聚焦离你最近的 ${nearest.region.name}。`;
-          this.setData({ selectedRegionId: nearest.region.id, locationStatus: status });
-          this.focusMapRegion(nearest.region.id);
-        } catch (error) {
-          this.setData({ locationStatus: `已定位到 ${res.latitude.toFixed(2)}, ${res.longitude.toFixed(2)}，城市内容仍在加载。` });
-        }
+        this.handleLocationSuccess({ lng: res.longitude, lat: res.latitude });
       },
       fail: () => {
-        this.setData({ locationStatus: '未授权定位，已保持全国探索视角。' });
+        this.setData({ locationStatus: '未授权定位，已保持全国探索视角；可手动搜索或选择已支持城市。' });
       }
     });
+  },
+
+  handleLocationSuccess(point: { lng: number; lat: number }) {
+    const feature = findContainingMapFeature(chinaProvinces, point);
+    const location: CurrentLocation = {
+      ...point,
+      label: feature ? feature.name : '当前位置'
+    };
+
+    let selectedRegionId = '';
+    let locationStatus = feature
+      ? `已定位到${feature.name}，地图已聚焦当前位置。`
+      : `已定位到 ${point.lat.toFixed(2)}, ${point.lng.toFixed(2)}，地图已聚焦当前位置。`;
+
+    try {
+      const nearest = findNearestRegion(this.data.regions, point);
+      if (nearest.distanceKm <= 120) {
+        selectedRegionId = nearest.region.id;
+        locationStatus = feature
+          ? `已定位到${feature.name}，附近支持 ${nearest.region.name} 内容。`
+          : `已定位到附近，附近支持 ${nearest.region.name} 内容。`;
+      } else {
+        locationStatus = `${locationStatus} 附近灵感待完善，可搜索或选择已支持城市。`;
+      }
+    } catch (error) {
+      locationStatus = `${locationStatus} 城市内容仍在加载。`;
+    }
+
+    this.setData({ currentLocation: location, selectedRegionId, locationStatus });
+    this.focusMapLocation(location);
   },
 
   closeSheet() {
@@ -84,6 +118,13 @@ Page({
     const map = this.selectComponent('#inkMap') as { focusRegion?: (regionId: string) => void } | null;
     if (map?.focusRegion) {
       map.focusRegion(regionId);
+    }
+  },
+
+  focusMapLocation(location: CurrentLocation) {
+    const map = this.selectComponent('#inkMap') as { focusLocation?: (location: CurrentLocation, scale?: number) => void } | null;
+    if (map?.focusLocation) {
+      map.focusLocation(location, 1.75);
     }
   }
 });

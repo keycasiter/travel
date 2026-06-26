@@ -12,6 +12,10 @@ Component({
         selectedRegionId: {
             type: String,
             value: ''
+        },
+        currentLocation: {
+            type: Object,
+            value: {}
         }
     },
     data: {
@@ -19,6 +23,7 @@ Component({
         offsetX: 0,
         offsetY: 0,
         displayRegions: [],
+        displayCurrentLocation: null,
         touchState: null
     },
     lifetimes: {
@@ -31,6 +36,9 @@ Component({
             this.drawInkMap();
         },
         selectedRegionId() {
+            this.drawInkMap();
+        },
+        currentLocation() {
             this.drawInkMap();
         }
     },
@@ -72,13 +80,27 @@ Component({
                 offsetX: this.data.offsetX,
                 offsetY: this.data.offsetY
             });
-            const markers = (0, map_geometry_1.projectRegionMarkers)(this.data.regions, projector).map((marker) => ({
+            const regions = this.data.regions || [];
+            const markers = (0, map_geometry_1.projectRegionMarkers)(regions, projector).map((marker) => ({
                 ...marker,
                 markerLeft: marker.left,
                 markerTop: marker.top,
                 markerVisible: marker.left > -8 && marker.left < 108 && marker.top > -8 && marker.top < 108
             }));
-            this.setData({ displayRegions: markers });
+            const currentLocation = this.data.currentLocation || null;
+            let displayCurrentLocation = null;
+            if (isValidLocation(currentLocation)) {
+                const point = projector.project({ lng: currentLocation.lng, lat: currentLocation.lat });
+                const markerLeft = (point.x / width) * 100;
+                const markerTop = (point.y / height) * 100;
+                displayCurrentLocation = {
+                    ...currentLocation,
+                    markerLeft,
+                    markerTop,
+                    markerVisible: markerLeft > -8 && markerLeft < 108 && markerTop > -8 && markerTop < 108
+                };
+            }
+            this.setData({ displayRegions: markers, displayCurrentLocation });
         },
         tapRegion(event) {
             const regionId = String(event.currentTarget.dataset.id || '');
@@ -90,30 +112,39 @@ Component({
             this.triggerEvent('locate');
         },
         focusRegion(regionId) {
-            const region = this.data.regions.find((item) => item.id === regionId);
+            const regions = this.data.regions || [];
+            const region = regions.find((item) => item.id === regionId);
             if (!region) {
                 return;
             }
+            this.focusLocation({ lng: region.centerLng, lat: region.centerLat, label: region.name }, 1.45);
+        },
+        focusLocation(location, scale = 1.7) {
             const query = this.createSelectorQuery();
             query.select('#inkCanvas').fields({ size: true }).exec((res) => {
                 const width = Number(res?.[0]?.width || 320);
                 const height = Number(res?.[0]?.height || 520);
-                const nextScale = Math.max(this.data.scale, 1.35);
-                const projector = (0, map_geometry_1.createViewportProjector)(CHINA_BOUNDS, {
+                const viewport = (0, map_geometry_1.createFocusedViewport)(CHINA_BOUNDS, {
                     width,
                     height,
                     padding: Math.max(width * 0.075, 24),
-                    scale: nextScale,
-                    offsetX: 0,
-                    offsetY: 0
-                });
-                const point = projector.project({ lng: region.centerLng, lat: region.centerLat });
+                    scale: this.data.scale,
+                    offsetX: this.data.offsetX,
+                    offsetY: this.data.offsetY
+                }, location, scale);
                 this.setData({
-                    scale: nextScale,
-                    offsetX: width * 0.5 - point.x,
-                    offsetY: height * 0.48 - point.y
+                    scale: viewport.scale,
+                    offsetX: viewport.offsetX,
+                    offsetY: viewport.offsetY
                 }, () => this.drawInkMap());
             });
+        },
+        zoomBy(event) {
+            const delta = Number(event.currentTarget.dataset.delta || 0);
+            this.setData({ scale: (0, map_geometry_1.clampMapScale)(this.data.scale + delta * 0.28) }, () => this.drawInkMap());
+        },
+        resetView() {
+            this.setData({ scale: 1, offsetX: 0, offsetY: 0 }, () => this.drawInkMap());
         },
         touchStart(event) {
             const touches = event.touches;
@@ -159,7 +190,7 @@ Component({
             }
             if (touches.length >= 2 && state.startDistance > 0) {
                 const next = distance(touches[0], touches[1]);
-                const scale = Math.max(0.78, Math.min(2.35, state.startScale * (next / state.startDistance)));
+                const scale = (0, map_geometry_1.clampMapScale)(state.startScale * (next / state.startDistance));
                 this.setData({ scale });
                 this.drawInkMap();
             }
@@ -173,6 +204,9 @@ function distance(a, b) {
     const dx = a.clientX - b.clientX;
     const dy = a.clientY - b.clientY;
     return Math.sqrt(dx * dx + dy * dy);
+}
+function isValidLocation(location) {
+    return !!location && Number.isFinite(location.lng) && Number.isFinite(location.lat);
 }
 function getPixelRatio() {
     const wxApi = wx;

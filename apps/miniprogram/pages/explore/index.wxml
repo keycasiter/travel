@@ -3,6 +3,7 @@
     id="inkMap"
     regions="{{regions}}"
     selectedRegionId="{{selectedRegionId}}"
+    currentLocation="{{currentLocation}}"
     bind:regiontap="onRegionTap"
     bind:locate="onLocate"
   />
