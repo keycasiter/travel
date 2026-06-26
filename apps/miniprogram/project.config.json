@@ -16,6 +16,7 @@
     "packNpmRelationList": [],
     "minifyWXSS": true,
     "minifyWXML": true,
+    "ignoreDevUnusedFiles": false,
     "localPlugins": false,
     "disableUseStrict": false,
     "useCompilerPlugins": [
@@ -33,7 +34,16 @@
   "simulatorPluginLibVersion": {},
   "packOptions": {
     "ignore": [],
-    "include": []
+    "include": [
+      {
+        "type": "file",
+        "value": "components/ink-map/index.js"
+      },
+      {
+        "type": "file",
+        "value": "components/bottom-sheet/index.js"
+      }
+    ]
   },
   "editorSetting": {}
 }

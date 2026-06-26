@@ -14,6 +14,21 @@ if (config.srcMiniprogramRoot !== config.miniprogramRoot) {
   throw new Error('project.config.json must set srcMiniprogramRoot to the same value as miniprogramRoot for TypeScript compilation');
 }
 
+if (config.setting && config.setting.ignoreDevUnusedFiles !== false) {
+  throw new Error('project.config.json must explicitly disable setting.ignoreDevUnusedFiles');
+}
+
+const requiredIncludes = [
+  'components/ink-map/index.js',
+  'components/bottom-sheet/index.js'
+];
+
+const includeValues = new Set(((config.packOptions && config.packOptions.include) || []).map((rule) => rule.value));
+const missingIncludes = requiredIncludes.filter((value) => !includeValues.has(value));
+if (missingIncludes.length > 0) {
+  throw new Error(`project.config.json packOptions.include must keep component runtime files: ${missingIncludes.join(', ')}`);
+}
+
 const disallowedGeneratedJs = [
   'app.js',
   'pages/explore/index.js',
