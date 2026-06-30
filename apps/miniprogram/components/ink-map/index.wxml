@@ -25,6 +25,20 @@
     </view>
   </view>
 
+  <view wx:if="{{calibrationEnabled}}" class="calibration-overlay" catchtap="markCalibrationPoint">
+    <view class="calibration-guide">点击地图取坐标</view>
+    <view
+      wx:if="{{calibrationPoint}}"
+      class="calibration-cross"
+      style="left: {{calibrationPoint.left}}; top: {{calibrationPoint.top}};"
+    ></view>
+    <button
+      wx:if="{{calibrationPoint}}"
+      class="calibration-copy"
+      catchtap="copyCalibrationPoint"
+    >{{calibrationPoint.snippet}}</button>
+  </view>
+
   <view class="map-top">
     <view class="search-panel">
       <input
@@ -54,6 +68,11 @@
     <button class="map-control-button" aria-label="缩小地图" data-delta="-1" catchtap="zoomHeroMap">-</button>
     <button class="map-control-button reset-control" aria-label="回到全国视角" catchtap="resetHeroMap">全</button>
   </view>
+  <button
+    wx:if="{{calibrationAvailable}}"
+    class="calibration-toggle {{calibrationEnabled ? 'calibration-toggle-active' : ''}}"
+    catchtap="toggleCalibrationMode"
+  >标定</button>
 
   <view wx:if="{{selectedCityCard}}" class="city-card">
     <view class="city-card-header">

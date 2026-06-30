@@ -8,10 +8,37 @@ const componentMarkup = fs.readFileSync(path.join(root, 'components/ink-map/inde
 const componentStyles = fs.readFileSync(path.join(root, 'components/ink-map/index.wxss'), 'utf8');
 const exploreSource = fs.readFileSync(path.join(root, 'pages/explore/index.ts'), 'utf8');
 const exploreMarkup = fs.readFileSync(path.join(root, 'pages/explore/index.wxml'), 'utf8');
-const heroImagePath = path.join(root, 'assets/maps/china-relief-home.jpg');
+const hotspotSourcePath = path.join(root, 'components/ink-map/city-hotspots.ts');
+const heroImagePath = path.join(root, 'assets/maps/home-map-mobile.jpg');
+const legacyHeroImagePath = path.join(root, 'assets/maps/china-relief-home.jpg');
+const metadataPath = path.resolve(root, '..', '..', 'docs/assets/maps/home-map-metadata.md');
 
 assert.ok(fs.existsSync(heroImagePath), 'homepage should include the 3D China bitmap master asset');
 assert.ok(fs.statSync(heroImagePath).size > 500 * 1024, 'homepage bitmap master should be a high-quality raster asset');
+assert.ok(!fs.existsSync(legacyHeroImagePath), 'prototype map asset should not remain in runtime assets');
+assert.ok(!componentSource.includes('china-relief-home.jpg'), 'homepage should not reference the prototype map filename');
+assert.ok(fs.existsSync(metadataPath), 'homepage map should include source and compliance metadata');
+
+const metadata = fs.readFileSync(metadataPath, 'utf8');
+assert.ok(metadata.includes('标准地图服务系统'), 'metadata should record the standard map source boundary');
+assert.ok(metadata.includes('内部原型'), 'metadata should state current review status');
+assert.ok(fs.existsSync(hotspotSourcePath), 'homepage city hotspots should live in a dedicated config file');
+
+const hotspotSource = fs.readFileSync(hotspotSourcePath, 'utf8');
+for (const cityId of [
+  'city-beijing',
+  'city-shanghai',
+  'city-hangzhou',
+  'city-chengdu',
+  'city-xian',
+  'city-guangzhou',
+  'city-shenzhen',
+  'city-xiamen'
+]) {
+  assert.ok(hotspotSource.includes(cityId), `hotspot config should include ${cityId}`);
+}
+assert.ok(componentSource.includes("from './city-hotspots'"), 'ink map should import hotspot config');
+assert.ok(!componentSource.includes('notes: {'), 'ink map component should not inline city copy');
 
 assert.ok(!componentMarkup.includes('<map'), 'homepage hero map must not use native Tencent/WeChat map');
 assert.ok(componentMarkup.includes('<image'), 'homepage hero map should render the bitmap master with image');
@@ -51,6 +78,17 @@ for (const required of [
   assert.ok(componentSource.includes(required), `homepage bitmap map should keep ${required}`);
 }
 
+for (const required of [
+  'calibrationAvailable',
+  'calibrationEnabled',
+  'calibrationPoint',
+  'toggleCalibrationMode',
+  'markCalibrationPoint',
+  'copyCalibrationPoint'
+]) {
+  assert.ok(componentSource.includes(required), `homepage should support dev calibration: ${required}`);
+}
+
 for (const forbidden of [
   'searchTencentPlaces',
   'suggestTencentPlaces',
@@ -68,6 +106,10 @@ for (const forbidden of [
 assert.ok(componentStyles.includes('.hero-map-image'), 'homepage should style the bitmap map image');
 assert.ok(componentStyles.includes('.city-hotspot'), 'homepage should style city hotspots');
 assert.ok(componentStyles.includes('.city-card'), 'homepage should style the city exploration card');
+assert.ok(componentMarkup.includes('calibration-overlay'), 'homepage should render calibration overlay');
+assert.ok(componentMarkup.includes('markCalibrationPoint'), 'homepage should capture calibration taps');
+assert.ok(componentMarkup.includes('copyCalibrationPoint'), 'homepage should copy calibration coordinates');
+assert.ok(componentStyles.includes('.calibration-overlay'), 'homepage should style calibration overlay');
 assert.ok(componentStyles.includes('touch-action'), 'homepage should avoid browser gesture interference where supported');
 assert.ok(!componentStyles.includes('.native-map'), 'homepage styles should not keep native map surface styles');
 assert.ok(!componentStyles.includes('.search-suggestions'), 'homepage styles should not keep Tencent POI suggestion UI');
