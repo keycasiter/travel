@@ -10,6 +10,7 @@
     "test:map-performance": "npm run build:runtime && node scripts/test-map-performance.js",
     "test:native-map-page": "node scripts/test-native-map-page.js",
     "test:hangzhou-mvp": "node scripts/test-hangzhou-mvp.js",
+    "test:home-map-layers": "node scripts/test-home-map-layers.js",
     "test:ui-polish": "node scripts/test-ui-polish.js",
     "typecheck": "tsc --noEmit"
   },

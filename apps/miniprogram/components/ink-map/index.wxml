@@ -7,20 +7,33 @@
     catchtouchcancel="onMapTouchEnd"
   >
     <view
-      class="hero-map-layer"
+      class="hero-map-layer hero-map-layer-{{semanticLayer}}"
       style="transform: translate({{heroOffsetX}}rpx, {{heroOffsetY}}rpx) scale({{heroScale}});"
     >
       <image class="hero-map-image" src="{{heroImage}}" mode="aspectFill" />
+      <block wx:for="{{cityHotspots}}" wx:key="id">
+        <button
+          wx:if="{{semanticLayer === 'national' || item.id === 'city-hangzhou'}}"
+          class="city-hotspot {{selectedCityId === item.id ? 'city-hotspot-active' : ''}} {{item.mvpReady ? 'city-hotspot-ready' : 'city-hotspot-pending'}}"
+          style="left: {{item.x}}%; top: {{item.y}}%;"
+          data-id="{{item.id}}"
+          catchtap="tapCityHotspot"
+        >
+          <view class="hotspot-dot"></view>
+          <view class="hotspot-label">{{item.name}}</view>
+        </button>
+      </block>
+
       <button
-        wx:for="{{cityHotspots}}"
+        wx:for="{{layerItems}}"
         wx:key="id"
-        class="city-hotspot {{selectedCityId === item.id ? 'city-hotspot-active' : ''}}"
+        class="layer-marker {{item.kind === 'area' ? 'area-marker' : 'poi-marker'}} {{selectedMapItem && selectedMapItem.id === item.id ? 'layer-marker-active' : ''}}"
         style="left: {{item.x}}%; top: {{item.y}}%;"
         data-id="{{item.id}}"
-        catchtap="tapCityHotspot"
+        catchtap="tapLayerMarker"
       >
-        <view class="hotspot-dot"></view>
-        <view class="hotspot-label">{{item.name}}</view>
+        <view class="layer-marker-dot"></view>
+        <view class="layer-marker-label">{{item.title}}</view>
       </button>
     </view>
   </view>
@@ -44,7 +57,7 @@
       <input
         class="search-input"
         value="{{searchKeyword}}"
-        placeholder="搜索好玩的"
+        placeholder="搜索杭州好玩的"
         confirm-type="search"
         bindinput="handleSearchInput"
         bindconfirm="submitSearch"
@@ -63,6 +76,10 @@
     >{{item.label}}</button>
   </view>
 
+  <view class="map-layer-status">
+    <text class="map-layer-chip">{{semanticLayerLabel}}</text>
+  </view>
+
   <view class="zoom-controls">
     <button class="map-control-button" aria-label="放大地图" data-delta="1" catchtap="zoomHeroMap">+</button>
     <button class="map-control-button" aria-label="缩小地图" data-delta="-1" catchtap="zoomHeroMap">-</button>
@@ -74,43 +91,59 @@
     catchtap="toggleCalibrationMode"
   >标定</button>
 
-  <view wx:if="{{selectedCityCard}}" class="city-card">
-    <view class="city-card-header">
-      <view>
-        <view class="city-kicker">{{selectedCityCard.recommendedDays}} · {{selectedCityCard.activeDiscoveryLabel}}</view>
-        <view class="city-title">{{selectedCityCard.name}}</view>
+  <view wx:if="{{selectedMapItem}}" class="city-card home-map-sheet">
+    <scroll-view scroll-y class="home-map-sheet-scroll">
+      <view class="city-card-header">
+        <view class="home-map-sheet-title-block">
+          <view class="city-kicker">{{selectedMapItem.duration}} · {{selectedMapItem.activeDiscoveryLabel}}</view>
+          <view class="city-title">{{selectedMapItem.title}}</view>
+        </view>
+        <view class="city-status-badge {{selectedMapItem.mvpReady ? 'city-status-ready' : ''}}">
+          {{selectedMapItem.statusLabel}}
+        </view>
+        <button class="city-card-close" catchtap="closeCityCard">×</button>
       </view>
-      <view class="city-status-badge {{selectedCityCard.mvpReady ? 'city-status-ready' : ''}}">
-        {{selectedCityCard.statusLabel}}
+
+      <view class="city-mood">{{selectedMapItem.subtitle}}</view>
+      <view class="city-summary">{{selectedMapItem.summary}}</view>
+      <view class="city-note">{{selectedMapItem.note}}</view>
+      <view class="city-mvp-notice">{{selectedMapItem.mvpNotice}}</view>
+      <view class="city-tags">
+        <text wx:for="{{selectedMapItem.tags}}" wx:key="*this" class="city-tag">{{item}}</text>
       </view>
-      <button class="city-card-close" catchtap="closeCityCard">×</button>
-    </view>
-    <view class="city-mood">{{selectedCityCard.mood}}</view>
-    <view class="city-summary">{{selectedCityCard.summary}}</view>
-    <view class="city-note">{{selectedCityCard.activeDiscoveryNote}}</view>
-    <view class="city-mvp-notice">{{selectedCityCard.mvpNotice}}</view>
-    <view class="city-tags">
-      <text wx:for="{{selectedCityCard.tags}}" wx:key="*this" class="city-tag">{{item}}</text>
-    </view>
-    <view class="card-actions">
-      <button
-        wx:if="{{selectedCityCard.mvpReady}}"
-        class="action-button primary-action"
-        data-id="{{selectedCityCard.id}}"
-        catchtap="enterCityDetail"
-      >看杭州内容</button>
-      <button
-        wx:if="{{selectedCityCard.mvpReady}}"
-        class="action-button"
-        data-id="{{selectedCityCard.id}}"
-        catchtap="goPlan"
-      >规划杭州行程</button>
-      <button
-        wx:else
-        class="action-button pending-action"
-        data-id="{{selectedCityCard.id}}"
-        catchtap="enterCityDetail"
-      >城市待完善</button>
-    </view>
+
+      <view class="card-actions home-map-actions">
+        <button
+          wx:if="{{selectedMapItem.mvpReady}}"
+          class="action-button primary-action"
+          data-id="{{selectedMapItem.targetId}}"
+          catchtap="enterCityDetail"
+        >看杭州内容</button>
+        <button
+          wx:if="{{selectedMapItem.mvpReady}}"
+          class="action-button"
+          catchtap="goPlanWithSelectedItem"
+        >
+          <text wx:if="{{selectedMapItem.kind === 'poi'}}">加入行程</text>
+          <text wx:else>规划杭州行程</text>
+        </button>
+        <button
+          wx:if="{{selectedMapItem.mvpReady}}"
+          class="action-button"
+          catchtap="saveSelectedMapItem"
+        >收藏</button>
+        <button
+          wx:if="{{selectedMapItem.mvpReady}}"
+          class="action-button"
+          catchtap="openStreetMapWithSelectedItem"
+        >街道地图</button>
+        <button
+          wx:else
+          class="action-button pending-action"
+          data-id="{{selectedMapItem.targetId}}"
+          catchtap="enterCityDetail"
+        >城市待完善</button>
+      </view>
+    </scroll-view>
   </view>
 </view>

@@ -1,0 +1,82 @@
+const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
+
+const root = path.resolve(__dirname, '..');
+const componentSource = read('components/ink-map/index.ts');
+const componentMarkup = read('components/ink-map/index.wxml');
+const componentStyles = read('components/ink-map/index.wxss');
+const packageJson = JSON.parse(read('package.json'));
+const layerConfigPath = path.join(root, 'components/ink-map/home-map-layers.ts');
+
+assert.ok(fs.existsSync(layerConfigPath), 'homepage semantic map layer data should live in home-map-layers.ts');
+
+const layerConfig = fs.existsSync(layerConfigPath) ? fs.readFileSync(layerConfigPath, 'utf8') : '';
+
+for (const required of [
+  'HOME_MAP_ZOOM_LEVELS',
+  'HANGZHOU_AREAS',
+  'HANGZHOU_POIS',
+  'getSemanticLayer',
+  'filterLayerItems',
+  'city-hangzhou',
+  '西湖',
+  '灵隐',
+  '湖滨',
+  '地标',
+  '美食',
+  '交通'
+]) {
+  assert.ok(layerConfig.includes(required), `home map layer data should include ${required}`);
+}
+
+for (const required of [
+  'HOME_MAP_ZOOM_LEVELS',
+  'getLayerItems',
+  'getSemanticLayer',
+  'semanticLayer',
+  'selectedMapItem',
+  'layerItems',
+  'pinchStartDistance',
+  'pinchStartScale',
+  'tapLayerMarker',
+  'goPlanWithSelectedItem',
+  'openStreetMapWithSelectedItem'
+]) {
+  assert.ok(componentSource.includes(required), `ink map component should implement ${required}`);
+}
+
+for (const required of [
+  '搜索杭州好玩的',
+  'layer-marker',
+  'area-marker',
+  'poi-marker',
+  'tapLayerMarker',
+  'home-map-sheet',
+  'selectedMapItem',
+  'goPlanWithSelectedItem',
+  'openStreetMapWithSelectedItem'
+]) {
+  assert.ok(componentMarkup.includes(required), `ink map markup should render ${required}`);
+}
+
+for (const required of [
+  '.layer-marker',
+  '.area-marker',
+  '.poi-marker',
+  '.home-map-sheet',
+  '.home-map-sheet-scroll',
+  '.map-layer-chip'
+]) {
+  assert.ok(componentStyles.includes(required), `ink map styles should include ${required}`);
+}
+
+assert.ok(componentSource.includes('selectedMapItem: null'), 'first screen should not open a half-screen map sheet by default');
+assert.ok(!componentSource.includes('selectedMapItem: build'), 'first screen should not prebuild the selected map sheet');
+assert.ok(componentSource.includes('MIN_HERO_SCALE = 1'), 'national view should remain the default map scale');
+assert.ok(componentSource.includes('MAX_HERO_SCALE = HOME_MAP_ZOOM_LEVELS.poiMax'), 'homepage should support the local detailed POI zoom ceiling');
+assert.ok(packageJson.scripts['test:home-map-layers'], 'package scripts should expose the home map layer test');
+
+function read(relativePath) {
+  return fs.readFileSync(path.join(root, relativePath), 'utf8');
+}
