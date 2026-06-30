@@ -9,6 +9,7 @@
     "test:map": "npm run build:runtime && node scripts/test-map-geometry.js",
     "test:map-performance": "npm run build:runtime && node scripts/test-map-performance.js",
     "test:native-map-page": "node scripts/test-native-map-page.js",
+    "test:launch-safety": "node scripts/test-launch-safety.js",
     "test:hangzhou-mvp": "node scripts/test-hangzhou-mvp.js",
     "test:home-map-layers": "node scripts/test-home-map-layers.js",
     "test:ui-polish": "node scripts/test-ui-polish.js",

@@ -1,4 +1,5 @@
 import { request } from '../../utils/api';
+import { ensureUserId } from '../../utils/auth';
 import type { Itinerary, ItineraryDetail, Region, ShareView, WeatherSummary } from '../../utils/types';
 
 const HANGZHOU_REGION_ID = 'city-hangzhou';
@@ -93,6 +94,7 @@ Page({
 
   async loadItineraries() {
     try {
+      await ensureUserId();
       const itineraries = await request<Itinerary[]>('/api/v1/itineraries');
       this.setData({ itineraries });
     } catch (error) {
@@ -121,6 +123,7 @@ Page({
   async generate() {
     const preferences = this.data.preferencesText.split(',').map((item) => item.trim()).filter(Boolean);
     try {
+      await ensureUserId();
       const currentItinerary = await request<ItineraryDetail>('/api/v1/itineraries/generate', 'POST', {
         destinationRegionId: this.data.selectedDestinationId,
         days: this.data.days,
@@ -165,6 +168,7 @@ Page({
       return;
     }
     try {
+      await ensureUserId();
       const share = await request<ShareView>(`/api/v1/itineraries/${itineraryId}/share`, 'POST');
       wx.navigateTo({ url: `/pages/share/index?shareCode=${share.shareCode}` });
     } catch (error) {

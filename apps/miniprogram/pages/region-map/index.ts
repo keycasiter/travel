@@ -1,4 +1,5 @@
 import { request } from '../../utils/api';
+import { ensureUserId } from '../../utils/auth';
 import type { Poi, RegionOverview, TravelService } from '../../utils/types';
 
 const HANGZHOU_REGION_ID = 'city-hangzhou';
@@ -168,6 +169,7 @@ Page({
       return;
     }
     try {
+      await ensureUserId();
       await request('/api/v1/favorites', 'POST', { targetType: 'poi', targetId: selectedPoi.id });
       this.setData({ statusText: `已收藏：${selectedPoi.name}` });
     } catch (error) {

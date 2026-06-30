@@ -14,6 +14,7 @@ export function request<T>(path: string, method: Method = 'GET', data?: unknown)
       url: `${API_BASE_URL}${path}`,
       method: method as unknown as WechatMiniprogram.RequestOption['method'],
       data: data as WechatMiniprogram.IAnyObject,
+      timeout: 6000,
       header: {
         'Content-Type': 'application/json',
         ...(userId ? { 'X-User-ID': String(userId) } : {})

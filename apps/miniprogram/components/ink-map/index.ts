@@ -1,4 +1,5 @@
 import { request } from '../../utils/api';
+import { ensureUserId } from '../../utils/auth';
 import type { Region } from '../../utils/types';
 import {
   CITY_HOTSPOTS,
@@ -250,10 +251,11 @@ Component({
       if (!selected) {
         return;
       }
-      request('/api/v1/favorites', 'POST', {
-        targetType: selected.targetType === 'transport' ? 'region' : selected.targetType,
-        targetId: selected.targetType === 'transport' ? HANGZHOU_REGION_ID : selected.targetId
-      })
+      ensureUserId()
+        .then(() => request('/api/v1/favorites', 'POST', {
+          targetType: selected.targetType === 'transport' ? 'region' : selected.targetType,
+          targetId: selected.targetType === 'transport' ? HANGZHOU_REGION_ID : selected.targetId
+        }))
         .then(() => {
           wx.showToast({ title: '已收藏', icon: 'success' });
         })

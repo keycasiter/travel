@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const api_1 = require("../../utils/api");
+const auth_1 = require("../../utils/auth");
 Page({
     data: {
         favorites: [],
@@ -11,6 +12,7 @@ Page({
     },
     async loadFavorites() {
         try {
+            await (0, auth_1.ensureUserId)();
             const favorites = await (0, api_1.request)('/api/v1/favorites');
             this.setData({
                 favorites: favorites.map(toFavoriteView),

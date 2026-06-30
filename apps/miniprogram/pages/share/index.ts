@@ -1,4 +1,5 @@
 import { request } from '../../utils/api';
+import { ensureUserId } from '../../utils/auth';
 import type { ItineraryDetail, ShareView } from '../../utils/types';
 
 Page({
@@ -29,6 +30,7 @@ Page({
       return;
     }
     try {
+      await ensureUserId();
       await request<ItineraryDetail>(`/api/v1/shares/${this.data.shareCode}/copy`, 'POST');
       wx.switchTab({ url: '/pages/itinerary/index' });
     } catch (error) {

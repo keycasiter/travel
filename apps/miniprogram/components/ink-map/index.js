@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const api_1 = require("../../utils/api");
+const auth_1 = require("../../utils/auth");
 const city_hotspots_1 = require("./city-hotspots");
 const home_map_layers_1 = require("./home-map-layers");
 const MAP_HERO_IMAGE = '/assets/maps/home-map-mobile.jpg';
@@ -183,10 +184,11 @@ Component({
             if (!selected) {
                 return;
             }
-            (0, api_1.request)('/api/v1/favorites', 'POST', {
+            (0, auth_1.ensureUserId)()
+                .then(() => (0, api_1.request)('/api/v1/favorites', 'POST', {
                 targetType: selected.targetType === 'transport' ? 'region' : selected.targetType,
                 targetId: selected.targetType === 'transport' ? HANGZHOU_REGION_ID : selected.targetId
-            })
+            }))
                 .then(() => {
                 wx.showToast({ title: '已收藏', icon: 'success' });
             })

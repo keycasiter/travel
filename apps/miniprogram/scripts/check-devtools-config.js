@@ -30,6 +30,7 @@ const runtimeFiles = [
   'components/ink-map/index.js',
   'components/bottom-sheet/index.js',
   'utils/api.js',
+  'utils/auth.js',
   'utils/config.js',
   'utils/map-geometry.js',
   'utils/tencent-map.js'
@@ -56,7 +57,7 @@ for (const tab of appConfig.tabBar.list || []) {
     if (!iconPath || !fs.existsSync(path.join(root, normalizedIconPath))) {
       missingTabIcons.push(`${tab.pagePath}:${key}`);
     }
-    if (iconPath && !iconPath.startsWith('/images/tabbar/')) {
+    if (iconPath && !iconPath.startsWith('images/tabbar/')) {
       unsafeTabIconPaths.push(`${tab.pagePath}:${key}:${iconPath}`);
     }
     if (iconPath && !includeValues.has(normalizedIconPath)) {
@@ -70,7 +71,7 @@ if (missingTabIcons.length > 0) {
 }
 
 if (unsafeTabIconPaths.length > 0) {
-  throw new Error(`tabBar icon paths must use /images/tabbar root paths: ${unsafeTabIconPaths.join(', ')}`);
+  throw new Error(`tabBar icon paths must use images/tabbar relative paths without leading slash: ${unsafeTabIconPaths.join(', ')}`);
 }
 
 if (missingTabIconIncludes.length > 0) {

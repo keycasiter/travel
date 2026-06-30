@@ -9,6 +9,7 @@ function request(path, method = 'GET', data) {
             url: `${config_1.API_BASE_URL}${path}`,
             method: method,
             data: data,
+            timeout: 6000,
             header: {
                 'Content-Type': 'application/json',
                 ...(userId ? { 'X-User-ID': String(userId) } : {})

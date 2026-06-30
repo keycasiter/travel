@@ -80,6 +80,10 @@
       },
       {
         "type": "file",
+        "value": "utils/auth.js"
+      },
+      {
+        "type": "file",
         "value": "utils/config.js"
       },
       {

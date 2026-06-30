@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const api_1 = require("../../utils/api");
+const auth_1 = require("../../utils/auth");
 const map_geometry_1 = require("../../utils/map-geometry");
 const HANGZHOU_REGION_ID = 'city-hangzhou';
 Page({
@@ -15,28 +16,24 @@ Page({
         this.bootstrap();
     },
     async bootstrap() {
-        await this.login();
-        await this.loadRegions();
-        this.requestLocation();
-    },
-    async login() {
-        try {
-            const login = await wxLogin();
-            const result = await (0, api_1.request)('/api/v1/auth/wechat-login', 'POST', { code: login.code || 'dev-code' });
-            wx.setStorageSync('userId', result.userId);
-        }
-        catch (error) {
-            wx.showToast({ title: `本地 API 未连接：${messageOf(error)}`, icon: 'none' });
-        }
+        return;
     },
     async loadRegions() {
         try {
             const regions = await (0, api_1.request)('/api/v1/regions?level=city');
             this.setData({ regions });
+            return regions;
         }
         catch (error) {
             wx.showToast({ title: `城市内容加载失败：${messageOf(error)}`, icon: 'none' });
+            return [];
         }
+    },
+    async ensureRegionsLoaded() {
+        if (this.data.regions.length > 0) {
+            return this.data.regions;
+        }
+        return this.loadRegions();
     },
     async onRegionTap(event) {
         const regionId = event.detail.regionId;
@@ -59,7 +56,10 @@ Page({
     requestLocation() {
         wx.getLocation({
             type: 'gcj02',
-            success: (res) => {
+            isHighAccuracy: true,
+            highAccuracyExpireTime: 3000,
+            success: async (res) => {
+                await this.ensureRegionsLoaded();
                 this.handleLocationSuccess({ lng: res.longitude, lat: res.latitude });
             },
             fail: () => {
@@ -103,6 +103,7 @@ Page({
         const targetType = String(event.currentTarget.dataset.type || 'region');
         const targetId = String(event.currentTarget.dataset.id || HANGZHOU_REGION_ID);
         try {
+            await (0, auth_1.ensureUserId)();
             await (0, api_1.request)('/api/v1/favorites', 'POST', { targetType, targetId });
             wx.showToast({ title: '已收藏', icon: 'success' });
         }
@@ -136,6 +137,7 @@ Page({
             return;
         }
         try {
+            await (0, auth_1.ensureUserId)();
             await (0, api_1.request)('/api/v1/favorites', 'POST', { targetType: 'guide', targetId: guide.id });
             wx.showToast({ title: '攻略已收藏', icon: 'success' });
         }
@@ -155,11 +157,6 @@ function findPoiById(pois, id) {
 }
 function findGuideById(guides, id) {
     return guides.find((guide) => guide.id === id) || null;
-}
-function wxLogin() {
-    return new Promise((resolve, reject) => {
-        wx.login({ success: resolve, fail: reject });
-    });
 }
 function messageOf(error) {
     return error instanceof Error ? error.message : String(error);

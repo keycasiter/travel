@@ -1,6 +1,7 @@
 import { request } from '../../utils/api';
+import { ensureUserId } from '../../utils/auth';
 import { findNearestRegion } from '../../utils/map-geometry';
-import type { Guide, LoginResult, Poi, Region, RegionOverview } from '../../utils/types';
+import type { Guide, Poi, Region, RegionOverview } from '../../utils/types';
 
 const HANGZHOU_REGION_ID = 'city-hangzhou';
 
@@ -24,28 +25,25 @@ Page({
   },
 
   async bootstrap() {
-    await this.login();
-    await this.loadRegions();
-    this.requestLocation();
+    return;
   },
 
-  async login() {
-    try {
-      const login = await wxLogin();
-      const result = await request<LoginResult>('/api/v1/auth/wechat-login', 'POST', { code: login.code || 'dev-code' });
-      wx.setStorageSync('userId', result.userId);
-    } catch (error) {
-      wx.showToast({ title: `本地 API 未连接：${messageOf(error)}`, icon: 'none' });
-    }
-  },
-
-  async loadRegions() {
+  async loadRegions(): Promise<Region[]> {
     try {
       const regions = await request<Region[]>('/api/v1/regions?level=city');
       this.setData({ regions });
+      return regions;
     } catch (error) {
       wx.showToast({ title: `城市内容加载失败：${messageOf(error)}`, icon: 'none' });
+      return [];
     }
+  },
+
+  async ensureRegionsLoaded(): Promise<Region[]> {
+    if (this.data.regions.length > 0) {
+      return this.data.regions;
+    }
+    return this.loadRegions();
   },
 
   async onRegionTap(event: WechatMiniprogram.CustomEvent<{ regionId: string }>) {
@@ -70,7 +68,10 @@ Page({
   requestLocation() {
     wx.getLocation({
       type: 'gcj02',
-      success: (res) => {
+      isHighAccuracy: true,
+      highAccuracyExpireTime: 3000,
+      success: async (res) => {
+        await this.ensureRegionsLoaded();
         this.handleLocationSuccess({ lng: res.longitude, lat: res.latitude });
       },
       fail: () => {
@@ -121,6 +122,7 @@ Page({
     const targetType = String(event.currentTarget.dataset.type || 'region');
     const targetId = String(event.currentTarget.dataset.id || HANGZHOU_REGION_ID);
     try {
+      await ensureUserId();
       await request('/api/v1/favorites', 'POST', { targetType, targetId });
       wx.showToast({ title: '已收藏', icon: 'success' });
     } catch (error) {
@@ -155,6 +157,7 @@ Page({
       return;
     }
     try {
+      await ensureUserId();
       await request('/api/v1/favorites', 'POST', { targetType: 'guide', targetId: guide.id });
       wx.showToast({ title: '攻略已收藏', icon: 'success' });
     } catch (error) {
@@ -177,12 +180,6 @@ function findPoiById(pois: Poi[], id: string): Poi | null {
 
 function findGuideById(guides: Guide[], id: string): Guide | null {
   return guides.find((guide) => guide.id === id) || null;
-}
-
-function wxLogin(): Promise<WechatMiniprogram.LoginSuccessCallbackResult> {
-  return new Promise((resolve, reject) => {
-    wx.login({ success: resolve, fail: reject });
-  });
 }
 
 function messageOf(error: unknown): string {

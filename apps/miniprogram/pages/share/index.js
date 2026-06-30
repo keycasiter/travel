@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const api_1 = require("../../utils/api");
+const auth_1 = require("../../utils/auth");
 Page({
     data: {
         shareCode: '',
@@ -27,6 +28,7 @@ Page({
             return;
         }
         try {
+            await (0, auth_1.ensureUserId)();
             await (0, api_1.request)(`/api/v1/shares/${this.data.shareCode}/copy`, 'POST');
             wx.switchTab({ url: '/pages/itinerary/index' });
         }

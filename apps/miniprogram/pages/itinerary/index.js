@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const api_1 = require("../../utils/api");
+const auth_1 = require("../../utils/auth");
 const HANGZHOU_REGION_ID = 'city-hangzhou';
 Page({
     data: {
@@ -75,6 +76,7 @@ Page({
     },
     async loadItineraries() {
         try {
+            await (0, auth_1.ensureUserId)();
             const itineraries = await (0, api_1.request)('/api/v1/itineraries');
             this.setData({ itineraries });
         }
@@ -100,6 +102,7 @@ Page({
     async generate() {
         const preferences = this.data.preferencesText.split(',').map((item) => item.trim()).filter(Boolean);
         try {
+            await (0, auth_1.ensureUserId)();
             const currentItinerary = await (0, api_1.request)('/api/v1/itineraries/generate', 'POST', {
                 destinationRegionId: this.data.selectedDestinationId,
                 days: this.data.days,
@@ -144,6 +147,7 @@ Page({
             return;
         }
         try {
+            await (0, auth_1.ensureUserId)();
             const share = await (0, api_1.request)(`/api/v1/itineraries/${itineraryId}/share`, 'POST');
             wx.navigateTo({ url: `/pages/share/index?shareCode=${share.shareCode}` });
         }

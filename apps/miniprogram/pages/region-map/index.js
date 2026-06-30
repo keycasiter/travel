@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const api_1 = require("../../utils/api");
+const auth_1 = require("../../utils/auth");
 const HANGZHOU_REGION_ID = 'city-hangzhou';
 Page({
     data: {
@@ -136,6 +137,7 @@ Page({
             return;
         }
         try {
+            await (0, auth_1.ensureUserId)();
             await (0, api_1.request)('/api/v1/favorites', 'POST', { targetType: 'poi', targetId: selectedPoi.id });
             this.setData({ statusText: `已收藏：${selectedPoi.name}` });
         }

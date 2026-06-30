@@ -1,4 +1,5 @@
 import { request } from '../../utils/api';
+import { ensureUserId } from '../../utils/auth';
 import type { Favorite } from '../../utils/types';
 
 interface FavoriteView extends Favorite {
@@ -19,6 +20,7 @@ Page({
 
   async loadFavorites() {
     try {
+      await ensureUserId();
       const favorites = await request<Favorite[]>('/api/v1/favorites');
       this.setData({
         favorites: favorites.map(toFavoriteView),
