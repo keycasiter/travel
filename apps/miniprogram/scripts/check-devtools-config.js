@@ -47,14 +47,22 @@ if (missingRuntimeFiles.length > 0) {
 }
 
 const missingTabIcons = [];
+const missingTabIconIncludes = [];
 for (const tab of appConfig.tabBar.list || []) {
   for (const key of ['iconPath', 'selectedIconPath']) {
     if (!tab[key] || !fs.existsSync(path.join(root, tab[key]))) {
       missingTabIcons.push(`${tab.pagePath}:${key}`);
+    }
+    if (tab[key] && !includeValues.has(tab[key])) {
+      missingTabIconIncludes.push(`${tab.pagePath}:${key}:${tab[key]}`);
     }
   }
 }
 
 if (missingTabIcons.length > 0) {
   throw new Error(`tabBar icon files are missing: ${missingTabIcons.join(', ')}`);
+}
+
+if (missingTabIconIncludes.length > 0) {
+  throw new Error(`project.config.json packOptions.include must keep tabBar icons: ${missingTabIconIncludes.join(', ')}`);
 }
