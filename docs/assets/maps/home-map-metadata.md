@@ -5,7 +5,7 @@
 | 字段 | 内容 |
 |---|---|
 | 资源版本 | `home-map-v1-prototype` |
-| 运行资源 | `apps/miniprogram/assets/maps/home-map-mobile.jpg` |
+| 运行资源 | `apps/miniprogram/assets/maps/home-map-mobile.jpg`，1800×2401 |
 | 母版资源 | `docs/assets/maps/home-map-master.jpg` |
 | 预览资源 | `docs/assets/maps/home-map-preview.jpg` |
 | 来源基准 | 自然资源部标准地图服务系统：`http://bzdt.ch.mnr.gov.cn/` |
@@ -24,3 +24,4 @@
 |---|---|---|
 | 2026-06-30 | 将当前首页高质感位图原型归档为母版和运行资源 | `docs/assets/maps/home-map-master.jpg`、`apps/miniprogram/assets/maps/home-map-mobile.jpg` |
 | 2026-06-30 | 生成 1080×1440 评审预览图 | `docs/assets/maps/home-map-preview.jpg` |
+| 2026-07-01 | 从母版导出 1800×2401 小程序运行图，并生成杭州聚焦、片区、点位三张缩放纵深叠层 | `apps/miniprogram/assets/maps/home-map-mobile.jpg`、`apps/miniprogram/assets/maps/home-map-hangzhou-focus.jpg`、`apps/miniprogram/assets/maps/home-map-hangzhou-areas.png`、`apps/miniprogram/assets/maps/home-map-hangzhou-poi-detail.png` |

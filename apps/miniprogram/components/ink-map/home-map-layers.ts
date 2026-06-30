@@ -1,6 +1,7 @@
 import type { DiscoveryId } from './city-hotspots';
 
 export type HomeMapLayer = 'national' | 'area' | 'poi';
+export type HomeMapVisualDepth = 'national' | 'city' | 'area' | 'poi';
 export type HomeMapItemKind = 'city' | 'area' | 'poi';
 export type HomeMapTargetType = 'region' | 'poi' | 'transport';
 
@@ -24,11 +25,13 @@ export interface HomeMapLayerItem {
 }
 
 export const HOME_MAP_ZOOM_LEVELS = {
-  nationalMax: 1.08,
-  areaMin: 1.09,
-  areaMax: 1.22,
-  poiMin: 1.23,
-  poiMax: 1.45
+  nationalMax: 1.04,
+  cityMin: 1.05,
+  cityMax: 1.17,
+  areaMin: 1.18,
+  areaMax: 1.34,
+  poiMin: 1.35,
+  poiMax: 1.62
 } as const;
 
 export const HANGZHOU_CITY_MAP_ITEM: HomeMapLayerItem = {
@@ -183,6 +186,19 @@ export function getSemanticLayer(scale: number): HomeMapLayer {
   }
   if (scale >= HOME_MAP_ZOOM_LEVELS.areaMin) {
     return 'area';
+  }
+  return 'national';
+}
+
+export function getVisualDepthLevel(scale: number): HomeMapVisualDepth {
+  if (scale >= HOME_MAP_ZOOM_LEVELS.poiMin) {
+    return 'poi';
+  }
+  if (scale >= HOME_MAP_ZOOM_LEVELS.areaMin) {
+    return 'area';
+  }
+  if (scale >= HOME_MAP_ZOOM_LEVELS.cityMin) {
+    return 'city';
   }
   return 'national';
 }

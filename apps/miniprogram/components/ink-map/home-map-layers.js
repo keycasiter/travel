@@ -2,15 +2,18 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.HANGZHOU_POIS = exports.HANGZHOU_AREAS = exports.HANGZHOU_CITY_MAP_ITEM = exports.HOME_MAP_ZOOM_LEVELS = void 0;
 exports.getSemanticLayer = getSemanticLayer;
+exports.getVisualDepthLevel = getVisualDepthLevel;
 exports.getLayerItems = getLayerItems;
 exports.filterLayerItems = filterLayerItems;
 exports.findHomeMapItem = findHomeMapItem;
 exports.HOME_MAP_ZOOM_LEVELS = {
-    nationalMax: 1.08,
-    areaMin: 1.09,
-    areaMax: 1.22,
-    poiMin: 1.23,
-    poiMax: 1.45
+    nationalMax: 1.04,
+    cityMin: 1.05,
+    cityMax: 1.17,
+    areaMin: 1.18,
+    areaMax: 1.34,
+    poiMin: 1.35,
+    poiMax: 1.62
 };
 exports.HANGZHOU_CITY_MAP_ITEM = {
     id: 'city-hangzhou',
@@ -161,6 +164,18 @@ function getSemanticLayer(scale) {
     }
     if (scale >= exports.HOME_MAP_ZOOM_LEVELS.areaMin) {
         return 'area';
+    }
+    return 'national';
+}
+function getVisualDepthLevel(scale) {
+    if (scale >= exports.HOME_MAP_ZOOM_LEVELS.poiMin) {
+        return 'poi';
+    }
+    if (scale >= exports.HOME_MAP_ZOOM_LEVELS.areaMin) {
+        return 'area';
+    }
+    if (scale >= exports.HOME_MAP_ZOOM_LEVELS.cityMin) {
+        return 'city';
     }
     return 'national';
 }

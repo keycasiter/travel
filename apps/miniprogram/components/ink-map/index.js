@@ -5,11 +5,15 @@ const auth_1 = require("../../utils/auth");
 const city_hotspots_1 = require("./city-hotspots");
 const home_map_layers_1 = require("./home-map-layers");
 const MAP_HERO_IMAGE = '/assets/maps/home-map-mobile.jpg';
+const MAP_CITY_FOCUS_IMAGE = '/assets/maps/home-map-hangzhou-focus.jpg';
+const MAP_AREA_DETAIL_IMAGE = '/assets/maps/home-map-hangzhou-areas.png';
+const MAP_POI_DETAIL_IMAGE = '/assets/maps/home-map-hangzhou-poi-detail.png';
 const HANGZHOU_REGION_ID = 'city-hangzhou';
 const MIN_HERO_SCALE = 1;
 const MAX_HERO_SCALE = home_map_layers_1.HOME_MAP_ZOOM_LEVELS.poiMax;
-const DEFAULT_CITY_SCALE = 1.14;
-const DEFAULT_POI_SCALE = 1.3;
+const DEFAULT_CITY_SCALE = 1.12;
+const DEFAULT_AREA_SCALE = 1.22;
+const DEFAULT_POI_SCALE = 1.38;
 const ZOOM_STEP = 0.12;
 const MAX_PAN_RPX = 220;
 const HANGZHOU_FALLBACK_LOCATION = { lat: 30.2741, lng: 120.1551 };
@@ -38,6 +42,9 @@ Component({
     },
     data: {
         heroImage: MAP_HERO_IMAGE,
+        cityFocusImage: MAP_CITY_FOCUS_IMAGE,
+        areaDetailImage: MAP_AREA_DETAIL_IMAGE,
+        poiDetailImage: MAP_POI_DETAIL_IMAGE,
         heroScale: MIN_HERO_SCALE,
         heroOffsetX: 0,
         heroOffsetY: 0,
@@ -47,6 +54,7 @@ Component({
         searchKeyword: '',
         layerFilterKeyword: '',
         semanticLayer: 'national',
+        visualDepthLevel: 'national',
         layerItems: [],
         selectedCityId: '',
         selectedCityCard: null,
@@ -95,6 +103,7 @@ Component({
             }
             const nextScale = Math.max(Number(this.data.heroScale || MIN_HERO_SCALE), chipId === 'inspiration' ? home_map_layers_1.HOME_MAP_ZOOM_LEVELS.areaMin : home_map_layers_1.HOME_MAP_ZOOM_LEVELS.poiMin);
             const semanticLayer = (0, home_map_layers_1.getSemanticLayer)(nextScale);
+            const visualDepthLevel = (0, home_map_layers_1.getVisualDepthLevel)(nextScale);
             this.setData({
                 activeDiscoveryId: chipId,
                 heroScale: nextScale,
@@ -105,6 +114,7 @@ Component({
                 selectedMapItem: null,
                 layerFilterKeyword: '',
                 semanticLayer,
+                visualDepthLevel,
                 layerItems: (0, home_map_layers_1.getLayerItems)(semanticLayer, chipId)
             });
         },
@@ -249,6 +259,7 @@ Component({
             }
             const nextScale = city.id === HANGZHOU_REGION_ID ? DEFAULT_CITY_SCALE : MIN_HERO_SCALE;
             const semanticLayer = (0, home_map_layers_1.getSemanticLayer)(nextScale);
+            const visualDepthLevel = (0, home_map_layers_1.getVisualDepthLevel)(nextScale);
             const mapItem = cityToMapItem(city, this.data.activeDiscoveryId);
             this.setData({
                 heroScale: nextScale,
@@ -259,13 +270,16 @@ Component({
                 selectedMapItem: showSheet ? buildMapSheet(mapItem, this.data.activeDiscoveryId) : null,
                 layerFilterKeyword: '',
                 semanticLayer,
+                visualDepthLevel,
                 layerItems: city.id === HANGZHOU_REGION_ID ? (0, home_map_layers_1.getLayerItems)(semanticLayer, this.data.activeDiscoveryId) : [],
                 searchKeyword: city.name
             });
         },
         focusMapItem(item, showSheet = true) {
-            const nextScale = item.kind === 'poi' ? Math.max(Number(this.data.heroScale || MIN_HERO_SCALE), DEFAULT_POI_SCALE) : DEFAULT_CITY_SCALE;
+            const targetScale = item.kind === 'poi' ? DEFAULT_POI_SCALE : item.kind === 'area' ? DEFAULT_AREA_SCALE : DEFAULT_CITY_SCALE;
+            const nextScale = Math.max(Number(this.data.heroScale || MIN_HERO_SCALE), targetScale);
             const semanticLayer = (0, home_map_layers_1.getSemanticLayer)(nextScale);
+            const visualDepthLevel = (0, home_map_layers_1.getVisualDepthLevel)(nextScale);
             const activeDiscoveryId = this.data.activeDiscoveryId;
             this.setData({
                 heroScale: nextScale,
@@ -275,16 +289,19 @@ Component({
                 selectedCityCard: item.kind === 'city' && showSheet ? buildSelectedCityCard(HANGZHOU_REGION_ID, activeDiscoveryId) : null,
                 selectedMapItem: showSheet ? buildMapSheet(item, activeDiscoveryId) : null,
                 semanticLayer,
+                visualDepthLevel,
                 layerItems: (0, home_map_layers_1.getLayerItems)(semanticLayer, activeDiscoveryId, String(this.data.layerFilterKeyword || ''))
             });
         },
         applyHeroScale(rawScale) {
             const heroScale = clampScale(rawScale);
             const semanticLayer = (0, home_map_layers_1.getSemanticLayer)(heroScale);
+            const visualDepthLevel = (0, home_map_layers_1.getVisualDepthLevel)(heroScale);
             const activeDiscoveryId = this.data.activeDiscoveryId;
             this.setData({
                 heroScale,
                 semanticLayer,
+                visualDepthLevel,
                 layerItems: (0, home_map_layers_1.getLayerItems)(semanticLayer, activeDiscoveryId, String(this.data.layerFilterKeyword || ''))
             });
         },

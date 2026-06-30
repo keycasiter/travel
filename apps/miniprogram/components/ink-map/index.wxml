@@ -7,13 +7,16 @@
     catchtouchcancel="onMapTouchEnd"
   >
     <view
-      class="hero-map-layer hero-map-layer-{{semanticLayer}}"
+      class="hero-map-layer hero-map-layer-{{visualDepthLevel}}"
       style="transform: translate({{heroOffsetX}}rpx, {{heroOffsetY}}rpx) scale({{heroScale}});"
     >
       <image class="hero-map-image" src="{{heroImage}}" mode="aspectFill" />
+      <image class="hero-map-depth hero-map-depth-city" src="{{cityFocusImage}}" mode="aspectFill" />
+      <image class="hero-map-depth hero-map-depth-area" src="{{areaDetailImage}}" mode="aspectFill" />
+      <image class="hero-map-depth hero-map-depth-poi" src="{{poiDetailImage}}" mode="aspectFill" />
       <block wx:for="{{cityHotspots}}" wx:key="id">
         <button
-          wx:if="{{semanticLayer === 'national' || item.id === 'city-hangzhou'}}"
+          wx:if="{{visualDepthLevel === 'national' || item.id === 'city-hangzhou'}}"
           class="city-hotspot {{selectedCityId === item.id ? 'city-hotspot-active' : ''}} {{item.mvpReady ? 'city-hotspot-ready' : 'city-hotspot-pending'}}"
           style="left: {{item.x}}%; top: {{item.y}}%;"
           data-id="{{item.id}}"

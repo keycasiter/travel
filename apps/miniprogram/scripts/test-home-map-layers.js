@@ -15,10 +15,15 @@ const layerConfig = fs.existsSync(layerConfigPath) ? fs.readFileSync(layerConfig
 
 for (const required of [
   'HOME_MAP_ZOOM_LEVELS',
+  'HomeMapVisualDepth',
   'HANGZHOU_AREAS',
   'HANGZHOU_POIS',
   'getSemanticLayer',
+  'getVisualDepthLevel',
   'filterLayerItems',
+  'cityMin',
+  'areaMin',
+  'poiMin',
   'city-hangzhou',
   '西湖',
   '灵隐',
@@ -34,7 +39,12 @@ for (const required of [
   'HOME_MAP_ZOOM_LEVELS',
   'getLayerItems',
   'getSemanticLayer',
+  'getVisualDepthLevel',
   'semanticLayer',
+  'visualDepthLevel',
+  'cityFocusImage',
+  'areaDetailImage',
+  'poiDetailImage',
   'selectedMapItem',
   'layerItems',
   'pinchStartDistance',
@@ -48,6 +58,10 @@ for (const required of [
 
 for (const required of [
   '搜索杭州好玩的',
+  'hero-map-layer-{{visualDepthLevel}}',
+  'hero-map-depth-city',
+  'hero-map-depth-area',
+  'hero-map-depth-poi',
   'layer-marker',
   'area-marker',
   'poi-marker',
@@ -61,6 +75,8 @@ for (const required of [
 }
 
 for (const required of [
+  '.hero-map-depth',
+  '.hero-map-layer-city',
   '.layer-marker',
   '.area-marker',
   '.poi-marker',
@@ -86,6 +102,9 @@ assert.ok(componentSource.includes('selectedMapItem: null'), 'first screen shoul
 assert.ok(!componentSource.includes('selectedMapItem: build'), 'first screen should not prebuild the selected map sheet');
 assert.ok(componentSource.includes('MIN_HERO_SCALE = 1'), 'national view should remain the default map scale');
 assert.ok(componentSource.includes('MAX_HERO_SCALE = HOME_MAP_ZOOM_LEVELS.poiMax'), 'homepage should support the local detailed POI zoom ceiling');
+assert.ok(layerConfig.includes('cityMin: 1.05'), 'city focus layer should have a distinct zoom threshold');
+assert.ok(layerConfig.includes('areaMin: 1.18'), 'area layer should not appear during the light Hangzhou focus zoom');
+assert.ok(layerConfig.includes('poiMin: 1.35'), 'POI layer should require a deeper zoom than area labels');
 assert.ok(packageJson.scripts['test:home-map-layers'], 'package scripts should expose the home map layer test');
 
 function read(relativePath) {

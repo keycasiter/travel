@@ -47,6 +47,21 @@ if (missingRuntimeFiles.length > 0) {
   throw new Error(`run npm run build:runtime to generate runtime JS files: ${missingRuntimeFiles.join(', ')}`);
 }
 
+const mapAssets = [
+  'assets/maps/home-map-mobile.jpg',
+  'assets/maps/home-map-hangzhou-focus.jpg',
+  'assets/maps/home-map-hangzhou-areas.png',
+  'assets/maps/home-map-hangzhou-poi-detail.png'
+];
+const missingMapAssets = mapAssets.filter((file) => !fs.existsSync(path.join(root, file)));
+if (missingMapAssets.length > 0) {
+  throw new Error(`homepage map assets are missing: ${missingMapAssets.join(', ')}`);
+}
+const missingMapAssetIncludes = mapAssets.filter((value) => !includeValues.has(value));
+if (missingMapAssetIncludes.length > 0) {
+  throw new Error(`project.config.json packOptions.include must keep homepage map assets: ${missingMapAssetIncludes.join(', ')}`);
+}
+
 const missingTabIcons = [];
 const missingTabIconIncludes = [];
 const unsafeTabIconPaths = [];

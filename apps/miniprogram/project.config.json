@@ -96,6 +96,22 @@
       },
       {
         "type": "file",
+        "value": "assets/maps/home-map-mobile.jpg"
+      },
+      {
+        "type": "file",
+        "value": "assets/maps/home-map-hangzhou-focus.jpg"
+      },
+      {
+        "type": "file",
+        "value": "assets/maps/home-map-hangzhou-areas.png"
+      },
+      {
+        "type": "file",
+        "value": "assets/maps/home-map-hangzhou-poi-detail.png"
+      },
+      {
+        "type": "file",
         "value": "images/tabbar/explore-default.png"
       },
       {
