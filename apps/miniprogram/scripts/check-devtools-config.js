@@ -48,13 +48,19 @@ if (missingRuntimeFiles.length > 0) {
 
 const missingTabIcons = [];
 const missingTabIconIncludes = [];
+const unsafeTabIconPaths = [];
 for (const tab of appConfig.tabBar.list || []) {
   for (const key of ['iconPath', 'selectedIconPath']) {
-    if (!tab[key] || !fs.existsSync(path.join(root, tab[key]))) {
+    const iconPath = tab[key];
+    const normalizedIconPath = normalizeMiniappPath(iconPath);
+    if (!iconPath || !fs.existsSync(path.join(root, normalizedIconPath))) {
       missingTabIcons.push(`${tab.pagePath}:${key}`);
     }
-    if (tab[key] && !includeValues.has(tab[key])) {
-      missingTabIconIncludes.push(`${tab.pagePath}:${key}:${tab[key]}`);
+    if (iconPath && !iconPath.startsWith('/images/tabbar/')) {
+      unsafeTabIconPaths.push(`${tab.pagePath}:${key}:${iconPath}`);
+    }
+    if (iconPath && !includeValues.has(normalizedIconPath)) {
+      missingTabIconIncludes.push(`${tab.pagePath}:${key}:${iconPath}`);
     }
   }
 }
@@ -63,6 +69,14 @@ if (missingTabIcons.length > 0) {
   throw new Error(`tabBar icon files are missing: ${missingTabIcons.join(', ')}`);
 }
 
+if (unsafeTabIconPaths.length > 0) {
+  throw new Error(`tabBar icon paths must use /images/tabbar root paths: ${unsafeTabIconPaths.join(', ')}`);
+}
+
 if (missingTabIconIncludes.length > 0) {
   throw new Error(`project.config.json packOptions.include must keep tabBar icons: ${missingTabIconIncludes.join(', ')}`);
+}
+
+function normalizeMiniappPath(value) {
+  return String(value || '').replace(/^\/+/, '');
 }

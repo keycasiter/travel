@@ -21,26 +21,26 @@
       {
         "pagePath": "pages/explore/index",
         "text": "探索",
-        "iconPath": "assets/tabbar/explore-default.png",
-        "selectedIconPath": "assets/tabbar/explore-active.png"
+        "iconPath": "/images/tabbar/explore-default.png",
+        "selectedIconPath": "/images/tabbar/explore-active.png"
       },
       {
         "pagePath": "pages/itinerary/index",
         "text": "行程",
-        "iconPath": "assets/tabbar/itinerary-default.png",
-        "selectedIconPath": "assets/tabbar/itinerary-active.png"
+        "iconPath": "/images/tabbar/itinerary-default.png",
+        "selectedIconPath": "/images/tabbar/itinerary-active.png"
       },
       {
         "pagePath": "pages/favorite/index",
         "text": "收藏",
-        "iconPath": "assets/tabbar/favorite-default.png",
-        "selectedIconPath": "assets/tabbar/favorite-active.png"
+        "iconPath": "/images/tabbar/favorite-default.png",
+        "selectedIconPath": "/images/tabbar/favorite-active.png"
       },
       {
         "pagePath": "pages/mine/index",
         "text": "我的",
-        "iconPath": "assets/tabbar/mine-default.png",
-        "selectedIconPath": "assets/tabbar/mine-active.png"
+        "iconPath": "/images/tabbar/mine-default.png",
+        "selectedIconPath": "/images/tabbar/mine-active.png"
       }
     ]
   },

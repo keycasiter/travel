@@ -92,35 +92,35 @@
       },
       {
         "type": "file",
-        "value": "assets/tabbar/explore-default.png"
+        "value": "images/tabbar/explore-default.png"
       },
       {
         "type": "file",
-        "value": "assets/tabbar/explore-active.png"
+        "value": "images/tabbar/explore-active.png"
       },
       {
         "type": "file",
-        "value": "assets/tabbar/itinerary-default.png"
+        "value": "images/tabbar/itinerary-default.png"
       },
       {
         "type": "file",
-        "value": "assets/tabbar/itinerary-active.png"
+        "value": "images/tabbar/itinerary-active.png"
       },
       {
         "type": "file",
-        "value": "assets/tabbar/favorite-default.png"
+        "value": "images/tabbar/favorite-default.png"
       },
       {
         "type": "file",
-        "value": "assets/tabbar/favorite-active.png"
+        "value": "images/tabbar/favorite-active.png"
       },
       {
         "type": "file",
-        "value": "assets/tabbar/mine-default.png"
+        "value": "images/tabbar/mine-default.png"
       },
       {
         "type": "file",
-        "value": "assets/tabbar/mine-active.png"
+        "value": "images/tabbar/mine-active.png"
       }
     ]
   },
