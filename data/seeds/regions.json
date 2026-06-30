@@ -1,6 +1,11 @@
 [
   {"id":"city-hangzhou","name":"杭州","level":"city","parentId":null,"centerLat":30.2741,"centerLng":120.1551,"enabled":true,"sortOrder":10},
   {"id":"area-hangzhou-westlake","name":"西湖热门片区","level":"district","parentId":"city-hangzhou","centerLat":30.2426,"centerLng":120.1503,"enabled":true,"sortOrder":11},
+  {"id":"area-hangzhou-lingyin-longjing","name":"灵隐龙井片区","level":"district","parentId":"city-hangzhou","centerLat":30.2382,"centerLng":120.1056,"enabled":true,"sortOrder":12},
+  {"id":"area-hangzhou-hubin-wulin","name":"湖滨武林片区","level":"district","parentId":"city-hangzhou","centerLat":30.2604,"centerLng":120.1699,"enabled":true,"sortOrder":13},
+  {"id":"area-hangzhou-shangcheng","name":"上城老街片区","level":"district","parentId":"city-hangzhou","centerLat":30.2458,"centerLng":120.1792,"enabled":true,"sortOrder":14},
+  {"id":"area-hangzhou-grand-canal","name":"大运河片区","level":"district","parentId":"city-hangzhou","centerLat":30.3182,"centerLng":120.1422,"enabled":true,"sortOrder":15},
+  {"id":"area-hangzhou-xixi","name":"西溪湿地片区","level":"district","parentId":"city-hangzhou","centerLat":30.2667,"centerLng":120.0648,"enabled":true,"sortOrder":16},
   {"id":"city-beijing","name":"北京","level":"city","parentId":null,"centerLat":39.9042,"centerLng":116.4074,"enabled":true,"sortOrder":20},
   {"id":"area-beijing-dongcheng","name":"东城热门片区","level":"district","parentId":"city-beijing","centerLat":39.9175,"centerLng":116.3972,"enabled":true,"sortOrder":21},
   {"id":"city-shanghai","name":"上海","level":"city","parentId":null,"centerLat":31.2304,"centerLng":121.4737,"enabled":true,"sortOrder":30},

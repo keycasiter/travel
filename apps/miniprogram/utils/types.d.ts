@@ -122,6 +122,8 @@ export interface ShareSnapshot {
     summary: string;
     items: Array<{
       poiId: string;
+      poiName: string;
+      poiSummary: string;
       startHint: string;
       durationMinutes: number;
       transportHint: string;

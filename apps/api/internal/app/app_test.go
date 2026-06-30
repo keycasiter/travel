@@ -35,8 +35,19 @@ func TestAPIVerticalTravelFlow(t *testing.T) {
 	}
 
 	overviewBody := getJSON(t, router, "/api/v1/regions/city-hangzhou/overview", "")
-	if countFromPath(t, overviewBody, "data.pois") == 0 {
-		t.Fatalf("expected Hangzhou overview POIs: %s", overviewBody)
+	if countFromPath(t, overviewBody, "data.pois") < 12 {
+		t.Fatalf("expected Hangzhou overview to expose MVP POI depth: %s", overviewBody)
+	}
+	if countFromPath(t, overviewBody, "data.guides") < 4 {
+		t.Fatalf("expected Hangzhou overview to expose multiple guides: %s", overviewBody)
+	}
+
+	favoriteBody := postJSON(t, router, "/api/v1/favorites", userHeader(userID), map[string]any{
+		"targetType": "poi",
+		"targetId":   "poi-hangzhou-westlake",
+	})
+	if stringFromPath(t, favoriteBody, "data.targetId") != "poi-hangzhou-westlake" {
+		t.Fatalf("expected Hangzhou favorite to be created: %s", favoriteBody)
 	}
 
 	itineraryBody := postJSON(t, router, "/api/v1/itineraries/generate", userHeader(userID), map[string]any{
@@ -47,6 +58,12 @@ func TestAPIVerticalTravelFlow(t *testing.T) {
 	itineraryID := intFromPath(t, itineraryBody, "data.itinerary.id")
 	if itineraryID == 0 {
 		t.Fatalf("expected itinerary id in response: %s", itineraryBody)
+	}
+	if stringFromPath(t, itineraryBody, "data.itinerary.title") != "杭州 2日行程" {
+		t.Fatalf("expected readable Hangzhou itinerary title: %s", itineraryBody)
+	}
+	if countFromPath(t, itineraryBody, "data.days.0.items") < 5 {
+		t.Fatalf("expected Hangzhou day 1 to include enough executable items: %s", itineraryBody)
 	}
 	itemID := intFromPath(t, itineraryBody, "data.days.0.items.0.item.id")
 	if itemID == 0 {
@@ -68,7 +85,7 @@ func TestAPIVerticalTravelFlow(t *testing.T) {
 	}
 
 	copyBody := postJSON(t, router, "/api/v1/shares/"+shareCode+"/copy", userHeader(userID), map[string]any{})
-	if stringFromPath(t, copyBody, "data.itinerary.title") != "city-hangzhou 2日行程 副本" {
+	if stringFromPath(t, copyBody, "data.itinerary.title") != "杭州 2日行程 副本" {
 		t.Fatalf("expected copied itinerary title: %s", copyBody)
 	}
 }

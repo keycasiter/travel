@@ -63,8 +63,8 @@
     <view wx:if="{{selectedPoi}}" class="poi-summary">{{selectedPoi.summary}}</view>
     <view wx:if="{{transportServices.length > 0}}" class="transport-text">{{transportServices[0].summary}}</view>
     <view class="poi-action-row">
-      <button class="sheet-button secondary">收藏</button>
-      <button class="sheet-button secondary">加入行程</button>
+      <button class="sheet-button secondary" bindtap="saveSelectedPoi">收藏</button>
+      <button class="sheet-button secondary" bindtap="addSelectedPoiToItinerary">加入行程</button>
       <button class="sheet-button primary" bindtap="openTraffic">交通</button>
     </view>
   </view>

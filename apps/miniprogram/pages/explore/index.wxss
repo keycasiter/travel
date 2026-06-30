@@ -1,7 +1,7 @@
 .explore-page {
-  padding: 0;
   position: relative;
   overflow: hidden;
+  padding: 0;
 }
 
 .plan-button {
@@ -22,39 +22,215 @@
   padding-bottom: 30rpx;
 }
 
-.sheet-map-button {
+.hangzhou-sheet-hero {
+  display: grid;
+  grid-template-columns: 1fr 128rpx;
+  gap: 20rpx;
+  align-items: start;
+  padding: 26rpx;
+  border: 1rpx solid rgba(34, 50, 45, 0.12);
+  border-radius: 18rpx;
+  background:
+    linear-gradient(135deg, rgba(255, 253, 248, 0.96), rgba(238, 230, 214, 0.86));
+  box-shadow: 0 14rpx 38rpx rgba(34, 50, 45, 0.1);
+}
+
+.sheet-kicker {
+  display: inline-block;
+  height: 42rpx;
+  padding: 0 14rpx;
+  border-radius: 21rpx;
+  background: #a84a34;
+  color: #fff8ec;
+  font-size: 21rpx;
+  font-weight: 700;
+  line-height: 42rpx;
+}
+
+.sheet-city-title {
+  margin-top: 16rpx;
+  color: #22322d;
+  font-family: "STKaiti", "Kaiti SC", serif;
+  font-size: 40rpx;
+  font-weight: 700;
+}
+
+.sheet-city-summary {
+  margin-top: 10rpx;
+  color: #68736d;
+  font-size: 24rpx;
+  line-height: 1.5;
+}
+
+.sheet-favorite-button {
+  width: 128rpx;
+  height: 62rpx;
+  line-height: 62rpx;
+  padding: 0;
+  border-radius: 31rpx;
+  background: rgba(45, 107, 93, 0.12);
+  color: #1f564c;
+  font-size: 23rpx;
+}
+
+.sheet-action-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16rpx;
+  margin-top: 20rpx;
+}
+
+.sheet-map-button,
+.sheet-plan-button {
   width: 100%;
   height: 78rpx;
   line-height: 78rpx;
   padding: 0;
-  border-radius: 8rpx;
-  background: #22322d;
-  color: #fffdf8;
+  border-radius: 10rpx;
   font-size: 26rpx;
   font-weight: 700;
+}
+
+.sheet-map-button {
+  border: 1rpx solid rgba(31, 86, 76, 0.6);
+  background: rgba(255, 253, 248, 0.62);
+  color: #1f564c;
+}
+
+.sheet-plan-button {
+  background: linear-gradient(135deg, #2d6b5d, #1f564c);
+  color: #fffdf8;
+}
+
+.sheet-section {
+  margin-top: 30rpx;
 }
 
 .section-title {
-  margin: 28rpx 0 14rpx;
-  color: #22564b;
-  font-size: 26rpx;
+  margin: 0 0 16rpx;
+  color: #22322d;
+  font-family: "STKaiti", "Kaiti SC", serif;
+  font-size: 34rpx;
   font-weight: 700;
 }
 
-.content-row {
-  padding: 20rpx 0;
-  border-bottom: 1rpx solid rgba(34, 50, 45, 0.08);
+.service-grid {
+  display: grid;
+  gap: 14rpx;
 }
 
-.row-title {
+.service-card,
+.poi-card,
+.guide-card {
+  border: 1rpx solid rgba(34, 50, 45, 0.1);
+  border-radius: 14rpx;
+  background: rgba(255, 253, 248, 0.78);
+}
+
+.service-card {
+  padding: 20rpx;
+}
+
+.service-type {
+  display: inline-block;
+  height: 34rpx;
+  padding: 0 12rpx;
+  border-radius: 17rpx;
+  background: rgba(168, 74, 52, 0.1);
+  color: #a84a34;
+  font-size: 19rpx;
+  line-height: 34rpx;
+}
+
+.poi-card {
+  display: grid;
+  grid-template-columns: 52rpx 1fr 150rpx;
+  gap: 16rpx;
+  align-items: start;
+  margin-top: 14rpx;
+  padding: 18rpx;
+}
+
+.poi-rank {
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+  background: #a84a34;
+  color: #fff8ec;
+  font-family: Georgia, serif;
+  font-size: 24rpx;
+  font-weight: 700;
+  line-height: 44rpx;
+  text-align: center;
+}
+
+.poi-body {
+  min-width: 0;
+}
+
+.row-title,
+.guide-title {
   color: #22322d;
   font-size: 28rpx;
   font-weight: 700;
+  line-height: 1.35;
 }
 
 .row-summary {
   margin-top: 8rpx;
-  color: #64716b;
-  font-size: 24rpx;
+  color: #68736d;
+  font-size: 23rpx;
   line-height: 1.45;
+}
+
+.poi-meta {
+  margin-top: 10rpx;
+  color: #8a672f;
+  font-size: 21rpx;
+}
+
+.poi-actions {
+  display: grid;
+  gap: 10rpx;
+}
+
+.poi-actions button,
+.guide-footer button {
+  height: 50rpx;
+  line-height: 50rpx;
+  padding: 0;
+  border-radius: 8rpx;
+  background: rgba(45, 107, 93, 0.12);
+  color: #1f564c;
+  font-size: 21rpx;
+}
+
+.guide-card {
+  margin-top: 14rpx;
+  padding: 20rpx;
+}
+
+.guide-footer {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  margin-top: 14rpx;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.guide-footer text {
+  flex: 0 0 auto;
+  height: 34rpx;
+  padding: 0 12rpx;
+  border-radius: 17rpx;
+  background: rgba(232, 224, 209, 0.76);
+  color: #657068;
+  font-size: 20rpx;
+  line-height: 34rpx;
+}
+
+.guide-footer button {
+  flex: 0 0 108rpx;
+  margin-left: auto;
 }

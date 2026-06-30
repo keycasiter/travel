@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const api_1 = require("../../utils/api");
 const map_geometry_1 = require("../../utils/map-geometry");
+const HANGZHOU_REGION_ID = 'city-hangzhou';
 Page({
     data: {
         regions: [],
@@ -39,6 +40,10 @@ Page({
     },
     async onRegionTap(event) {
         const regionId = event.detail.regionId;
+        if (regionId !== HANGZHOU_REGION_ID) {
+            wx.showToast({ title: '城市待完善，先体验杭州', icon: 'none' });
+            return;
+        }
         this.setData({ selectedRegionId: regionId });
         try {
             const activeOverview = await (0, api_1.request)(`/api/v1/regions/${regionId}/overview`);
@@ -83,6 +88,7 @@ Page({
         this.setData({ sheetVisible: false });
     },
     goPlan() {
+        wx.setStorageSync('pendingDestinationRegionId', HANGZHOU_REGION_ID);
         wx.switchTab({ url: '/pages/itinerary/index' });
     },
     goRegionMap() {
@@ -93,6 +99,50 @@ Page({
         }
         wx.navigateTo({ url: `/pages/region-map/index?regionId=${encodeURIComponent(regionId)}` });
     },
+    async saveFavorite(event) {
+        const targetType = String(event.currentTarget.dataset.type || 'region');
+        const targetId = String(event.currentTarget.dataset.id || HANGZHOU_REGION_ID);
+        try {
+            await (0, api_1.request)('/api/v1/favorites', 'POST', { targetType, targetId });
+            wx.showToast({ title: '已收藏', icon: 'success' });
+        }
+        catch (error) {
+            wx.showToast({ title: `收藏失败：${messageOf(error)}`, icon: 'none' });
+        }
+    },
+    addPoiToItinerary(event) {
+        const poi = findPoiById(this.data.activeOverview?.pois || [], String(event.currentTarget.dataset.id || ''));
+        if (!poi) {
+            wx.showToast({ title: '点位信息缺失', icon: 'none' });
+            return;
+        }
+        wx.setStorageSync('pendingDestinationRegionId', HANGZHOU_REGION_ID);
+        wx.setStorageSync('pendingItineraryPlace', {
+            id: poi.id,
+            title: poi.name,
+            address: poi.summary,
+            category: poi.type,
+            location: {
+                lat: poi.lat,
+                lng: poi.lng
+            }
+        });
+        wx.switchTab({ url: '/pages/itinerary/index' });
+    },
+    async addGuideToFavorite(event) {
+        const guide = findGuideById(this.data.activeOverview?.guides || [], String(event.currentTarget.dataset.id || ''));
+        if (!guide) {
+            wx.showToast({ title: '攻略信息缺失', icon: 'none' });
+            return;
+        }
+        try {
+            await (0, api_1.request)('/api/v1/favorites', 'POST', { targetType: 'guide', targetId: guide.id });
+            wx.showToast({ title: '攻略已收藏', icon: 'success' });
+        }
+        catch (error) {
+            wx.showToast({ title: `收藏失败：${messageOf(error)}`, icon: 'none' });
+        }
+    },
     focusMapRegion(regionId) {
         const map = this.selectComponent('#inkMap');
         if (map?.focusRegion) {
@@ -100,6 +150,12 @@ Page({
         }
     },
 });
+function findPoiById(pois, id) {
+    return pois.find((poi) => poi.id === id) || null;
+}
+function findGuideById(guides, id) {
+    return guides.find((guide) => guide.id === id) || null;
+}
 function wxLogin() {
     return new Promise((resolve, reject) => {
         wx.login({ success: resolve, fail: reject });

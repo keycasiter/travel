@@ -54,13 +54,13 @@ func GeneratePlan(input GenerateInput, pois []CandidatePOI) (GeneratedPlan, erro
 	})
 
 	plan := GeneratedPlan{
-		Title: fmt.Sprintf("%s %d日行程", input.DestinationRegionID, input.Days),
+		Title: fmt.Sprintf("%s %d日行程", destinationDisplayName(input.DestinationRegionID), input.Days),
 		Days:  make([]GeneratedDay, input.Days),
 	}
 	for day := range plan.Days {
 		plan.Days[day] = GeneratedDay{
 			DayIndex: day + 1,
-			Summary:  fmt.Sprintf("第%d天精选路线", day+1),
+			Summary:  daySummary(input.DestinationRegionID, day+1),
 		}
 	}
 
@@ -104,5 +104,30 @@ func startHint(index int) string {
 		return "下午"
 	default:
 		return "傍晚"
+	}
+}
+
+func destinationDisplayName(regionID string) string {
+	switch regionID {
+	case "city-hangzhou":
+		return "杭州"
+	default:
+		return regionID
+	}
+}
+
+func daySummary(regionID string, dayIndex int) string {
+	if regionID != "city-hangzhou" {
+		return fmt.Sprintf("第%d天精选路线", dayIndex)
+	}
+	switch dayIndex {
+	case 1:
+		return "西湖湖线与湖滨夜景"
+	case 2:
+		return "灵隐龙井与上城老街"
+	case 3:
+		return "运河街区与西溪慢游"
+	default:
+		return fmt.Sprintf("杭州第%d天弹性探索", dayIndex)
 	}
 }

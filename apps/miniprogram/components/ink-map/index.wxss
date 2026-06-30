@@ -330,7 +330,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 20rpx;
+  gap: 14rpx;
 }
 
 .city-kicker {
@@ -346,6 +346,25 @@
   font-size: 38rpx;
   font-weight: 800;
   line-height: 1.2;
+}
+
+.city-status-badge {
+  flex: 0 0 auto;
+  height: 44rpx;
+  padding: 0 14rpx;
+  border: 1rpx solid rgba(143, 47, 34, 0.22);
+  border-radius: 22rpx;
+  background: rgba(143, 47, 34, 0.08);
+  color: #8f2f22;
+  font-size: 21rpx;
+  font-weight: 700;
+  line-height: 44rpx;
+}
+
+.city-status-ready {
+  border-color: rgba(39, 61, 54, 0.26);
+  background: #273d36;
+  color: #fffdf8;
 }
 
 .city-card-close {
@@ -382,6 +401,16 @@
   border-radius: 6rpx;
   background: rgba(244, 238, 224, 0.72);
   color: #3c4c44;
+}
+
+.city-mvp-notice {
+  margin-top: 12rpx;
+  padding: 14rpx 16rpx;
+  border-radius: 6rpx;
+  background: rgba(200, 150, 52, 0.11);
+  color: #7a5a26;
+  font-size: 23rpx;
+  line-height: 1.45;
 }
 
 .city-tags {
@@ -422,4 +451,9 @@
 .primary-action {
   background: #273d36;
   color: #fffdf8;
+}
+
+.pending-action {
+  background: rgba(143, 47, 34, 0.09);
+  color: #8f2f22;
 }

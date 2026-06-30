@@ -134,11 +134,19 @@ Component({
       if (!cityId) {
         return;
       }
+      if (!isMvpCity(cityId)) {
+        wx.showToast({ title: '城市待完善，先体验杭州', icon: 'none' });
+        return;
+      }
       this.triggerEvent('regiontap', { regionId: cityId });
     },
 
     goPlan(event: WechatMiniprogram.TouchEvent) {
       const cityId = String(event.currentTarget.dataset.id || this.data.selectedCityId || '');
+      if (cityId && !isMvpCity(cityId)) {
+        wx.showToast({ title: '城市待完善，先规划杭州', icon: 'none' });
+        return;
+      }
       if (cityId) {
         wx.setStorageSync('pendingDestinationRegionId', cityId);
       }
@@ -313,6 +321,10 @@ function buildSelectedCityCard(cityId: string, discoveryId: DiscoveryId): Select
     activeDiscoveryLabel: chip.label,
     activeDiscoveryNote: city.notes[chip.id]
   };
+}
+
+function isMvpCity(cityId: string): boolean {
+  return findCityById(cityId)?.mvpReady === true;
 }
 
 function isDiscoveryId(value: string): value is DiscoveryId {

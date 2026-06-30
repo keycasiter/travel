@@ -39,8 +39,9 @@
         <view wx:for="{{item.items}}" wx:for-item="entry" wx:key="poiId" class="share-item">
           <view class="share-dot"></view>
           <view class="share-item-body">
-            <view class="share-item-title">{{entry.poiId}}</view>
+            <view class="share-item-title">{{entry.poiName || entry.poiId}}</view>
             <view class="share-item-meta">{{entry.startHint}} · {{entry.transportHint}} · {{entry.durationMinutes}} 分钟</view>
+            <view wx:if="{{entry.poiSummary}}" class="share-item-note">{{entry.poiSummary}}</view>
             <view wx:if="{{entry.note}}" class="share-item-note">{{entry.note}}</view>
           </view>
           <view class="share-item-saved">已收藏</view>

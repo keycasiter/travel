@@ -22,6 +22,12 @@ func TestGeneratePlanDistributesPOIsAcrossDays(t *testing.T) {
 	if len(plan.Days) != 2 {
 		t.Fatalf("expected 2 days, got %d", len(plan.Days))
 	}
+	if plan.Title != "杭州 2日行程" {
+		t.Fatalf("expected readable Hangzhou title, got %q", plan.Title)
+	}
+	if plan.Days[0].Summary == "第1天精选路线" {
+		t.Fatalf("expected Hangzhou-specific day summary, got %q", plan.Days[0].Summary)
+	}
 	if len(plan.Days[0].Items) == 0 || len(plan.Days[1].Items) == 0 {
 		t.Fatalf("expected both days to contain items: %+v", plan.Days)
 	}

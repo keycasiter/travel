@@ -14,21 +14,57 @@
     bind:close="closeSheet"
   >
     <view wx:if="{{activeOverview}}" class="sheet-content">
-      <button class="sheet-map-button" bindtap="goRegionMap">街道地图</button>
-      <view class="section-title">旅行便利</view>
-      <view wx:for="{{activeOverview.services}}" wx:key="id" class="content-row">
-        <view class="row-title">{{item.title}}</view>
-        <view class="row-summary">{{item.summary}}</view>
+      <view class="hangzhou-sheet-hero">
+        <view>
+          <view class="sheet-kicker">杭州先行版</view>
+          <view class="sheet-city-title">{{activeOverview.region.name}}自由行管家</view>
+          <view class="sheet-city-summary">西湖、灵隐、龙井、湖滨、上城老街与运河片区已开放完整 MVP 闭环。</view>
+        </view>
+        <button class="sheet-favorite-button" data-type="region" data-id="{{activeOverview.region.id}}" bindtap="saveFavorite">收藏</button>
       </view>
-      <view class="section-title">推荐点位</view>
-      <view wx:for="{{activeOverview.pois}}" wx:key="id" class="content-row">
-        <view class="row-title">{{item.name}}</view>
-        <view class="row-summary">{{item.summary}}</view>
+
+      <view class="sheet-action-grid">
+        <button class="sheet-map-button" bindtap="goRegionMap">街道地图</button>
+        <button class="sheet-plan-button" bindtap="goPlan">规划杭州行程</button>
       </view>
-      <view class="section-title">精选攻略</view>
-      <view wx:for="{{activeOverview.guides}}" wx:key="id" class="content-row">
-        <view class="row-title">{{item.title}}</view>
-        <view class="row-summary">{{item.content}}</view>
+
+      <view class="sheet-section">
+        <view class="section-title">旅行便利</view>
+        <view class="service-grid">
+          <view wx:for="{{activeOverview.services}}" wx:key="id" class="service-card">
+            <view class="service-type">{{item.type}}</view>
+            <view class="row-title">{{item.title}}</view>
+            <view class="row-summary">{{item.summary}}</view>
+          </view>
+        </view>
+      </view>
+
+      <view class="sheet-section">
+        <view class="section-title">推荐点位</view>
+        <view wx:for="{{activeOverview.pois}}" wx:key="id" class="poi-card">
+          <view class="poi-rank">{{index + 1}}</view>
+          <view class="poi-body">
+            <view class="row-title">{{item.name}}</view>
+            <view class="row-summary">{{item.summary}}</view>
+            <view class="poi-meta">{{item.durationMinutes}} 分钟 · 热度 {{item.hotScore}}</view>
+          </view>
+          <view class="poi-actions">
+            <button size="mini" data-type="poi" data-id="{{item.id}}" bindtap="saveFavorite">收藏</button>
+            <button size="mini" data-id="{{item.id}}" bindtap="addPoiToItinerary">加入行程</button>
+          </view>
+        </view>
+      </view>
+
+      <view class="sheet-section">
+        <view class="section-title">精选攻略</view>
+        <view wx:for="{{activeOverview.guides}}" wx:key="id" class="guide-card">
+          <view class="guide-title">{{item.title}}</view>
+          <view class="row-summary">{{item.content}}</view>
+          <view class="guide-footer">
+            <text wx:for="{{item.tags}}" wx:key="*this">{{item}}</text>
+            <button size="mini" data-id="{{item.id}}" bindtap="addGuideToFavorite">收藏</button>
+          </view>
+        </view>
       </view>
     </view>
   </bottom-sheet>

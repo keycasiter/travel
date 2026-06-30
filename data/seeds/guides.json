@@ -1,5 +1,9 @@
 [
   {"id":"guide-hangzhou-48h","regionId":"city-hangzhou","title":"杭州 48 小时慢游精选攻略","content":"第一天安排西湖苏堤、湖滨和南山路，第二天早出发去灵隐寺。雨天可把户外湖线缩短，增加浙江省博物馆等室内点位。","tags":["2日游","城市漫步","避坑"],"coverUrl":"seed://hangzhou-48h-cover","official":true},
+  {"id":"guide-hangzhou-westlake-walk","regionId":"area-hangzhou-westlake","title":"西湖半日不绕湖路线","content":"从断桥进入，串联白堤、孤山、曲院风荷和苏堤北段。体力一般的用户不要追求全天绕湖，傍晚回到湖滨看夜景更舒服。","tags":["半日游","湖景","体力友好"],"coverUrl":"seed://hangzhou-westlake-walk","official":true},
+  {"id":"guide-hangzhou-lingyin-longjing","regionId":"area-hangzhou-lingyin-longjing","title":"灵隐龙井半日山寺茶线","content":"早上先到灵隐和飞来峰，中午前后转龙井村茶歇。九溪适合晴天加一段慢走，雨天缩短为灵隐加茶歇。","tags":["半日游","茶文化","历史文化"],"coverUrl":"seed://hangzhou-lingyin-longjing","official":true},
+  {"id":"guide-hangzhou-food-avoidance","regionId":"city-hangzhou","title":"杭州餐饮住宿与避坑提示","content":"首次到杭州住湖滨、武林或凤起路最稳。西湖边正餐不必硬找景观位，湖滨、南山路、武林夜市和龙井村分担餐饮和茶歇，更少排队。","tags":["住宿","美食","避坑"],"coverUrl":"seed://hangzhou-food-avoidance","official":true},
+  {"id":"guide-hangzhou-rainy-day","regionId":"city-hangzhou","title":"杭州雨天替代方案","content":"雨天减少九溪、西溪和长距离湖边步行，把浙江省博物馆、运河历史街区、湖滨商圈和茶馆作为替代。出门带伞，鞋子优先防滑。","tags":["雨天","管家提醒","替代路线"],"coverUrl":"seed://hangzhou-rainy-day","official":true},
   {"id":"guide-beijing-72h","regionId":"city-beijing","title":"北京 72 小时历史文化路线","content":"第一天围绕天安门、故宫和景山，第二天走胡同和中轴线，第三天安排长城或博物馆。故宫、国博等热门点位需要提前预约。","tags":["3日游","历史文化","预约提醒"],"coverUrl":"seed://beijing-72h-cover","official":true},
   {"id":"guide-shanghai-48h","regionId":"city-shanghai","title":"上海 48 小时城市夜景攻略","content":"第一天安排人民广场、南京东路和外滩夜景，第二天串联豫园和陆家嘴。雨天可增加博物馆和商场。","tags":["2日游","夜景","城市漫步"],"coverUrl":"seed://shanghai-48h-cover","official":true},
   {"id":"guide-chengdu-72h","regionId":"city-chengdu","title":"成都 72 小时慢生活攻略","content":"宽窄巷子、武侯祠、锦里和火锅适合放慢节奏安排。熊猫基地建议单独早起半日，避免和晚间重餐排得太紧。","tags":["3日游","美食","慢游"],"coverUrl":"seed://chengdu-72h-cover","official":true},

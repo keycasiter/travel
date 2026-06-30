@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const api_1 = require("../../utils/api");
+const HANGZHOU_REGION_ID = 'city-hangzhou';
 Page({
     data: {
         regionId: '',
@@ -127,6 +128,39 @@ Page({
             address: selectedPoi.summary,
             scale: 18
         });
+    },
+    async saveSelectedPoi() {
+        const selectedPoi = this.data.selectedPoi;
+        if (!selectedPoi) {
+            this.setData({ statusText: '请先选择一个点位。' });
+            return;
+        }
+        try {
+            await (0, api_1.request)('/api/v1/favorites', 'POST', { targetType: 'poi', targetId: selectedPoi.id });
+            this.setData({ statusText: `已收藏：${selectedPoi.name}` });
+        }
+        catch (error) {
+            this.setData({ statusText: `收藏失败：${messageOf(error)}` });
+        }
+    },
+    addSelectedPoiToItinerary() {
+        const selectedPoi = this.data.selectedPoi;
+        if (!selectedPoi) {
+            this.setData({ statusText: '请先选择一个点位。' });
+            return;
+        }
+        wx.setStorageSync('pendingDestinationRegionId', HANGZHOU_REGION_ID);
+        wx.setStorageSync('pendingItineraryPlace', {
+            id: selectedPoi.id,
+            title: selectedPoi.name,
+            address: selectedPoi.summary,
+            category: selectedPoi.type,
+            location: {
+                lat: selectedPoi.lat,
+                lng: selectedPoi.lng
+            }
+        });
+        wx.switchTab({ url: '/pages/itinerary/index' });
     },
     goBack() {
         wx.navigateBack();

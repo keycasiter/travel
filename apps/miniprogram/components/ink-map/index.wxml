@@ -80,17 +80,37 @@
         <view class="city-kicker">{{selectedCityCard.recommendedDays}} · {{selectedCityCard.activeDiscoveryLabel}}</view>
         <view class="city-title">{{selectedCityCard.name}}</view>
       </view>
+      <view class="city-status-badge {{selectedCityCard.mvpReady ? 'city-status-ready' : ''}}">
+        {{selectedCityCard.statusLabel}}
+      </view>
       <button class="city-card-close" catchtap="closeCityCard">×</button>
     </view>
     <view class="city-mood">{{selectedCityCard.mood}}</view>
     <view class="city-summary">{{selectedCityCard.summary}}</view>
     <view class="city-note">{{selectedCityCard.activeDiscoveryNote}}</view>
+    <view class="city-mvp-notice">{{selectedCityCard.mvpNotice}}</view>
     <view class="city-tags">
       <text wx:for="{{selectedCityCard.tags}}" wx:key="*this" class="city-tag">{{item}}</text>
     </view>
     <view class="card-actions">
-      <button class="action-button primary-action" data-id="{{selectedCityCard.id}}" catchtap="enterCityDetail">看城市内容</button>
-      <button class="action-button" data-id="{{selectedCityCard.id}}" catchtap="goPlan">规划行程</button>
+      <button
+        wx:if="{{selectedCityCard.mvpReady}}"
+        class="action-button primary-action"
+        data-id="{{selectedCityCard.id}}"
+        catchtap="enterCityDetail"
+      >看杭州内容</button>
+      <button
+        wx:if="{{selectedCityCard.mvpReady}}"
+        class="action-button"
+        data-id="{{selectedCityCard.id}}"
+        catchtap="goPlan"
+      >规划杭州行程</button>
+      <button
+        wx:else
+        class="action-button pending-action"
+        data-id="{{selectedCityCard.id}}"
+        catchtap="enterCityDetail"
+      >城市待完善</button>
     </view>
   </view>
 </view>

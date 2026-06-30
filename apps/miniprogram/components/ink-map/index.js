@@ -95,10 +95,18 @@ Component({
             if (!cityId) {
                 return;
             }
+            if (!isMvpCity(cityId)) {
+                wx.showToast({ title: '城市待完善，先体验杭州', icon: 'none' });
+                return;
+            }
             this.triggerEvent('regiontap', { regionId: cityId });
         },
         goPlan(event) {
             const cityId = String(event.currentTarget.dataset.id || this.data.selectedCityId || '');
+            if (cityId && !isMvpCity(cityId)) {
+                wx.showToast({ title: '城市待完善，先规划杭州', icon: 'none' });
+                return;
+            }
             if (cityId) {
                 wx.setStorageSync('pendingDestinationRegionId', cityId);
             }
@@ -253,6 +261,9 @@ function buildSelectedCityCard(cityId, discoveryId) {
         activeDiscoveryLabel: chip.label,
         activeDiscoveryNote: city.notes[chip.id]
     };
+}
+function isMvpCity(cityId) {
+    return findCityById(cityId)?.mvpReady === true;
 }
 function isDiscoveryId(value) {
     return city_hotspots_1.DISCOVERY_CHIPS.some((item) => item.id === value);

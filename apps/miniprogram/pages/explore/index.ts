@@ -1,6 +1,8 @@
 import { request } from '../../utils/api';
 import { findNearestRegion } from '../../utils/map-geometry';
-import type { LoginResult, Region, RegionOverview } from '../../utils/types';
+import type { Guide, LoginResult, Poi, Region, RegionOverview } from '../../utils/types';
+
+const HANGZHOU_REGION_ID = 'city-hangzhou';
 
 interface CurrentLocation {
   lng: number;
@@ -48,6 +50,10 @@ Page({
 
   async onRegionTap(event: WechatMiniprogram.CustomEvent<{ regionId: string }>) {
     const regionId = event.detail.regionId;
+    if (regionId !== HANGZHOU_REGION_ID) {
+      wx.showToast({ title: '城市待完善，先体验杭州', icon: 'none' });
+      return;
+    }
     this.setData({ selectedRegionId: regionId });
     try {
       const activeOverview = await request<RegionOverview>(`/api/v1/regions/${regionId}/overview`);
@@ -98,6 +104,7 @@ Page({
   },
 
   goPlan() {
+    wx.setStorageSync('pendingDestinationRegionId', HANGZHOU_REGION_ID);
     wx.switchTab({ url: '/pages/itinerary/index' });
   },
 
@@ -110,6 +117,51 @@ Page({
     wx.navigateTo({ url: `/pages/region-map/index?regionId=${encodeURIComponent(regionId)}` });
   },
 
+  async saveFavorite(event: WechatMiniprogram.TouchEvent) {
+    const targetType = String(event.currentTarget.dataset.type || 'region');
+    const targetId = String(event.currentTarget.dataset.id || HANGZHOU_REGION_ID);
+    try {
+      await request('/api/v1/favorites', 'POST', { targetType, targetId });
+      wx.showToast({ title: '已收藏', icon: 'success' });
+    } catch (error) {
+      wx.showToast({ title: `收藏失败：${messageOf(error)}`, icon: 'none' });
+    }
+  },
+
+  addPoiToItinerary(event: WechatMiniprogram.TouchEvent) {
+    const poi = findPoiById(this.data.activeOverview?.pois || [], String(event.currentTarget.dataset.id || ''));
+    if (!poi) {
+      wx.showToast({ title: '点位信息缺失', icon: 'none' });
+      return;
+    }
+    wx.setStorageSync('pendingDestinationRegionId', HANGZHOU_REGION_ID);
+    wx.setStorageSync('pendingItineraryPlace', {
+      id: poi.id,
+      title: poi.name,
+      address: poi.summary,
+      category: poi.type,
+      location: {
+        lat: poi.lat,
+        lng: poi.lng
+      }
+    });
+    wx.switchTab({ url: '/pages/itinerary/index' });
+  },
+
+  async addGuideToFavorite(event: WechatMiniprogram.TouchEvent) {
+    const guide = findGuideById(this.data.activeOverview?.guides || [], String(event.currentTarget.dataset.id || ''));
+    if (!guide) {
+      wx.showToast({ title: '攻略信息缺失', icon: 'none' });
+      return;
+    }
+    try {
+      await request('/api/v1/favorites', 'POST', { targetType: 'guide', targetId: guide.id });
+      wx.showToast({ title: '攻略已收藏', icon: 'success' });
+    } catch (error) {
+      wx.showToast({ title: `收藏失败：${messageOf(error)}`, icon: 'none' });
+    }
+  },
+
   focusMapRegion(regionId: string) {
     const map = this.selectComponent('#inkMap') as { focusRegion?: (regionId: string) => void } | null;
     if (map?.focusRegion) {
@@ -118,6 +170,14 @@ Page({
   },
 
 });
+
+function findPoiById(pois: Poi[], id: string): Poi | null {
+  return pois.find((poi) => poi.id === id) || null;
+}
+
+function findGuideById(guides: Guide[], id: string): Guide | null {
+  return guides.find((guide) => guide.id === id) || null;
+}
 
 function wxLogin(): Promise<WechatMiniprogram.LoginSuccessCallbackResult> {
   return new Promise((resolve, reject) => {

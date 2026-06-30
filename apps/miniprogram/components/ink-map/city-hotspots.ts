@@ -11,6 +11,9 @@ export interface CityHotspot {
   x: number;
   y: number;
   recommendedDays: string;
+  mvpReady: boolean;
+  statusLabel: string;
+  mvpNotice: string;
   mood: string;
   summary: string;
   tags: string[];
@@ -37,6 +40,9 @@ export const CITY_HOTSPOTS: CityHotspot[] = [
     x: 67,
     y: 33,
     recommendedDays: '3-5 天',
+    mvpReady: false,
+    statusLabel: '待完善',
+    mvpNotice: '北京灵感已保留，完整攻略会在杭州 MVP 跑通后补充。',
     mood: '中轴线、宫城与胡同慢行',
     summary: '适合把故宫、景山、胡同和博物馆串成历史文化路线，热门场馆重点看预约。',
     tags: ['历史文化', '预约提醒', '城市漫步'],
@@ -54,6 +60,9 @@ export const CITY_HOTSPOTS: CityHotspot[] = [
     x: 76,
     y: 52,
     recommendedDays: '2-4 天',
+    mvpReady: false,
+    statusLabel: '待完善',
+    mvpNotice: '上海灵感已保留，完整攻略会在杭州 MVP 跑通后补充。',
     mood: '江岸夜景、海派街区与展馆',
     summary: '外滩、豫园、人民广场和陆家嘴适合按半日模块组合，雨天也有室内替代。',
     tags: ['夜景', '城市漫步', '地铁友好'],
@@ -71,6 +80,9 @@ export const CITY_HOTSPOTS: CityHotspot[] = [
     x: 73,
     y: 55,
     recommendedDays: '2-3 天',
+    mvpReady: true,
+    statusLabel: '杭州先行版',
+    mvpNotice: '杭州已开放完整探索、行程、收藏和分享闭环。',
     mood: '湖山、寺院与茶田慢游',
     summary: '西湖适合清晨或傍晚慢走，灵隐和龙井方向建议单独留半日。',
     tags: ['湖景', '轻松', '避峰'],
@@ -88,6 +100,9 @@ export const CITY_HOTSPOTS: CityHotspot[] = [
     x: 45,
     y: 59,
     recommendedDays: '3-5 天',
+    mvpReady: false,
+    statusLabel: '待完善',
+    mvpNotice: '成都灵感已保留，完整攻略会在杭州 MVP 跑通后补充。',
     mood: '烟火老城、茶馆与川味',
     summary: '宽窄巷子、武侯祠、锦里和熊猫基地适合松弛安排，重餐后留轻松段。',
     tags: ['美食', '慢游', '亲子'],
@@ -105,6 +120,9 @@ export const CITY_HOTSPOTS: CityHotspot[] = [
     x: 55,
     y: 48,
     recommendedDays: '2-4 天',
+    mvpReady: false,
+    statusLabel: '待完善',
+    mvpNotice: '西安灵感已保留，完整攻略会在杭州 MVP 跑通后补充。',
     mood: '古城墙、博物馆与夜色小吃',
     summary: '城墙、钟楼和碑林适合步行串联，兵马俑等远郊点位单独排半日以上。',
     tags: ['古城', '夜景', '避坑'],
@@ -122,6 +140,9 @@ export const CITY_HOTSPOTS: CityHotspot[] = [
     x: 62,
     y: 72,
     recommendedDays: '2-4 天',
+    mvpReady: false,
+    statusLabel: '待完善',
+    mvpNotice: '广州灵感已保留，完整攻略会在杭州 MVP 跑通后补充。',
     mood: '早茶、骑楼与岭南老城',
     summary: '越秀、荔湾、沙面和珠江两岸适合慢慢串，午后雷雨季准备室内替代。',
     tags: ['早茶', '老城', '岭南'],
@@ -139,6 +160,9 @@ export const CITY_HOTSPOTS: CityHotspot[] = [
     x: 64,
     y: 75,
     recommendedDays: '2-3 天',
+    mvpReady: false,
+    statusLabel: '待完善',
+    mvpNotice: '深圳灵感已保留，完整攻略会在杭州 MVP 跑通后补充。',
     mood: '滨海公园、城市更新与夜景',
     summary: '南山滨海、人才公园和南头古城适合组合，周末海边停车压力大。',
     tags: ['滨海', '夜景', '地铁'],
@@ -156,6 +180,9 @@ export const CITY_HOTSPOTS: CityHotspot[] = [
     x: 72,
     y: 68,
     recommendedDays: '2-4 天',
+    mvpReady: false,
+    statusLabel: '待完善',
+    mvpNotice: '厦门灵感已保留，完整攻略会在杭州 MVP 跑通后补充。',
     mood: '海岛、老港口与慢节奏街区',
     summary: '鼓浪屿、沙坡尾和环岛路适合慢游，船票和海鲜价格是主要避坑点。',
     tags: ['海滨', '慢游', '船票'],

@@ -25,10 +25,10 @@
       </view>
       <view class="favorite-body">
         <view class="favorite-title-row">
-          <view class="favorite-stamp">{{item.targetType}}</view>
-          <view class="favorite-title">{{item.targetId}}</view>
+          <view class="favorite-stamp">{{item.displayBadge}}</view>
+          <view class="favorite-title">{{item.displayTitle}}</view>
         </view>
-        <view class="favorite-summary">已沉淀到旅行清单，可在行程规划中加入当天路线。</view>
+        <view class="favorite-summary">{{item.displaySummary}}</view>
         <view class="favorite-tags">
           <view>想去优先级</view>
           <view>精选内容</view>

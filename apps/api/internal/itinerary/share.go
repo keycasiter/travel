@@ -27,6 +27,8 @@ type ShareDay struct {
 
 type ShareItem struct {
 	POIID           string `json:"poiId"`
+	POIName         string `json:"poiName"`
+	POISummary      string `json:"poiSummary"`
 	StartHint       string `json:"startHint"`
 	DurationMinutes int    `json:"durationMinutes"`
 	TransportHint   string `json:"transportHint"`
@@ -164,6 +166,8 @@ func detailToSnapshot(detail *Detail) ShareItinerarySnapshot {
 		for _, item := range day.Items {
 			shareDay.Items = append(shareDay.Items, ShareItem{
 				POIID:           item.Item.PoiID,
+				POIName:         item.POI.Name,
+				POISummary:      item.POI.Summary,
 				StartHint:       item.Item.StartHint,
 				DurationMinutes: item.Item.DurationMinutes,
 				TransportHint:   item.Item.TransportHint,

@@ -1,6 +1,8 @@
 import { request } from '../../utils/api';
 import type { Itinerary, ItineraryDetail, Region, ShareView, WeatherSummary } from '../../utils/types';
 
+const HANGZHOU_REGION_ID = 'city-hangzhou';
+
 interface PendingItineraryPlace {
   id: string;
   title: string;
@@ -15,16 +17,16 @@ interface PendingItineraryPlace {
 Page({
   data: {
     destinations: [] as Region[],
-    destinationNames: [] as string[],
+    destinationNames: ['杭州'] as string[],
     selectedDestinationIndex: 0,
-    selectedDestinationId: 'city-hangzhou',
+    selectedDestinationId: HANGZHOU_REGION_ID,
     days: 2,
     preferencesText: '城市漫步,历史文化',
     currentItinerary: null as ItineraryDetail | null,
     itineraries: [] as Itinerary[],
     weather: null as WeatherSummary | null,
     pendingPlace: null as PendingItineraryPlace | null,
-    status: '选择目的地和天数，生成你的自由行计划。'
+    status: '杭州先行版：选择天数和偏好，生成可执行自由行计划。'
   },
 
   onLoad() {
@@ -32,11 +34,13 @@ Page({
   },
 
   onShow() {
+    this.consumePendingDestination();
     this.consumePendingPlace();
   },
 
   async loadInitialData() {
     await Promise.all([this.loadDestinations(), this.loadItineraries()]);
+    this.consumePendingDestination();
     this.consumePendingPlace();
   },
 
@@ -56,13 +60,31 @@ Page({
     });
   },
 
+  consumePendingDestination() {
+    const pendingDestination = wx.getStorageSync('pendingDestinationRegionId') as string | '';
+    if (!pendingDestination) {
+      return;
+    }
+    wx.removeStorageSync('pendingDestinationRegionId');
+    if (pendingDestination !== HANGZHOU_REGION_ID) {
+      this.setData({ status: '该城市攻略待完善，已切回杭州先行版。' });
+      return;
+    }
+    this.setData({
+      selectedDestinationId: HANGZHOU_REGION_ID,
+      selectedDestinationIndex: 0,
+      status: '已选择杭州，可继续生成行程。'
+    });
+  },
+
   async loadDestinations() {
     try {
-      const destinations = await request<Region[]>('/api/v1/regions?level=city');
+      const allDestinations = await request<Region[]>('/api/v1/regions?level=city');
+      const destinations = allDestinations.filter((item) => item.id === HANGZHOU_REGION_ID);
       this.setData({
         destinations,
         destinationNames: destinations.map((item) => item.name),
-        selectedDestinationId: destinations[0]?.id || 'city-hangzhou'
+        selectedDestinationId: destinations[0]?.id || HANGZHOU_REGION_ID
       });
     } catch (error) {
       this.setData({ status: messageOf(error) });
@@ -83,7 +105,7 @@ Page({
     const selected = this.data.destinations[selectedDestinationIndex];
     this.setData({
       selectedDestinationIndex,
-      selectedDestinationId: selected?.id || this.data.selectedDestinationId
+      selectedDestinationId: selected?.id || HANGZHOU_REGION_ID
     });
   },
 
