@@ -34,21 +34,6 @@ interface CurrentLocation {
   label: string;
 }
 
-interface CalibrationPoint {
-  x: number;
-  y: number;
-  left: string;
-  top: string;
-  snippet: string;
-}
-
-interface StageRect {
-  left: number;
-  top: number;
-  width: number;
-  height: number;
-}
-
 interface SelectedMapItemCard extends HomeMapLayerItem {
   activeDiscoveryLabel: string;
   note: string;
@@ -94,23 +79,10 @@ Component({
     searchKeyword: '',
     layerFilterKeyword: '',
     semanticLayer: 'national' as HomeMapLayer,
-    semanticLayerLabel: semanticLayerLabel('national'),
     layerItems: [] as HomeMapLayerItem[],
     selectedCityId: '',
     selectedCityCard: null as SelectedCityCard | null,
-    selectedMapItem: null as SelectedMapItemCard | null,
-    calibrationAvailable: false,
-    calibrationEnabled: false,
-    calibrationPoint: null as CalibrationPoint | null
-  },
-
-  lifetimes: {
-    attached() {
-      this.setData({
-        calibrationAvailable: isCalibrationAvailable(),
-        semanticLayerLabel: semanticLayerLabel(this.data.semanticLayer as HomeMapLayer)
-      });
-    }
+    selectedMapItem: null as SelectedMapItemCard | null
   },
 
   observers: {
@@ -176,7 +148,6 @@ Component({
         selectedMapItem: null,
         layerFilterKeyword: '',
         semanticLayer,
-        semanticLayerLabel: semanticLayerLabel(semanticLayer),
         layerItems: getLayerItems(semanticLayer, chipId)
       });
     },
@@ -277,79 +248,6 @@ Component({
       this.applyHeroScale(Number(this.data.heroScale || MIN_HERO_SCALE) + delta * ZOOM_STEP);
     },
 
-    resetHeroMap() {
-      this.setData({
-        heroScale: MIN_HERO_SCALE,
-        heroOffsetX: 0,
-        heroOffsetY: 0,
-        selectedCityId: '',
-        selectedCityCard: null,
-        selectedMapItem: null,
-        searchKeyword: '',
-        layerFilterKeyword: '',
-        semanticLayer: 'national' as HomeMapLayer,
-        semanticLayerLabel: semanticLayerLabel('national'),
-        layerItems: []
-      });
-    },
-
-    toggleCalibrationMode() {
-      const calibrationEnabled = !this.data.calibrationEnabled;
-      this.setData({
-        calibrationEnabled,
-        calibrationPoint: null,
-        heroScale: MIN_HERO_SCALE,
-        heroOffsetX: 0,
-        heroOffsetY: 0,
-        selectedMapItem: null,
-        semanticLayer: 'national' as HomeMapLayer,
-        semanticLayerLabel: semanticLayerLabel('national'),
-        layerItems: []
-      });
-    },
-
-    markCalibrationPoint(event: WechatMiniprogram.TouchEvent) {
-      if (!this.data.calibrationEnabled) {
-        return;
-      }
-      const touch = firstChangedTouch(event);
-      if (!touch) {
-        return;
-      }
-      const query = this.createSelectorQuery();
-      query
-        .select('.hero-map-stage')
-        .boundingClientRect((rect) => {
-          const box = rect as StageRect | null;
-          if (!box?.width || !box.height) {
-            return;
-          }
-          const x = clampPercent(((touch.clientX - box.left) / box.width) * 100);
-          const y = clampPercent(((touch.clientY - box.top) / box.height) * 100);
-          const snippet = `x: ${x}, y: ${y}`;
-          this.setData({
-            calibrationPoint: {
-              x,
-              y,
-              left: `${x}%`,
-              top: `${y}%`,
-              snippet
-            }
-          });
-          console.info(`[home-map-calibration] ${snippet}`);
-        })
-        .exec();
-    },
-
-    copyCalibrationPoint() {
-      const point = this.data.calibrationPoint;
-      if (!point) {
-        wx.showToast({ title: '先点地图取坐标', icon: 'none' });
-        return;
-      }
-      wx.setClipboardData({ data: point.snippet });
-    },
-
     onMapTouchStart(event: WechatMiniprogram.TouchEvent) {
       const touches = event.touches || [];
       if (touches.length >= 2) {
@@ -421,7 +319,6 @@ Component({
         selectedMapItem: showSheet ? buildMapSheet(mapItem, this.data.activeDiscoveryId as DiscoveryId) : null,
         layerFilterKeyword: '',
         semanticLayer,
-        semanticLayerLabel: semanticLayerLabel(semanticLayer),
         layerItems: city.id === HANGZHOU_REGION_ID ? getLayerItems(semanticLayer, this.data.activeDiscoveryId as DiscoveryId) : [],
         searchKeyword: city.name
       });
@@ -439,7 +336,6 @@ Component({
         selectedCityCard: item.kind === 'city' && showSheet ? buildSelectedCityCard(HANGZHOU_REGION_ID, activeDiscoveryId) : null,
         selectedMapItem: showSheet ? buildMapSheet(item, activeDiscoveryId) : null,
         semanticLayer,
-        semanticLayerLabel: semanticLayerLabel(semanticLayer),
         layerItems: getLayerItems(semanticLayer, activeDiscoveryId, String(this.data.layerFilterKeyword || ''))
       });
     },
@@ -451,7 +347,6 @@ Component({
       this.setData({
         heroScale,
         semanticLayer,
-        semanticLayerLabel: semanticLayerLabel(semanticLayer),
         layerItems: getLayerItems(semanticLayer, activeDiscoveryId, String(this.data.layerFilterKeyword || ''))
       });
     },
@@ -574,11 +469,6 @@ function firstTouch(event: WechatMiniprogram.TouchEvent): WechatMiniprogram.Touc
   return touches.length > 0 ? touches[0] : null;
 }
 
-function firstChangedTouch(event: WechatMiniprogram.TouchEvent): WechatMiniprogram.TouchDetail | null {
-  const touches = event.changedTouches || event.touches || [];
-  return touches.length > 0 ? touches[0] : null;
-}
-
 function touchDistance(first: WechatMiniprogram.TouchDetail, second: WechatMiniprogram.TouchDetail): number {
   const deltaX = first.clientX - second.clientX;
   const deltaY = first.clientY - second.clientY;
@@ -593,10 +483,6 @@ function clampPan(value: number): number {
   return Math.max(-MAX_PAN_RPX, Math.min(MAX_PAN_RPX, Math.round(value)));
 }
 
-function clampPercent(value: number): number {
-  return Number(Math.max(0, Math.min(100, value)).toFixed(2));
-}
-
 function focusOffsetX(item: HomeMapLayerItem): number {
   return clampPan((50 - item.x) * 6);
 }
@@ -605,27 +491,9 @@ function focusOffsetY(item: HomeMapLayerItem): number {
   return clampPan((50 - item.y) * 6);
 }
 
-function semanticLayerLabel(layer: HomeMapLayer): string {
-  if (layer === 'poi') {
-    return '点位细节';
-  }
-  if (layer === 'area') {
-    return '杭州片区';
-  }
-  return '全国视角';
-}
-
 function getMapItemLocation(item: HomeMapLayerItem): { lat: number; lng: number } {
   const known = KNOWN_POI_LOCATIONS[item.targetId];
   return known || HANGZHOU_FALLBACK_LOCATION;
-}
-
-function isCalibrationAvailable(): boolean {
-  try {
-    return wx.getAccountInfoSync().miniProgram.envVersion !== 'release';
-  } catch (_error) {
-    return true;
-  }
 }
 
 function messageOf(error: unknown): string {

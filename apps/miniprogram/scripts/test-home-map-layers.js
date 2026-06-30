@@ -66,9 +66,20 @@ for (const required of [
   '.poi-marker',
   '.home-map-sheet',
   '.home-map-sheet-scroll',
-  '.map-layer-chip'
+  '.zoom-controls'
 ]) {
   assert.ok(componentStyles.includes(required), `ink map styles should include ${required}`);
+}
+
+for (const removedUi of [
+  'map-layer-status',
+  'map-layer-chip',
+  'resetHeroMap',
+  'calibration-toggle',
+  'calibration-overlay'
+]) {
+  assert.ok(!componentMarkup.includes(removedUi), `ink map should not render removed homepage control ${removedUi}`);
+  assert.ok(!componentStyles.includes(`.${removedUi}`), `ink map styles should not keep removed homepage control ${removedUi}`);
 }
 
 assert.ok(componentSource.includes('selectedMapItem: null'), 'first screen should not open a half-screen map sheet by default');

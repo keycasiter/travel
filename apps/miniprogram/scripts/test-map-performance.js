@@ -78,7 +78,7 @@ for (const required of [
   assert.ok(componentSource.includes(required), `homepage bitmap map should keep ${required}`);
 }
 
-for (const required of [
+for (const forbidden of [
   'calibrationAvailable',
   'calibrationEnabled',
   'calibrationPoint',
@@ -86,7 +86,7 @@ for (const required of [
   'markCalibrationPoint',
   'copyCalibrationPoint'
 ]) {
-  assert.ok(componentSource.includes(required), `homepage should support dev calibration: ${required}`);
+  assert.ok(!componentSource.includes(forbidden), `homepage should not keep dev calibration code: ${forbidden}`);
 }
 
 for (const forbidden of [
@@ -106,13 +106,36 @@ for (const forbidden of [
 assert.ok(componentStyles.includes('.hero-map-image'), 'homepage should style the bitmap map image');
 assert.ok(componentStyles.includes('.city-hotspot'), 'homepage should style city hotspots');
 assert.ok(componentStyles.includes('.city-card'), 'homepage should style the city exploration card');
-assert.ok(componentMarkup.includes('calibration-overlay'), 'homepage should render calibration overlay');
-assert.ok(componentMarkup.includes('markCalibrationPoint'), 'homepage should capture calibration taps');
-assert.ok(componentMarkup.includes('copyCalibrationPoint'), 'homepage should copy calibration coordinates');
-assert.ok(componentStyles.includes('.calibration-overlay'), 'homepage should style calibration overlay');
 assert.ok(componentStyles.includes('touch-action'), 'homepage should avoid browser gesture interference where supported');
 assert.ok(!componentStyles.includes('.native-map'), 'homepage styles should not keep native map surface styles');
 assert.ok(!componentStyles.includes('.search-suggestions'), 'homepage styles should not keep Tencent POI suggestion UI');
+
+for (const forbidden of [
+  'map-layer-status',
+  'map-layer-chip',
+  'resetHeroMap',
+  '回到全国视角',
+  'calibration-overlay',
+  'markCalibrationPoint',
+  'copyCalibrationPoint',
+  'toggleCalibrationMode',
+  '标定'
+]) {
+  assert.ok(!componentMarkup.includes(forbidden), `homepage should not render removed map utility UI: ${forbidden}`);
+}
+
+for (const forbidden of [
+  '.map-layer-status',
+  '.map-layer-chip',
+  '.reset-control',
+  '.calibration-toggle',
+  '.calibration-overlay',
+  '.calibration-guide',
+  '.calibration-cross',
+  '.calibration-copy'
+]) {
+  assert.ok(!componentStyles.includes(forbidden), `homepage styles should not keep removed map utility UI: ${forbidden}`);
+}
 
 assert.ok(exploreMarkup.includes('bind:regiontap="onRegionTap"'), 'explore page should still open city exploration cards from hotspots');
 assert.ok(exploreSource.includes('focusMapRegion'), 'explore page should still support programmatic city focus');
