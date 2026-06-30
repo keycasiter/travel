@@ -1,9 +1,235 @@
-.empty-panel {
-  margin-top: 40rpx;
-  padding: 28rpx;
-  border: 1rpx solid rgba(34, 50, 45, 0.14);
+.favorite-page {
+  padding-top: 70rpx;
+}
+
+.favorite-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.manage-pill {
+  height: 58rpx;
+  padding: 0 22rpx;
+  border: 1rpx solid rgba(34, 50, 45, 0.16);
+  border-radius: 29rpx;
+  background: rgba(255, 253, 247, 0.7);
+  color: #4d5953;
+  font-size: 24rpx;
+  line-height: 58rpx;
+}
+
+.favorite-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin-top: 30rpx;
+  overflow: hidden;
+}
+
+.favorite-tab {
+  position: relative;
+  height: 82rpx;
+  color: #5e6963;
+  font-family: "STKaiti", "Kaiti SC", serif;
+  font-size: 30rpx;
+  font-weight: 700;
+  line-height: 82rpx;
+  text-align: center;
+}
+
+.favorite-tab::after {
+  content: "";
+  position: absolute;
+  top: 22rpx;
+  right: 0;
+  width: 1rpx;
+  height: 38rpx;
+  background: rgba(34, 50, 45, 0.1);
+}
+
+.favorite-tab:last-child::after {
+  display: none;
+}
+
+.favorite-tab.active {
+  color: #2d6b5d;
+}
+
+.favorite-tab.active::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 12rpx;
+  width: 38rpx;
+  height: 5rpx;
+  border-radius: 5rpx;
+  background: #2d6b5d;
+  transform: translateX(-50%);
+}
+
+.favorite-tools {
+  display: grid;
+  grid-template-columns: 1fr 196rpx;
+  gap: 14rpx;
+  margin-top: 20rpx;
+}
+
+.favorite-search,
+.favorite-filter {
+  height: 72rpx;
+  box-sizing: border-box;
+  padding: 0 24rpx;
+  border: 1rpx solid rgba(34, 50, 45, 0.12);
+  border-radius: 36rpx;
+  background: rgba(255, 253, 247, 0.7);
+  color: #8a8f88;
+  font-size: 24rpx;
+  line-height: 72rpx;
+}
+
+.favorite-filter {
+  color: #4d5953;
+  text-align: center;
+}
+
+.favorite-section {
+  margin-top: 30rpx;
+}
+
+.favorite-card {
+  display: grid;
+  grid-template-columns: 214rpx 1fr;
+  gap: 22rpx;
+  margin-top: 18rpx;
+  padding: 18rpx;
+}
+
+.favorite-thumb {
+  height: 182rpx;
+  overflow: hidden;
+  border-radius: 14rpx;
+  background: #e8dfcf;
+}
+
+.favorite-thumb image {
+  width: 100%;
+  height: 100%;
+}
+
+.favorite-body {
+  min-width: 0;
+}
+
+.favorite-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.favorite-stamp {
+  flex: 0 0 auto;
+  min-width: 38rpx;
+  height: 48rpx;
+  padding: 0 8rpx;
   border-radius: 8rpx;
-  background: #fffdf8;
-  color: #64716b;
-  font-size: 28rpx;
+  background: #a84a34;
+  color: #fff8ec;
+  font-size: 20rpx;
+  line-height: 48rpx;
+  text-align: center;
+}
+
+.favorite-title {
+  min-width: 0;
+  overflow: hidden;
+  color: #22322d;
+  font-size: 32rpx;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.favorite-summary {
+  margin-top: 10rpx;
+  color: #68736d;
+  font-size: 23rpx;
+  line-height: 1.45;
+}
+
+.favorite-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+  margin-top: 14rpx;
+}
+
+.favorite-tags view {
+  height: 38rpx;
+  padding: 0 12rpx;
+  border-radius: 19rpx;
+  background: rgba(232, 224, 209, 0.76);
+  color: #657068;
+  font-size: 20rpx;
+  line-height: 38rpx;
+}
+
+.favorite-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr 128rpx;
+  align-items: center;
+  gap: 10rpx;
+  margin-top: 16rpx;
+  color: #4d5953;
+  font-size: 23rpx;
+  text-align: center;
+}
+
+.favorite-action-button {
+  width: 128rpx;
+  height: 52rpx;
+  line-height: 52rpx;
+  padding: 0;
+  border-radius: 8rpx;
+  background: rgba(45, 107, 93, 0.12);
+  color: #1f564c;
+  font-size: 21rpx;
+}
+
+.favorite-empty {
+  margin-top: 34rpx;
+  padding: 64rpx 42rpx;
+  text-align: center;
+}
+
+.empty-seal {
+  width: 104rpx;
+  height: 104rpx;
+  margin: 0 auto;
+  border: 8rpx solid rgba(168, 74, 52, 0.2);
+  border-radius: 50%;
+  background: #a84a34;
+  color: #fff8ec;
+  font-family: "STKaiti", "Kaiti SC", serif;
+  font-size: 46rpx;
+  font-weight: 700;
+  line-height: 104rpx;
+}
+
+.empty-title {
+  margin-top: 26rpx;
+  color: #22322d;
+  font-size: 34rpx;
+  font-weight: 700;
+}
+
+.empty-summary {
+  margin-top: 14rpx;
+  color: #68736d;
+  font-size: 25rpx;
+  line-height: 1.55;
+}
+
+.empty-button {
+  width: 260rpx;
+  margin-top: 30rpx;
 }

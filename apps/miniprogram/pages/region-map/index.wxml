@@ -33,7 +33,18 @@
 
   <view class="map-header">
     <button class="back-button" bindtap="goBack">返回</button>
-    <view class="map-title">{{regionName || '街道地图'}}</view>
+    <view class="map-title">
+      <view class="map-title-main">{{regionName || '街道地图'}}</view>
+      <view class="map-title-sub">真实地图 · 街道级</view>
+    </view>
+  </view>
+
+  <view class="map-filter-chips">
+    <view class="filter-chip active">景点</view>
+    <view class="filter-chip">美食</view>
+    <view class="filter-chip">交通</view>
+    <view class="filter-chip">住宿</view>
+    <view class="filter-chip">攻略</view>
   </view>
 
   <view class="map-actions">
@@ -42,11 +53,19 @@
     <button class="action-button" bindtap="locateMe">定位</button>
   </view>
 
-  <view class="poi-panel">
+  <view class="poi-sheet">
+    <view class="sheet-grabber"></view>
     <view class="status-text">{{statusText}}</view>
-    <view wx:if="{{selectedPoi}}" class="poi-title">{{selectedPoi.name}}</view>
+    <view wx:if="{{selectedPoi}}" class="poi-title-row">
+      <view class="poi-title">{{selectedPoi.name}}</view>
+      <view class="poi-type">{{selectedPoi.type}}</view>
+    </view>
     <view wx:if="{{selectedPoi}}" class="poi-summary">{{selectedPoi.summary}}</view>
     <view wx:if="{{transportServices.length > 0}}" class="transport-text">{{transportServices[0].summary}}</view>
-    <button class="traffic-button" bindtap="openTraffic">交通</button>
+    <view class="poi-action-row">
+      <button class="sheet-button secondary">收藏</button>
+      <button class="sheet-button secondary">加入行程</button>
+      <button class="sheet-button primary" bindtap="openTraffic">交通</button>
+    </view>
   </view>
 </view>

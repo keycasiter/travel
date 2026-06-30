@@ -1,9 +1,99 @@
-<view class="page">
-  <view class="page-title">我的</view>
-  <view class="page-subtitle">{{status}}</view>
-  <view class="empty-panel">
-    <view>用户 ID：{{userId || '未登录'}}</view>
-    <view>已保存行程：{{itineraryCount}}</view>
-    <view>API：{{apiBaseUrl}}</view>
+<view class="page app-paper-bg mine-page">
+  <view class="mine-title-row">
+    <view class="page-title">我的</view>
+    <view class="settings-dot">设置</view>
+  </view>
+
+  <view class="profile-hero ink-card">
+    <view class="profile-seal">旅</view>
+    <view class="profile-copy">
+      <view class="profile-name">微信静默身份</view>
+      <view class="profile-desc">{{status}}</view>
+    </view>
+    <view class="profile-action">完善资料</view>
+
+    <view class="mine-stats">
+      <view class="stat-item">
+        <view class="stat-value">{{itineraryCount}}</view>
+        <view class="stat-label">已保存行程</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-value">{{userId || '-'}}</view>
+        <view class="stat-label">本地用户</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-value">0</view>
+        <view class="stat-label">分享</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="mine-section ink-card">
+    <view class="section-header">
+      <view class="section-title">我的行程</view>
+      <view class="section-link">全部行程</view>
+    </view>
+    <view class="trip-row">
+      <view class="trip-thumb">
+        <image src="/assets/maps/home-map-mobile.jpg" mode="aspectFill" />
+      </view>
+      <view class="trip-copy">
+        <view class="trip-title">杭州 3 日游</view>
+        <view class="trip-desc">西湖泛舟 · 灵隐祈福 · 龙井问茶</view>
+      </view>
+      <view class="trip-status">出发前 5 天</view>
+    </view>
+    <view class="trip-row">
+      <view class="trip-thumb alt">
+        <image src="/assets/maps/home-map-mobile.jpg" mode="aspectFill" />
+      </view>
+      <view class="trip-copy">
+        <view class="trip-title">成都 4 日游</view>
+        <view class="trip-desc">宽窄巷子 · 都江堰 · 熊猫基地</view>
+      </view>
+      <view class="trip-status">出发前 12 天</view>
+    </view>
+  </view>
+
+  <view class="sync-panel ink-card">
+    <view class="section-title">授权与同步</view>
+    <view class="sync-grid">
+      <view class="sync-item">
+        <view class="sync-state active"></view>
+        <view>
+          <view class="sync-title">位置权限</view>
+          <view class="sync-desc">用于探索附近灵感</view>
+        </view>
+      </view>
+      <view class="sync-item">
+        <view class="sync-state active"></view>
+        <view>
+          <view class="sync-title">行程保存</view>
+          <view class="sync-desc">已接入 API</view>
+        </view>
+      </view>
+      <view class="sync-item">
+        <view class="sync-state"></view>
+        <view>
+          <view class="sync-title">跨端同步</view>
+          <view class="sync-desc">保存时再授权</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="settings-list ink-card">
+    <view class="setting-row">
+      <view>通知提醒</view>
+      <view>未开启</view>
+    </view>
+    <view class="setting-row">
+      <view>数据与隐私</view>
+      <view>查看</view>
+    </view>
+    <view class="setting-row">
+      <view>开发 API</view>
+      <view>{{apiBaseUrl}}</view>
+    </view>
   </view>
 </view>

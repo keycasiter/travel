@@ -1,9 +1,244 @@
-.empty-panel {
-  margin-top: 40rpx;
-  padding: 28rpx;
-  border: 1rpx solid rgba(34, 50, 45, 0.14);
-  border-radius: 8rpx;
-  background: #fffdf8;
-  color: #64716b;
-  font-size: 28rpx;
+.mine-page {
+  padding-top: 70rpx;
+}
+
+.mine-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.settings-dot {
+  height: 60rpx;
+  padding: 0 22rpx;
+  border: 1rpx solid rgba(34, 50, 45, 0.16);
+  border-radius: 30rpx;
+  background: rgba(255, 253, 247, 0.72);
+  color: #4d5953;
+  font-size: 24rpx;
+  line-height: 60rpx;
+}
+
+.profile-hero {
+  display: grid;
+  grid-template-columns: 118rpx 1fr 156rpx;
+  gap: 22rpx;
+  margin-top: 30rpx;
+  padding: 34rpx 30rpx 0;
+  overflow: hidden;
+}
+
+.profile-seal {
+  width: 112rpx;
+  height: 112rpx;
+  border: 8rpx solid rgba(168, 74, 52, 0.22);
+  border-radius: 50%;
+  background: #a84a34;
+  color: #fff8ec;
+  font-family: "STKaiti", "Kaiti SC", serif;
+  font-size: 46rpx;
+  font-weight: 700;
+  line-height: 112rpx;
+  text-align: center;
+}
+
+.profile-copy {
+  min-width: 0;
+  padding-top: 8rpx;
+}
+
+.profile-name {
+  color: #22322d;
+  font-size: 34rpx;
+  font-weight: 700;
+}
+
+.profile-desc {
+  margin-top: 10rpx;
+  color: #68736d;
+  font-size: 23rpx;
+  line-height: 1.45;
+}
+
+.profile-action {
+  align-self: start;
+  height: 64rpx;
+  border-radius: 32rpx;
+  background: #2d6b5d;
+  color: #fffdf7;
+  font-size: 23rpx;
+  line-height: 64rpx;
+  text-align: center;
+}
+
+.mine-stats {
+  grid-column: 1 / 4;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 24rpx;
+  border-top: 1rpx solid rgba(34, 50, 45, 0.09);
+}
+
+.stat-item {
+  position: relative;
+  padding: 26rpx 0 28rpx;
+  text-align: center;
+}
+
+.stat-item::after {
+  content: "";
+  position: absolute;
+  top: 30rpx;
+  right: 0;
+  width: 1rpx;
+  height: 58rpx;
+  background: rgba(34, 50, 45, 0.11);
+}
+
+.stat-item:last-child::after {
+  display: none;
+}
+
+.stat-value {
+  color: #22322d;
+  font-family: Georgia, serif;
+  font-size: 36rpx;
+}
+
+.stat-label {
+  margin-top: 8rpx;
+  color: #68736d;
+  font-size: 22rpx;
+}
+
+.mine-section,
+.sync-panel,
+.settings-list {
+  margin-top: 24rpx;
+  padding: 30rpx;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-link {
+  color: #68736d;
+  font-size: 23rpx;
+}
+
+.trip-row {
+  display: grid;
+  grid-template-columns: 156rpx 1fr 148rpx;
+  gap: 18rpx;
+  align-items: center;
+  margin-top: 22rpx;
+  padding-top: 22rpx;
+  border-top: 1rpx solid rgba(34, 50, 45, 0.08);
+}
+
+.trip-thumb {
+  height: 104rpx;
+  overflow: hidden;
+  border-radius: 14rpx;
+  background: #e8dfcf;
+}
+
+.trip-thumb image {
+  width: 100%;
+  height: 100%;
+}
+
+.trip-thumb.alt {
+  filter: sepia(0.14) saturate(0.82);
+}
+
+.trip-copy {
+  min-width: 0;
+}
+
+.trip-title {
+  color: #22322d;
+  font-size: 29rpx;
+  font-weight: 700;
+}
+
+.trip-desc {
+  margin-top: 8rpx;
+  overflow: hidden;
+  color: #68736d;
+  font-size: 22rpx;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trip-status {
+  color: #a84a34;
+  font-size: 22rpx;
+  text-align: right;
+}
+
+.sync-grid {
+  display: grid;
+  gap: 22rpx;
+  margin-top: 22rpx;
+}
+
+.sync-item {
+  display: grid;
+  grid-template-columns: 36rpx 1fr;
+  gap: 18rpx;
+  align-items: start;
+}
+
+.sync-state {
+  width: 26rpx;
+  height: 26rpx;
+  margin-top: 8rpx;
+  border: 2rpx solid rgba(34, 50, 45, 0.24);
+  border-radius: 50%;
+  background: rgba(255, 253, 247, 0.68);
+}
+
+.sync-state.active {
+  border-color: #2d6b5d;
+  background: #2d6b5d;
+}
+
+.sync-title {
+  color: #22322d;
+  font-size: 27rpx;
+  font-weight: 700;
+}
+
+.sync-desc {
+  margin-top: 5rpx;
+  color: #68736d;
+  font-size: 22rpx;
+}
+
+.setting-row {
+  display: grid;
+  grid-template-columns: 180rpx 1fr;
+  gap: 18rpx;
+  min-height: 78rpx;
+  align-items: center;
+  border-bottom: 1rpx solid rgba(34, 50, 45, 0.08);
+  color: #22322d;
+  font-size: 26rpx;
+}
+
+.setting-row:last-child {
+  border-bottom: 0;
+}
+
+.setting-row view:last-child {
+  overflow: hidden;
+  color: #68736d;
+  font-size: 22rpx;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

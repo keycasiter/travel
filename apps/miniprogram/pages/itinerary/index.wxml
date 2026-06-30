@@ -1,44 +1,127 @@
-<view class="page">
-  <view class="page-title">行程规划</view>
-  <view class="page-subtitle">{{status}}</view>
+<view class="page app-paper-bg itinerary-page">
+  <view class="itinerary-nav">
+    <view>
+      <view class="page-title">规划行程</view>
+      <view class="page-subtitle">{{status}}</view>
+    </view>
+    <view class="nav-pill">我的行程</view>
+  </view>
 
-  <view wx:if="{{pendingPlace}}" class="pending-place">
+  <view class="itinerary-hero ink-card">
+    <view class="hero-copy">
+      <view class="hero-title-row">
+        <view class="hero-title">{{destinationNames[selectedDestinationIndex] || '杭州'}}</view>
+        <view class="seal-badge">行</view>
+      </view>
+      <view class="hero-subtitle">按天生成路线，出发后作为旅行管家执行。</view>
+      <view class="hero-meta">
+        <view>国内自由行</view>
+        <view>{{days}} 天</view>
+        <view>官方精选</view>
+      </view>
+    </view>
+    <image class="hero-map" src="/assets/maps/home-map-mobile.jpg" mode="aspectFill" />
+  </view>
+
+  <view wx:if="{{pendingPlace}}" class="pending-place ink-card">
     <view class="pending-label">待规划点位</view>
     <view class="pending-title">{{pendingPlace.title}}</view>
     <view class="pending-address">{{pendingPlace.address}}</view>
   </view>
 
-  <view class="panel">
-    <view class="field-label">目的地</view>
-    <picker mode="selector" range="{{destinationNames}}" value="{{selectedDestinationIndex}}" bindchange="onDestinationChange">
-      <view class="field-value">{{destinationNames[selectedDestinationIndex] || '加载中'}}</view>
-    </picker>
-    <view class="field-label">天数</view>
-    <input class="field-input" type="number" value="{{days}}" bindinput="onDaysInput" />
-    <view class="field-label">偏好</view>
-    <input class="field-input" value="{{preferencesText}}" bindinput="onPreferencesInput" />
-    <button class="primary-button" bindtap="generate">生成行程</button>
+  <view class="planning-panel ink-card">
+    <view class="planning-step">
+      <view class="step-index">1</view>
+      <view class="step-body">
+        <view class="step-title">目的地</view>
+        <picker mode="selector" range="{{destinationNames}}" value="{{selectedDestinationIndex}}" bindchange="onDestinationChange">
+          <view class="field-value">{{destinationNames[selectedDestinationIndex] || '加载中'}}</view>
+        </picker>
+      </view>
+    </view>
+
+    <view class="thin-divider"></view>
+
+    <view class="planning-step">
+      <view class="step-index">2</view>
+      <view class="step-body">
+        <view class="step-title">天数 / 日期</view>
+        <view class="days-control">
+          <view class="days-chip muted">周末短途</view>
+          <input class="field-input days-input" type="number" value="{{days}}" bindinput="onDaysInput" />
+          <view class="days-chip">自定义</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="thin-divider"></view>
+
+    <view class="planning-step">
+      <view class="step-index">3</view>
+      <view class="step-body">
+        <view class="step-title">偏好</view>
+        <view class="preference-row">
+          <view class="preference-chip active">历史文化</view>
+          <view class="preference-chip">城市漫步</view>
+          <view class="preference-chip">美食</view>
+          <view class="preference-chip">打卡</view>
+        </view>
+        <input class="field-input preference-input" value="{{preferencesText}}" bindinput="onPreferencesInput" />
+      </view>
+    </view>
+
+    <view class="butler-grid">
+      <view class="butler-item">
+        <view class="butler-label">预算参考</view>
+        <view class="butler-value">￥600/天</view>
+      </view>
+      <view class="butler-item">
+        <view class="butler-label">节奏</view>
+        <view class="butler-value">从容</view>
+      </view>
+      <view class="butler-item">
+        <view class="butler-label">天气</view>
+        <view class="butler-value">{{weather ? weather.temperatureRange : '生成后更新'}}</view>
+      </view>
+    </view>
+
+    <button class="primary-cta generate-button" bindtap="generate">生成行程</button>
   </view>
 
-  <view wx:if="{{weather}}" class="panel compact-panel">
-    <view class="panel-title">今日管家</view>
-    <view class="row-summary">{{weather.summary}} · {{weather.temperatureRange}}</view>
+  <view wx:if="{{weather}}" class="butler-panel ink-card">
+    <view class="section-title">今日管家</view>
+    <view class="weather-line">{{weather.summary}} · {{weather.temperatureRange}}</view>
+    <view wx:for="{{weather.tips}}" wx:key="*this" class="tip-row">{{item}}</view>
   </view>
 
-  <view wx:if="{{currentItinerary}}" class="itinerary-detail">
-    <view class="panel-title">{{currentItinerary.itinerary.title}}</view>
-    <button class="secondary-button" bindtap="createShare">分享只读行程</button>
-    <view wx:for="{{currentItinerary.days}}" wx:key="day.id" class="day-card">
-      <view class="day-title">第 {{item.day.dayIndex}} 天 · {{item.day.summary}}</view>
-      <view wx:for="{{item.items}}" wx:for-item="entry" wx:key="item.id" class="item-row">
-        <view class="row-title">{{entry.poi.name}}</view>
-        <view class="row-summary">{{entry.item.startHint}} · {{entry.item.transportHint}}</view>
-        <view wx:if="{{entry.item.note}}" class="item-note">{{entry.item.note}}</view>
-        <view class="actions">
-          <button size="mini" data-id="{{entry.item.id}}" data-done="{{!entry.item.done}}" bindtap="toggleDone">
-            {{entry.item.done ? '已完成' : '打勾'}}
-          </button>
-          <button size="mini" data-id="{{entry.item.id}}" bindtap="addNote">备注</button>
+  <view wx:if="{{currentItinerary}}" class="execution-panel ink-card">
+    <view class="execution-header">
+      <view>
+        <view class="section-title">{{currentItinerary.itinerary.title}}</view>
+        <view class="muted-text">按天执行，可标记完成、添加备注并生成只读分享。</view>
+      </view>
+      <button class="secondary-cta share-button" bindtap="createShare">分享</button>
+    </view>
+
+    <view wx:for="{{currentItinerary.days}}" wx:key="day.id" class="day-block">
+      <view class="day-title">Day {{item.day.dayIndex}} · {{item.day.summary}}</view>
+      <view wx:for="{{item.items}}" wx:for-item="entry" wx:key="item.id" class="timeline-item">
+        <view class="timeline-rail">
+          <view class="timeline-dot {{entry.item.done ? 'done' : ''}}"></view>
+        </view>
+        <view class="timeline-content">
+          <view class="item-topline">
+            <view class="row-title">{{entry.poi.name}}</view>
+            <view class="done-state">{{entry.item.done ? '已完成' : '待完成'}}</view>
+          </view>
+          <view class="row-summary">{{entry.item.startHint}} · {{entry.item.transportHint}}</view>
+          <view wx:if="{{entry.item.note}}" class="item-note">{{entry.item.note}}</view>
+          <view class="actions">
+            <button size="mini" class="mini-action" data-id="{{entry.item.id}}" data-done="{{!entry.item.done}}" bindtap="toggleDone">
+              {{entry.item.done ? '取消完成' : '完成'}}
+            </button>
+            <button size="mini" class="mini-action" data-id="{{entry.item.id}}" bindtap="addNote">备注</button>
+          </view>
         </view>
       </view>
     </view>

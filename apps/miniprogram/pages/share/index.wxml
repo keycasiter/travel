@@ -1,14 +1,61 @@
-<view class="page">
-  <view class="page-title">分享行程</view>
-  <view class="page-subtitle">{{status}} · 分享码：{{shareCode || '未提供'}}</view>
-  <view wx:if="{{share}}" class="share-card">
-    <view class="share-title">{{share.snapshot.title}}</view>
-    <view wx:for="{{share.snapshot.days}}" wx:key="dayIndex" class="share-day">
-      <view class="share-day-title">第 {{item.dayIndex}} 天 · {{item.summary}}</view>
-      <view wx:for="{{item.items}}" wx:for-item="entry" wx:key="poiId" class="share-item">
-        {{entry.startHint}} · {{entry.poiId}}
+<view class="page app-paper-bg share-page">
+  <view class="share-nav">
+    <view class="page-title">分享行程</view>
+    <view class="readonly-pill">只读</view>
+  </view>
+
+  <view class="share-notice">
+    <view>只读分享，可收藏副本，保存为自己的行程。</view>
+    <view>分享码：{{shareCode || '未提供'}}</view>
+  </view>
+
+  <view wx:if="{{share}}" class="share-hero ink-card">
+    <view class="share-hero-copy">
+      <view class="share-title-row">
+        <view class="share-title">{{share.snapshot.title}}</view>
+        <view class="seal-badge">游</view>
+      </view>
+      <view class="share-subtitle">烟雨入江南，山水如墨染</view>
+      <view class="share-author">行者分享 · {{status}}</view>
+      <view class="share-meta">
+        <view>目的地 {{share.snapshot.destinationRegionId}}</view>
+        <view>天数 {{share.snapshot.days.length}}</view>
+        <view>预算 ￥{{share.snapshot.budgetCents / 100}}</view>
       </view>
     </view>
-    <button class="copy-button" bindtap="copyShare">收藏为我的行程</button>
+    <image class="share-map" src="/assets/maps/home-map-mobile.jpg" mode="aspectFill" />
+  </view>
+
+  <view wx:if="{{share}}" class="share-card ink-card">
+    <view class="share-tabs">
+      <view class="share-tab active">第 1 天</view>
+      <view class="share-tab">第 2 天</view>
+      <view class="share-tab">总览</view>
+    </view>
+
+    <view class="share-timeline">
+      <view wx:for="{{share.snapshot.days}}" wx:key="dayIndex" class="share-day">
+        <view class="share-day-title">第 {{item.dayIndex}} 天 · {{item.summary}}</view>
+        <view wx:for="{{item.items}}" wx:for-item="entry" wx:key="poiId" class="share-item">
+          <view class="share-dot"></view>
+          <view class="share-item-body">
+            <view class="share-item-title">{{entry.poiId}}</view>
+            <view class="share-item-meta">{{entry.startHint}} · {{entry.transportHint}} · {{entry.durationMinutes}} 分钟</view>
+            <view wx:if="{{entry.note}}" class="share-item-note">{{entry.note}}</view>
+          </view>
+          <view class="share-item-saved">已收藏</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:else class="share-loading ink-card">
+    <view class="empty-title">{{status}}</view>
+    <view class="muted-text">请确认分享码有效，或返回行程页重新生成分享。</view>
+  </view>
+
+  <view wx:if="{{share}}" class="share-action-bar">
+    <button class="secondary-cta">查看城市攻略</button>
+    <button class="primary-cta" bindtap="copyShare">收藏副本</button>
   </view>
 </view>

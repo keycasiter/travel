@@ -1,7 +1,51 @@
-<view class="page">
-  <view class="page-title">收藏</view>
+<view class="page app-paper-bg favorite-page">
+  <view class="favorite-header">
+    <view class="page-title">收藏</view>
+    <view class="manage-pill">管理</view>
+  </view>
   <view class="page-subtitle">{{status}}</view>
-  <view wx:for="{{favorites}}" wx:key="id" class="empty-panel">
-    <view>{{item.targetType}} · {{item.targetId}}</view>
+
+  <view class="favorite-tabs ink-card">
+    <view class="favorite-tab active">全部</view>
+    <view class="favorite-tab">想去</view>
+    <view class="favorite-tab">攻略</view>
+    <view class="favorite-tab">路线</view>
+  </view>
+
+  <view class="favorite-tools">
+    <view class="favorite-search">搜索我的收藏</view>
+    <view class="favorite-filter">最新收藏</view>
+  </view>
+
+  <view wx:if="{{favorites.length}}" class="favorite-section">
+    <view class="section-title">已收藏 · {{favorites.length}}</view>
+    <view wx:for="{{favorites}}" wx:key="id" class="favorite-card ink-card">
+      <view class="favorite-thumb">
+        <image src="/assets/maps/home-map-mobile.jpg" mode="aspectFill" />
+      </view>
+      <view class="favorite-body">
+        <view class="favorite-title-row">
+          <view class="favorite-stamp">{{item.targetType}}</view>
+          <view class="favorite-title">{{item.targetId}}</view>
+        </view>
+        <view class="favorite-summary">已沉淀到旅行清单，可在行程规划中加入当天路线。</view>
+        <view class="favorite-tags">
+          <view>想去优先级</view>
+          <view>精选内容</view>
+        </view>
+        <view class="favorite-actions">
+          <view>移除</view>
+          <view>分享</view>
+          <button size="mini" class="favorite-action-button">加入行程</button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:else class="favorite-empty ink-card">
+    <view class="empty-seal">藏</view>
+    <view class="empty-title">还没有收藏</view>
+    <view class="empty-summary">在探索地图、城市详情和分享行程中收藏想去点位、攻略和路线。</view>
+    <button class="primary-cta empty-button">加入行程</button>
   </view>
 </view>
