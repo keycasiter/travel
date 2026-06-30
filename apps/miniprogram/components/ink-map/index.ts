@@ -12,9 +12,11 @@ import {
   HANGZHOU_CITY_MAP_ITEM,
   HOME_MAP_ZOOM_LEVELS,
   findHomeMapItem,
+  getDetailElements,
   getLayerItems,
   getSemanticLayer,
   getVisualDepthLevel,
+  type HomeMapDetailElement,
   type HomeMapLayer,
   type HomeMapVisualDepth,
   type HomeMapLayerItem
@@ -89,6 +91,7 @@ Component({
     layerFilterKeyword: '',
     semanticLayer: 'national' as HomeMapLayer,
     visualDepthLevel: 'national' as HomeMapVisualDepth,
+    detailElements: getDetailElements('national') as HomeMapDetailElement[],
     layerItems: [] as HomeMapLayerItem[],
     selectedCityId: '',
     selectedCityCard: null as SelectedCityCard | null,
@@ -160,6 +163,7 @@ Component({
         layerFilterKeyword: '',
         semanticLayer,
         visualDepthLevel,
+        detailElements: getDetailElements(visualDepthLevel),
         layerItems: getLayerItems(semanticLayer, chipId)
       });
     },
@@ -333,6 +337,7 @@ Component({
         layerFilterKeyword: '',
         semanticLayer,
         visualDepthLevel,
+        detailElements: city.id === HANGZHOU_REGION_ID ? getDetailElements(visualDepthLevel) : [],
         layerItems: city.id === HANGZHOU_REGION_ID ? getLayerItems(semanticLayer, this.data.activeDiscoveryId as DiscoveryId) : [],
         searchKeyword: city.name
       });
@@ -353,6 +358,7 @@ Component({
         selectedMapItem: showSheet ? buildMapSheet(item, activeDiscoveryId) : null,
         semanticLayer,
         visualDepthLevel,
+        detailElements: getDetailElements(visualDepthLevel),
         layerItems: getLayerItems(semanticLayer, activeDiscoveryId, String(this.data.layerFilterKeyword || ''))
       });
     },
@@ -366,6 +372,7 @@ Component({
         heroScale,
         semanticLayer,
         visualDepthLevel,
+        detailElements: getDetailElements(visualDepthLevel),
         layerItems: getLayerItems(semanticLayer, activeDiscoveryId, String(this.data.layerFilterKeyword || ''))
       });
     },

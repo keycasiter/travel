@@ -1,8 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.HANGZHOU_POIS = exports.HANGZHOU_AREAS = exports.HANGZHOU_CITY_MAP_ITEM = exports.HOME_MAP_ZOOM_LEVELS = void 0;
+exports.HANGZHOU_DETAIL_ELEMENTS = exports.HANGZHOU_POIS = exports.HANGZHOU_AREAS = exports.HANGZHOU_CITY_MAP_ITEM = exports.HOME_MAP_ZOOM_LEVELS = void 0;
 exports.getSemanticLayer = getSemanticLayer;
 exports.getVisualDepthLevel = getVisualDepthLevel;
+exports.getDetailElements = getDetailElements;
 exports.getLayerItems = getLayerItems;
 exports.filterLayerItems = filterLayerItems;
 exports.findHomeMapItem = findHomeMapItem;
@@ -158,6 +159,27 @@ exports.HANGZHOU_POIS = [
     transport('transport-hangzhou-xiaoshan-airport', '萧山机场', '机场到达枢纽', '机场进城建议预留 60-90 分钟，晚到时优先住湖滨或武林附近。', 79.1, 58.6, ['飞机场', '交通', '到达']),
     transport('transport-hangzhou-westlake-bus', '西湖公交换乘', '景区接驳提醒', '西湖核心区节假日少自驾，公交接驳和步行更稳定。', 72.6, 54.9, ['公交站', '交通', '避坑'])
 ];
+exports.HANGZHOU_DETAIL_ELEMENTS = [
+    detail('detail-hangzhou-city-seal', 'city', 'seal', 73.1, 55.0, 92, 58, -8),
+    detail('detail-hangzhou-city-ridge', 'city', 'terrain', 70.7, 55.4, 162, 76, -18),
+    detail('detail-hangzhou-city-water', 'city', 'water', 72.8, 54.7, 132, 82, -10),
+    detail('detail-hangzhou-westlake-water', 'area', 'water', 72.7, 54.9, 178, 116, -13),
+    detail('detail-hangzhou-lingyin-ridge', 'area', 'terrain', 70.2, 55.5, 188, 84, -24),
+    detail('detail-hangzhou-hubin-wash', 'area', 'seal', 74.5, 54.1, 104, 48, 8),
+    detail('detail-hangzhou-canal-line', 'area', 'route', 73.4, 51.7, 210, 10, -12),
+    detail('detail-hangzhou-xixi-water', 'area', 'water', 68.8, 53.9, 144, 88, 7),
+    detail('detail-hangzhou-jiuxi-ridge', 'poi', 'terrain', 70.4, 56.8, 154, 58, -34),
+    detail('detail-hangzhou-hubin-route', 'poi', 'route', 74.4, 54.7, 176, 10, 18),
+    detail('detail-hangzhou-shangcheng-seal', 'poi', 'seal', 75.1, 55.6, 92, 44, 12),
+    detail('detail-hangzhou-transport-route', 'poi', 'route', 76.0, 53.3, 230, 10, 30),
+    detail('detail-hangzhou-airport-route', 'poi', 'route', 77.8, 57.0, 250, 10, 38)
+];
+const VISUAL_DEPTH_RANK = {
+    national: 0,
+    city: 1,
+    area: 2,
+    poi: 3
+};
 function getSemanticLayer(scale) {
     if (scale >= exports.HOME_MAP_ZOOM_LEVELS.poiMin) {
         return 'poi';
@@ -178,6 +200,10 @@ function getVisualDepthLevel(scale) {
         return 'city';
     }
     return 'national';
+}
+function getDetailElements(depth) {
+    const currentRank = VISUAL_DEPTH_RANK[depth];
+    return exports.HANGZHOU_DETAIL_ELEMENTS.filter((item) => VISUAL_DEPTH_RANK[item.minDepth] <= currentRank);
 }
 function getLayerItems(layer, discoveryId, keyword = '') {
     if (layer === 'national') {
@@ -246,6 +272,9 @@ function transport(id, title, subtitle, summary, x, y, tags) {
         duration: '按到达方式调整',
         actionHint: '交通点用于辅助规划，不作为景点加入游玩时长。'
     };
+}
+function detail(id, minDepth, kind, x, y, width, height, rotate) {
+    return { id, minDepth, kind, x, y, width, height, rotate };
 }
 function discoveryTagMatches(tag, discoveryId) {
     const tagText = tag.toLowerCase();

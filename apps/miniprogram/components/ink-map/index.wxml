@@ -14,6 +14,12 @@
       <image class="hero-map-depth hero-map-depth-city" src="{{cityFocusImage}}" mode="aspectFill" />
       <image class="hero-map-depth hero-map-depth-area" src="{{areaDetailImage}}" mode="aspectFill" />
       <image class="hero-map-depth hero-map-depth-poi" src="{{poiDetailImage}}" mode="aspectFill" />
+      <view
+        wx:for="{{detailElements}}"
+        wx:key="id"
+        class="map-detail-element map-detail-{{item.kind}}"
+        style="left: {{item.x}}%; top: {{item.y}}%; width: {{item.width}}rpx; height: {{item.height}}rpx; transform: translate(-50%, -50%) rotate({{item.rotate}}deg);"
+      ></view>
       <block wx:for="{{cityHotspots}}" wx:key="id">
         <button
           wx:if="{{visualDepthLevel === 'national' || item.id === 'city-hangzhou'}}"

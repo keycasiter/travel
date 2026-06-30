@@ -22,8 +22,8 @@ assert.ok(fs.existsSync(heroImagePath), 'homepage should include the 3D China bi
 assert.ok(fs.statSync(heroImagePath).size > 500 * 1024, 'homepage bitmap master should be a high-quality raster asset');
 assert.ok(fs.statSync(heroImagePath).size < 950 * 1024, 'homepage bitmap master should leave room for zoom-depth layers');
 assertMapAsset(cityFocusImagePath, 120, 900, 'Hangzhou city focus raster layer');
-assertMapAsset(areaDetailImagePath, 20, 650, 'Hangzhou area transparent detail layer');
-assertMapAsset(poiDetailImagePath, 20, 650, 'Hangzhou POI transparent detail layer');
+assertMapAsset(areaDetailImagePath, 140, 650, 'Hangzhou area transparent detail layer');
+assertMapAsset(poiDetailImagePath, 120, 650, 'Hangzhou POI transparent detail layer');
 assert.ok(
   fs.statSync(heroImagePath).size + fs.statSync(cityFocusImagePath).size + fs.statSync(areaDetailImagePath).size + fs.statSync(poiDetailImagePath).size < 1700 * 1024,
   'homepage layered bitmap assets should stay below the local package budget'

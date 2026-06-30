@@ -7,7 +7,7 @@ import math
 import random
 from pathlib import Path
 
-from PIL import Image, ImageChops, ImageDraw, ImageEnhance, ImageFilter
+from PIL import Image, ImageDraw, ImageEnhance, ImageFilter
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -23,12 +23,12 @@ RUNTIME_WIDTH = 1800
 HANGZHOU_CENTER = (73.0, 55.0)
 
 AREAS = [
-    ("westlake", 72.6, 54.7, (190, 139, 57, 92)),
-    ("lingyin", 70.3, 55.7, (77, 115, 96, 82)),
-    ("hubin", 74.4, 53.9, (158, 57, 43, 76)),
-    ("shangcheng", 75.1, 55.8, (191, 143, 61, 78)),
-    ("canal", 73.4, 51.6, (65, 111, 118, 68)),
-    ("xixi", 68.8, 53.8, (82, 125, 95, 72)),
+    ("westlake", 72.6, 54.7, (190, 139, 57, 142)),
+    ("lingyin", 70.3, 55.7, (77, 115, 96, 126)),
+    ("hubin", 74.4, 53.9, (158, 57, 43, 118)),
+    ("shangcheng", 75.1, 55.8, (191, 143, 61, 120)),
+    ("canal", 73.4, 51.6, (65, 111, 118, 112)),
+    ("xixi", 68.8, 53.8, (82, 125, 95, 116)),
 ]
 
 POIS = [
@@ -115,16 +115,18 @@ def generate_area_detail(size: tuple[int, int]) -> None:
     width, height = size
     layer = Image.new("RGBA", size, (0, 0, 0, 0))
 
+    draw_hangzhou_context(layer, detail="area")
+
     for name, x, y, color in AREAS:
         px, py = point(width, height, x, y)
-        blob = watercolor_blob(size, px, py, int(width * 0.03), int(height * 0.022), color, seed=name)
+        blob = watercolor_blob(size, px, py, int(width * 0.05), int(height * 0.034), color, seed=name)
         layer = Image.alpha_composite(layer, blob)
         draw_area_strokes(layer, px, py, color)
 
     line = Image.new("RGBA", size, (0, 0, 0, 0))
     draw = ImageDraw.Draw(line)
     route = [point(width, height, x, y) for _, x, y, _ in AREAS]
-    draw.line(route, fill=(62, 90, 79, 44), width=max(3, int(width * 0.0017)), joint="curve")
+    draw.line(route, fill=(62, 90, 79, 84), width=max(4, int(width * 0.0024)), joint="curve")
     line = line.filter(ImageFilter.GaussianBlur(1.2))
     layer = Image.alpha_composite(layer, line)
 
@@ -135,6 +137,8 @@ def generate_poi_detail(size: tuple[int, int]) -> None:
     width, height = size
     layer = Image.new("RGBA", size, (0, 0, 0, 0))
     draw = ImageDraw.Draw(layer)
+
+    draw_hangzhou_context(layer, detail="poi")
 
     palette = {
         "landmark": ((157, 55, 42, 178), (213, 166, 67, 82)),
@@ -147,31 +151,100 @@ def generate_poi_detail(size: tuple[int, int]) -> None:
     for index, (x, y, kind) in enumerate(POIS):
         px, py = point(width, height, x, y)
         main, wash = palette[kind]
-        radius = int(width * (0.0044 if kind != "transport" else 0.0054))
+        radius = int(width * (0.0056 if kind != "transport" else 0.0068))
         draw.ellipse((px - radius, py - radius, px + radius, py + radius), fill=main)
         draw.ellipse((px - radius * 4, py - radius * 4, px + radius * 4, py + radius * 4), outline=wash, width=2)
         draw_micro_strokes(draw, px, py, width, main, index)
 
     transport_points = [point(width, height, x, y) for x, y, kind in POIS if kind == "transport"]
     for first, second in zip(transport_points, transport_points[1:]):
-        draw.line((first, second), fill=(45, 82, 103, 72), width=max(2, int(width * 0.0013)))
+        draw.line((first, second), fill=(45, 82, 103, 116), width=max(3, int(width * 0.0017)))
 
-    for _ in range(220):
+    for _ in range(520):
         x = random.uniform(68.2, 79.5)
         y = random.uniform(51.0, 59.0)
         px, py = point(width, height, x, y)
         length = random.randint(5, 18)
         angle = random.uniform(-0.9, 0.9)
-        color = random.choice([(57, 83, 74, 42), (139, 97, 54, 38), (108, 128, 103, 36)])
+        color = random.choice([(57, 83, 74, 64), (139, 97, 54, 58), (108, 128, 103, 54)])
         draw.line(
             (px, py, px + math.cos(angle) * length, py + math.sin(angle) * length),
             fill=color,
             width=random.choice([1, 1, 2]),
         )
 
-    soft = layer.filter(ImageFilter.GaussianBlur(0.35))
+    soft = layer.filter(ImageFilter.GaussianBlur(0.28))
     layer = Image.alpha_composite(soft, layer)
     layer.save(POI_DETAIL_IMAGE, "PNG", optimize=True)
+
+
+def draw_hangzhou_context(layer: Image.Image, detail: str) -> None:
+    width, height = layer.size
+    draw = ImageDraw.Draw(layer)
+    cx, cy = point(width, height, *HANGZHOU_CENTER)
+
+    wash = Image.new("RGBA", layer.size, (0, 0, 0, 0))
+    wash_draw = ImageDraw.Draw(wash)
+    points = []
+    radius_x = width * 0.12
+    radius_y = height * 0.092
+    local_random = random.Random(f"context-{detail}")
+    for step in range(30):
+        angle = (math.tau * step) / 30
+        jitter = local_random.uniform(0.76, 1.18)
+        points.append((cx + math.cos(angle) * radius_x * jitter, cy + math.sin(angle) * radius_y * jitter))
+    wash_draw.polygon(points, fill=(224, 208, 165, 42 if detail == "area" else 32))
+    wash_draw.ellipse(
+        (
+            cx - int(width * 0.055),
+            cy - int(height * 0.038),
+            cx + int(width * 0.035),
+            cy + int(height * 0.035),
+        ),
+        fill=(76, 128, 126, 42 if detail == "area" else 30),
+        outline=(47, 88, 92, 84 if detail == "area" else 62),
+        width=max(2, int(width * 0.0017)),
+    )
+    wash = wash.filter(ImageFilter.GaussianBlur(9 if detail == "area" else 7))
+    layer.alpha_composite(wash)
+
+    contour_alpha = 68 if detail == "area" else 82
+    for index in range(22 if detail == "area" else 34):
+        origin_x = random.uniform(68.0, 76.0)
+        origin_y = random.uniform(52.0, 57.8)
+        px, py = point(width, height, origin_x, origin_y)
+        radius = random.uniform(width * 0.025, width * 0.072)
+        squash = random.uniform(0.24, 0.48)
+        start = random.uniform(-1.7, 1.2)
+        points = []
+        for step in range(18):
+            angle = start + step * random.uniform(0.08, 0.13)
+            points.append((px + math.cos(angle) * radius, py + math.sin(angle) * radius * squash))
+        color = random.choice(
+            [
+                (51, 75, 62, contour_alpha),
+                (88, 106, 82, contour_alpha - 14),
+                (136, 92, 52, contour_alpha - 20),
+            ]
+        )
+        draw.line(points, fill=color, width=random.choice([2, 2, 3, 4]))
+
+    water_points = [
+        point(width, height, 72.6, 54.0),
+        point(width, height, 73.0, 54.4),
+        point(width, height, 73.1, 55.0),
+        point(width, height, 72.8, 55.5),
+        point(width, height, 72.4, 55.1),
+        point(width, height, 72.2, 54.5),
+    ]
+    draw.line(water_points, fill=(39, 88, 96, 96 if detail == "area" else 116), width=max(3, int(width * 0.0025)), joint="curve")
+    canal = [
+        point(width, height, 72.8, 51.0),
+        point(width, height, 73.2, 51.7),
+        point(width, height, 73.7, 52.4),
+        point(width, height, 74.2, 53.0),
+    ]
+    draw.line(canal, fill=(45, 92, 102, 90 if detail == "area" else 112), width=max(3, int(width * 0.0021)), joint="curve")
 
 
 def watercolor_blob(

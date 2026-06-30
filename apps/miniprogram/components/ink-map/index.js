@@ -55,6 +55,7 @@ Component({
         layerFilterKeyword: '',
         semanticLayer: 'national',
         visualDepthLevel: 'national',
+        detailElements: (0, home_map_layers_1.getDetailElements)('national'),
         layerItems: [],
         selectedCityId: '',
         selectedCityCard: null,
@@ -115,6 +116,7 @@ Component({
                 layerFilterKeyword: '',
                 semanticLayer,
                 visualDepthLevel,
+                detailElements: (0, home_map_layers_1.getDetailElements)(visualDepthLevel),
                 layerItems: (0, home_map_layers_1.getLayerItems)(semanticLayer, chipId)
             });
         },
@@ -271,6 +273,7 @@ Component({
                 layerFilterKeyword: '',
                 semanticLayer,
                 visualDepthLevel,
+                detailElements: city.id === HANGZHOU_REGION_ID ? (0, home_map_layers_1.getDetailElements)(visualDepthLevel) : [],
                 layerItems: city.id === HANGZHOU_REGION_ID ? (0, home_map_layers_1.getLayerItems)(semanticLayer, this.data.activeDiscoveryId) : [],
                 searchKeyword: city.name
             });
@@ -290,6 +293,7 @@ Component({
                 selectedMapItem: showSheet ? buildMapSheet(item, activeDiscoveryId) : null,
                 semanticLayer,
                 visualDepthLevel,
+                detailElements: (0, home_map_layers_1.getDetailElements)(visualDepthLevel),
                 layerItems: (0, home_map_layers_1.getLayerItems)(semanticLayer, activeDiscoveryId, String(this.data.layerFilterKeyword || ''))
             });
         },
@@ -302,6 +306,7 @@ Component({
                 heroScale,
                 semanticLayer,
                 visualDepthLevel,
+                detailElements: (0, home_map_layers_1.getDetailElements)(visualDepthLevel),
                 layerItems: (0, home_map_layers_1.getLayerItems)(semanticLayer, activeDiscoveryId, String(this.data.layerFilterKeyword || ''))
             });
         },
