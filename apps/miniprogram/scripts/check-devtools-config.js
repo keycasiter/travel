@@ -6,6 +6,10 @@ const projectConfigPath = path.join(root, 'project.config.json');
 const config = JSON.parse(fs.readFileSync(projectConfigPath, 'utf8'));
 const appConfig = JSON.parse(fs.readFileSync(path.join(root, 'app.json'), 'utf8'));
 
+if (config.compileType !== 'miniprogram') {
+  throw new Error('project.config.json compileType must be miniprogram so app.json tabBar and icons are rendered');
+}
+
 const compilerPlugins = config.setting && config.setting.useCompilerPlugins;
 if (compilerPlugins !== false) {
   throw new Error('project.config.json must disable DevTools TypeScript compiler and use checked-in runtime JS');
