@@ -91,7 +91,6 @@ Page({
     }
 
     this.setData({ currentLocation: location, selectedRegionId });
-    this.focusMapLocation(location);
   },
 
   closeSheet() {
@@ -118,12 +117,6 @@ Page({
     }
   },
 
-  focusMapLocation(location: CurrentLocation) {
-    const map = this.selectComponent('#inkMap') as { focusLocation?: (location: CurrentLocation, scale?: number) => void } | null;
-    if (map?.focusLocation) {
-      map.focusLocation(location, 14);
-    }
-  }
 });
 
 function wxLogin(): Promise<WechatMiniprogram.LoginSuccessCallbackResult> {

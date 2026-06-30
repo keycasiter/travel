@@ -78,7 +78,6 @@ Page({
             selectedRegionId = '';
         }
         this.setData({ currentLocation: location, selectedRegionId });
-        this.focusMapLocation(location);
     },
     closeSheet() {
         this.setData({ sheetVisible: false });
@@ -100,12 +99,6 @@ Page({
             map.focusRegion(regionId);
         }
     },
-    focusMapLocation(location) {
-        const map = this.selectComponent('#inkMap');
-        if (map?.focusLocation) {
-            map.focusLocation(location, 14);
-        }
-    }
 });
 function wxLogin() {
     return new Promise((resolve, reject) => {
